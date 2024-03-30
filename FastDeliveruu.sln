@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{27E10351-FE57-4622-9884-C82CB8D0CDE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Api", "src\FastDeliveruu.Api\FastDeliveruu.Api.csproj", "{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Application", "src\FastDeliveruu.Application\FastDeliveruu.Application.csproj", "{FFEA914C-D029-432B-8646-D2CF053EEBC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Domain", "src\FastDeliveruu.Domain\FastDeliveruu.Domain.csproj", "{E1F38900-1FEB-4834-8223-D886FB5C67AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Infrastructure", "src\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj", "{3429C3B0-B619-42A1-91A6-365A41C05742}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B1447FC9-990A-4991-A18C-6E33C6129340}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Api.Tests", "test\FastDeliveruu.Api.Tests\FastDeliveruu.Api.Tests.csproj", "{5D4601FA-0399-4AA0-87B1-5FB11DBD2514}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFEA914C-D029-432B-8646-D2CF053EEBC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFEA914C-D029-432B-8646-D2CF053EEBC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFEA914C-D029-432B-8646-D2CF053EEBC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFEA914C-D029-432B-8646-D2CF053EEBC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1F38900-1FEB-4834-8223-D886FB5C67AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1F38900-1FEB-4834-8223-D886FB5C67AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1F38900-1FEB-4834-8223-D886FB5C67AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1F38900-1FEB-4834-8223-D886FB5C67AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3429C3B0-B619-42A1-91A6-365A41C05742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3429C3B0-B619-42A1-91A6-365A41C05742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3429C3B0-B619-42A1-91A6-365A41C05742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3429C3B0-B619-42A1-91A6-365A41C05742}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D4601FA-0399-4AA0-87B1-5FB11DBD2514}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D4601FA-0399-4AA0-87B1-5FB11DBD2514}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D4601FA-0399-4AA0-87B1-5FB11DBD2514}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D4601FA-0399-4AA0-87B1-5FB11DBD2514}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F157D57D-AD8D-47DB-A8DA-D74AF5BED3B1} = {27E10351-FE57-4622-9884-C82CB8D0CDE1}
+		{FFEA914C-D029-432B-8646-D2CF053EEBC3} = {27E10351-FE57-4622-9884-C82CB8D0CDE1}
+		{E1F38900-1FEB-4834-8223-D886FB5C67AC} = {27E10351-FE57-4622-9884-C82CB8D0CDE1}
+		{3429C3B0-B619-42A1-91A6-365A41C05742} = {27E10351-FE57-4622-9884-C82CB8D0CDE1}
+		{5D4601FA-0399-4AA0-87B1-5FB11DBD2514} = {B1447FC9-990A-4991-A18C-6E33C6129340}
+	EndGlobalSection
+EndGlobal
