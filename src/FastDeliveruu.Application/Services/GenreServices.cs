@@ -24,7 +24,7 @@ public class GenreServices : IGenreServices
 
     public async Task<Genre?> GetGenreByIdAsync(int id)
     {
-        string procedureName = "spGetGenre";
+        string procedureName = "spGetGenreById";
 
         DynamicParameters parameters = new DynamicParameters();
         parameters.Add("@GenreId", id);
@@ -69,7 +69,7 @@ public class GenreServices : IGenreServices
         await _sP_Call.ExecuteAsync(procedureName, parameters);
     }
 
-    public async Task RemoveGenreAsync(int id)
+    public async Task DeleteGenreAsync(int id)
     {
         string procedureName = "spDeleteGenre";
 

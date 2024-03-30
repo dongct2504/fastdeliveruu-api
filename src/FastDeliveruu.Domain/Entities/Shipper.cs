@@ -4,32 +4,35 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace FastDeliveruu.Domain.Entities;
-
-public partial class Shipper
+namespace FastDeliveruu.Domain.Entities
 {
-    [Key]
-    public int ShipperId { get; set; }
+    public partial class Shipper
+    {
+        public Shipper()
+        {
+            Orders = new HashSet<Order>();
+        }
 
-    [StringLength(50)]
-    public string FirstName { get; set; } = null!;
+        [Key]
+        public int ShipperId { get; set; }
+        [StringLength(50)]
+        public string FirstName { get; set; } = null!;
+        [StringLength(50)]
+        public string LastName { get; set; } = null!;
+        [StringLength(15)]
+        [Unicode(false)]
+        public string PhoneNumber { get; set; } = null!;
+        [Column(TypeName = "datetime")]
+        public DateTime ShippingDate { get; set; }
+        [StringLength(126)]
+        [Unicode(false)]
+        public string? VehicleType { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime CreatedAt { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime UpdatedAt { get; set; }
 
-    [StringLength(50)]
-    public string LastName { get; set; } = null!;
-
-    [StringLength(15)]
-    [Unicode(false)]
-    public string PhoneNumber { get; set; } = null!;
-
-    [StringLength(126)]
-    public string? VehicleType { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime CreatedAt { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime UpdatedAt { get; set; }
-
-    [InverseProperty("Shipper")]
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        [InverseProperty("Shipper")]
+        public virtual ICollection<Order> Orders { get; set; }
+    }
 }

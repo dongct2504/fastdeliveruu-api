@@ -10,5 +10,5 @@ public interface IGenreServices
 
     Task<int> CreateGenreAsync(Genre genre);
     Task UpdateGenreAsync(Genre genre);
-    Task RemoveGenreAsync(int id);
+    Task DeleteGenreAsync(int id);
 }

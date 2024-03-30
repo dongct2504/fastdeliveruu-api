@@ -187,7 +187,7 @@ public class GenresController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            await _genreServices.RemoveGenreAsync(id);
+            await _genreServices.DeleteGenreAsync(id);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
             _apiResponse.IsSuccess = true;
