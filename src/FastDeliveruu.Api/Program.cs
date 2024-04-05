@@ -10,13 +10,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 {
     // Add services to the container.
 
     // allows for the correct parsing of Patch document using NewtonsoftJson
-    builder.Services.AddControllers()
+    builder.Services.AddResponseCaching();
+
+    builder.Services.AddControllers(options =>
+    {
+        options.CacheProfiles
+            .Add("Default30", new CacheProfile
+            {
+                Duration = 30
+            });
+    })
         .AddNewtonsoftJson()
         .AddXmlDataContractSerializerFormatters();
 
@@ -70,6 +80,28 @@ var builder = WebApplication.CreateBuilder(args);
                 new List<string>()
             }
         });
+        options.SwaggerDoc("v1", new OpenApiInfo // 'v1' name must match the swagger endpoint bellow
+        {
+            Version = "1.0",
+            Title = "FastDeliveruu V1",
+            TermsOfService = new Uri("https://example.com/terms"),
+            License = new OpenApiLicense
+            {
+                Name = "License",
+                Url = new Uri("https://example.com/license")
+            }
+        });
+        options.SwaggerDoc("v2", new OpenApiInfo
+        {
+            Version = "2.0",
+            Title = "FastDeliveruu V2",
+            TermsOfService = new Uri("https://example.com/terms"),
+            License = new OpenApiLicense
+            {
+                Name = "License",
+                Url = new Uri("https://example.com/license")
+            }
+        });
     });
 
     // setting connection string and register DbContext
@@ -91,6 +123,18 @@ var builder = WebApplication.CreateBuilder(args);
 
     // register automapper
     builder.Services.AddAutoMapper(typeof(Program));
+
+    builder.Services.AddApiVersioning(options =>
+    {
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.ReportApiVersions = true; // report the support version in the response headers
+    });
+    builder.Services.AddVersionedApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true; // automatically change to the version (v1)
+    });
 }
 
 var app = builder.Build();
@@ -99,10 +143,16 @@ var app = builder.Build();
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "FastDeliveruuApiV1");
+            options.SwaggerEndpoint("/swagger/v2/swagger.json", "FastDeliveruuApiV2");
+        });
     }
 
     app.UseHttpsRedirection();
+
+    app.UseResponseCaching();
 
     app.UseStaticFiles(); // upload images
 

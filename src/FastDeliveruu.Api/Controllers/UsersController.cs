@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FastDeliveruu.Api.Controllers;
 
 [ApiController]
-[Route("api/user-auth")]
+[ApiVersionNeutral]
+[Route("api/v{version:apiVersion}/user-auth")]
 public class UsersController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;

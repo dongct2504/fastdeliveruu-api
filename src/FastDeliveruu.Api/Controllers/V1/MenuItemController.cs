@@ -8,10 +8,11 @@ using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FastDeliveruu.Api.Controllers;
+namespace FastDeliveruu.Api.Controllers.V1;
 
 [ApiController]
-[Route("api/menu-items")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/menu-items")]
 public class MenuItemController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
@@ -33,7 +34,7 @@ public class MenuItemController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> GetAllMenuItems()

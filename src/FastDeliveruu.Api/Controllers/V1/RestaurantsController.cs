@@ -1,42 +1,50 @@
-﻿using AutoMapper;
-using FastDeliveruu.Application.Dtos.GenreDtos;
+using AutoMapper;
+using FastDeliveruu.Api.Dtos;
+using FastDeliveruu.Api.Interfaces;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Common;
 using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FastDeliveruu.Api.Controllers;
+namespace FastDeliveruu.Api.Controllers.V1;
 
 [ApiController]
-[Route("api/genres")]
-public class GenresController : ControllerBase
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/restaurants")]
+public class RestaurantsController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
-    private readonly IGenreServices _genreServices;
-    private readonly ILogger<GenresController> _logger;
+    private readonly IRestaurantServices _restaurantServices;
+    private readonly ILogger<RestaurantsController> _logger;
     private readonly IMapper _mapper;
+    private readonly IImageServices _imageServices;
 
-    public GenresController(IGenreServices genreServices,
-        ILogger<GenresController> logger,
-        IMapper mapper)
+    public RestaurantsController(IRestaurantServices restaurantServices,
+        ILogger<RestaurantsController> logger,
+        IMapper mapper,
+        IImageServices imageServices)
     {
         _apiResponse = new ApiResponse();
-        _genreServices = genreServices;
+        _restaurantServices = restaurantServices;
         _logger = logger;
         _mapper = mapper;
+        _imageServices = imageServices;
     }
 
     [HttpGet]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllGenres()
+    public async Task<ActionResult<ApiResponse>> GetAllRestaurants()
     {
         try
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<IEnumerable<GenreDto>>(await _genreServices.GetAllGenresAsync());
+            _apiResponse.Result = _mapper.Map<IEnumerable<RestaurantDto>>(
+                await _restaurantServices.GetAllRestaurantsAsync());
 
             return Ok(_apiResponse);
         }
@@ -50,18 +58,18 @@ public class GenresController : ControllerBase
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetGenreById")]
+    [HttpGet("{id:int}", Name = "GetRestaurantById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetGenreById(int id)
+    public async Task<ActionResult<ApiResponse>> GetRestaurantById(int id)
     {
         try
         {
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
-            if (genre == null)
+            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
+            if (restaurant == null)
             {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
+                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
 
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
                 _apiResponse.IsSuccess = false;
@@ -72,7 +80,7 @@ public class GenresController : ControllerBase
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
+            _apiResponse.Result = await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
 
             return Ok(_apiResponse);
         }
@@ -93,7 +101,8 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> CreateGenre(GenreCreateDto genreCreateDto)
+    public async Task<ActionResult<ApiResponse>> CreateRestaurant(
+        [FromForm] RestaurantCreateWithImageDto restaurantCreateWithImageDto)
     {
         try
         {
@@ -102,9 +111,9 @@ public class GenresController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            if (genreCreateDto == null)
+            if (restaurantCreateWithImageDto.RestaurantCreateDto == null)
             {
-                string errorMessage = "Can't create the requested genre because it is null.";
+                string errorMessage = "Can't create the requested restaurant because it is null.";
 
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
@@ -113,9 +122,10 @@ public class GenresController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            if (await _genreServices.GetGenreByNameAsync(genreCreateDto.Name) != null)
+            if (await _restaurantServices.GetRestaurantByNameAsync(
+                restaurantCreateWithImageDto.RestaurantCreateDto.Name) != null)
             {
-                string errorMessage = "Can't create the requested genre because it already exists.";
+                string errorMessage = "Can't create the requested restaurant because it already exists.";
 
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
@@ -124,18 +134,28 @@ public class GenresController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            Genre genre = _mapper.Map<Genre>(genreCreateDto);
-            genre.CreatedAt = DateTime.Now;
-            genre.UpdatedAt = DateTime.Now;
+            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantCreateWithImageDto.RestaurantCreateDto);
 
-            int createdGenreId = await _genreServices.CreateGenreAsync(genre);
-            genre.GenreId = createdGenreId;
+            if (restaurantCreateWithImageDto.ImageFile != null)
+            {
+                // create and save image
+                string uploadImagePath = @"images\restaurants";
+                string? fileNameWithExtension = await _imageServices.UploadImageAsync(
+                    restaurantCreateWithImageDto.ImageFile, uploadImagePath);
+                restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
+            }
+
+            restaurant.CreatedAt = DateTime.Now;
+            restaurant.UpdatedAt = DateTime.Now;
+
+            int createdRestaurantId = await _restaurantServices.CreateRestaurantAsync(restaurant);
+            restaurant.RestaurantId = createdRestaurantId;
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Created;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<GenreDto>(genre);
+            _apiResponse.Result = _mapper.Map<RestaurantDto>(restaurant);
 
-            return CreatedAtRoute(nameof(GetGenreById), new { Id = createdGenreId }, _apiResponse);
+            return CreatedAtRoute(nameof(GetRestaurantById), new { Id = createdRestaurantId }, _apiResponse);
         }
         catch (Exception e)
         {
@@ -154,8 +174,8 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> UpdateGenre(int id,
-        GenreUpdateDto genreUpdateDto)
+    public async Task<ActionResult<ApiResponse>> UpdateRestaurant(int id,
+        [FromForm] RestaurantUpdateWithImageDto restaurantUpdateWithImageDto)
     {
         try
         {
@@ -164,10 +184,10 @@ public class GenresController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
-            if (genre == null)
+            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
+            if (restaurant == null)
             {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
+                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
 
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
                 _apiResponse.IsSuccess = false;
@@ -176,11 +196,21 @@ public class GenresController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            // Source -> Target
-            _mapper.Map(genreUpdateDto, genre);
-            genre.UpdatedAt = DateTime.Now;
+            _mapper.Map(restaurantUpdateWithImageDto.RestaurantUpdateDto, restaurant);
 
-            await _genreServices.UpdateGenreAsync(genre);
+            if (restaurantUpdateWithImageDto.ImageFile != null)
+            {
+                _imageServices.DeleteImage(restaurant.ImageUrl); // delete the old ones if it already exist
+
+                string uploadImagePath = @"images\restaurants";
+                string? fileNameWithExtension = await _imageServices.UploadImageAsync(
+                    restaurantUpdateWithImageDto.ImageFile, uploadImagePath);
+                restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
+            }
+
+            restaurant.UpdatedAt = DateTime.Now;
+
+            await _restaurantServices.UpdateRestaurantAsync(restaurant);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
             _apiResponse.IsSuccess = true;
@@ -204,14 +234,14 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> DeleteGenre(int id)
+    public async Task<ActionResult<ApiResponse>> DeleteRestaurant(int id)
     {
         try
         {
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
-            if (genre == null)
+            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
+            if (restaurant == null)
             {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
+                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
 
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
                 _apiResponse.IsSuccess = false;
@@ -220,7 +250,8 @@ public class GenresController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            await _genreServices.DeleteGenreAsync(id);
+            await _restaurantServices.DeleteRestaurantAsync(id);
+            _imageServices.DeleteImage(restaurant.ImageUrl);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
             _apiResponse.IsSuccess = true;
