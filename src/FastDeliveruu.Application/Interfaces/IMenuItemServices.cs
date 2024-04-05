@@ -7,6 +7,9 @@ public interface IMenuItemServices
 {
     Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync();
     Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetAllMenuItemsWithRestaurantGenreAsync();
+    Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetFilterMenuItemsWithRestaurantGenreAsync(
+        int? genreId, int? restaurantId, string? search);
+
     Task<MenuItem?> GetMenuItemByIdAsync(int id);
     Task<MenuItemWithRestaurantGenreDto?> GetMenuItemWithRestaurantGenreByIdAsync(int id);
     Task<MenuItem?> GetMenuItemByNameAsync(string name);

@@ -34,16 +34,21 @@ public class MenuItemController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30")]
+    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "genreId", "restaurantId" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllMenuItems()
+    public async Task<ActionResult<ApiResponse>> GetAllMenuItems(int? genreId, int? restaurantId,
+        string? search)
     {
         try
         {
+            IEnumerable<MenuItemWithRestaurantGenreDto> menuItemDtos =
+                await _menuItemServices.GetFilterMenuItemsWithRestaurantGenreAsync(
+                    genreId, restaurantId, search);
+
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _menuItemServices.GetAllMenuItemsWithRestaurantGenreAsync();
+            _apiResponse.Result = menuItemDtos;
 
             return Ok(_apiResponse);
         }

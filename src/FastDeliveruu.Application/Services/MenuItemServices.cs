@@ -30,6 +30,30 @@ public class MenuItemServices : IMenuItemServices
         return await _sP_Call.ListAsync<MenuItemWithRestaurantGenreDto>(procedureName);
     }
 
+    public async Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetFilterMenuItemsWithRestaurantGenreAsync(
+        int? genreId, int? restaurantId, string? search)
+    {
+        IEnumerable<MenuItemWithRestaurantGenreDto> menuItemDtos = await 
+            GetAllMenuItemsWithRestaurantGenreAsync();
+
+        if (genreId != null)
+        {
+            menuItemDtos = menuItemDtos.Where(mi => mi.GenreId == genreId);
+        }
+
+        if (restaurantId != null)
+        {
+            menuItemDtos = menuItemDtos.Where(mi => mi.RestaurantId == restaurantId);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            menuItemDtos = menuItemDtos.Where(mi => mi.Name.ToLower().Contains(search));
+        }
+
+        return menuItemDtos;
+    }
+
     public async Task<MenuItem?> GetMenuItemByIdAsync(int id)
     {
         string procedureName = "spGetMenuItemById";
