@@ -61,6 +61,11 @@ public class UsersController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (!await _localUserServices.IsUniqueUserAsync(registerationRequestDto.UserName))
             {
                 _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;

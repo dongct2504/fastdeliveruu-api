@@ -10,15 +10,15 @@ public class RegisterationRequestDto
     [Required(ErrorMessage = "Vui lòng nhập họ.")]
     public string LastName { get; set; } = null!;
 
-    [Required(ErrorMessage = "Vui lòng nhập user name.")]
+    [Required(ErrorMessage = "Vui lòng nhập username.")]
     public string UserName { get; set; } = null!;
 
     [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
-    [Phone]
+    [Phone(ErrorMessage = "Vui lòng nhập số điện thoại hợp lệ.")]
     public string PhoneNumber { get; set; } = null!;
 
     [Required(ErrorMessage = "Vui lòng nhập email.")]
-    [EmailAddress]
+    [EmailAddress(ErrorMessage = "Vui lòng nhập email hợp lệ.")]
     public string Email { get; set; } = null!;
 
     [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
