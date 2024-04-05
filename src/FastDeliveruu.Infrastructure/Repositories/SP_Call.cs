@@ -52,12 +52,16 @@ public class SP_Call : ISP_Call
 
             var result = await SqlMapper.QueryMultipleAsync(connection,
                 procedureName, CommandType.StoredProcedure);
-            var item1 = result.Read<T1>().ToList();
-            var item2 = result.Read<T2>().ToList();
 
-            if (item1 != null && item2 != null)
+            var item1 = await result.ReadAsync<T1>();
+            List<T1> item1List = item1.ToList();
+
+            var item2 = await result.ReadAsync<T2>();
+            List<T2> item2List = item2.ToList();
+
+            if (item1List != null && item2List != null)
             {
-                return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(item1, item2);
+                return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(item1List, item2List);
             }
         }
 
@@ -69,7 +73,7 @@ public class SP_Call : ISP_Call
         using (SqlConnection connection = new SqlConnection(ConnectionString))
         {
             await connection.OpenAsync();
-            var value = connection.Query<T>(procedureName, parameters,
+            var value = await connection.QueryAsync<T>(procedureName, parameters,
                 commandType: CommandType.StoredProcedure);
 
             var firstValue = value.FirstOrDefault();
@@ -88,10 +92,15 @@ public class SP_Call : ISP_Call
         using (SqlConnection connection = new SqlConnection(ConnectionString))
         {
             await connection.OpenAsync();
-            var value = connection.ExecuteScalarAsync<T>(procedureName, parameters,
+            var value = await connection.ExecuteScalarAsync<T>(procedureName, parameters,
                 commandType: CommandType.StoredProcedure);
 
-            return (T)Convert.ChangeType(value, typeof(T));
+            if (value != null)
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+
+            return default;
         }
     }
 }

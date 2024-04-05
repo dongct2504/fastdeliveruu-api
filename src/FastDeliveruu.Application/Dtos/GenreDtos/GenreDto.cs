@@ -1,4 +1,4 @@
-﻿namespace FastDeliveruu.Application.Dtos;
+﻿namespace FastDeliveruu.Application.Dtos.GenreDtos;
 
 public class GenreDto
 {

@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Domain.Entities;
+﻿using FastDeliveruu.Application.Dtos.GenreDtos;
+using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Interfaces;
 
@@ -6,6 +7,7 @@ public interface IGenreServices
 {
     Task<IEnumerable<Genre>> GetAllGenresAsync();
     Task<Genre?> GetGenreByIdAsync(int id);
+    Task<GenreWithMenuItemsDto?> GetGenreWithMenuItemsByIdAsync(int id);
     Task<Genre?> GetGenreByNameAsync(string name);
 
     Task<int> CreateGenreAsync(Genre genre);

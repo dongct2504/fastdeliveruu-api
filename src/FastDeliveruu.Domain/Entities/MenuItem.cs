@@ -20,6 +20,8 @@ namespace FastDeliveruu.Domain.Entities
         public int MenuItemId { get; set; }
         public int RestaurantId { get; set; }
         public int GenreId { get; set; }
+        [StringLength(50)]
+        public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Inventory { get; set; }
         [Column(TypeName = "money")]

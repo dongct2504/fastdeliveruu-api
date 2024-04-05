@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -30,6 +31,16 @@ public class GenreServices : IGenreServices
         parameters.Add("@GenreId", id);
 
         return await _sP_Call.OneRecordAsync<Genre>(procedureName, parameters);
+    }
+
+    public async Task<GenreWithMenuItemsDto?> GetGenreWithMenuItemsByIdAsync(int id)
+    {
+        string procedureName = "spGetGenreWithMenuItemsById";
+
+        DynamicParameters parameters = new DynamicParameters();
+        parameters.Add("@GenreId", id);
+
+        return await _sP_Call.OneRecordAsync<GenreWithMenuItemsDto>(procedureName, parameters);
     }
 
     public async Task<Genre?> GetGenreByNameAsync(string name)
