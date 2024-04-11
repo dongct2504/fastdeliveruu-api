@@ -29,16 +29,17 @@ public class GenresController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30")]
+    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "page" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllGenres()
+    public async Task<ActionResult<ApiResponse>> GetAllGenres(int page = 1)
     {
         try
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<IEnumerable<GenreDto>>(await _genreServices.GetAllGenresAsync());
+            _apiResponse.Result = _mapper.Map<IEnumerable<GenreDto>>(
+                await _genreServices.GetAllGenresAsync(page));
 
             return Ok(_apiResponse);
         }

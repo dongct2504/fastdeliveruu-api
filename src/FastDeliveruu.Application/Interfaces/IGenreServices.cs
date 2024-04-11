@@ -5,7 +5,7 @@ namespace FastDeliveruu.Application.Interfaces;
 
 public interface IGenreServices
 {
-    Task<IEnumerable<Genre>> GetAllGenresAsync();
+    Task<IEnumerable<Genre>> GetAllGenresAsync(int page);
     Task<Genre?> GetGenreByIdAsync(int id);
     Task<GenreWithMenuItemsDto?> GetGenreWithMenuItemsByIdAsync(int id);
     Task<Genre?> GetGenreByNameAsync(string name);

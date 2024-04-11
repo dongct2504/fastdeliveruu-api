@@ -2,6 +2,7 @@
 using Dapper;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 
@@ -16,11 +17,15 @@ public class RestaurantServices : IRestaurantServices
         _sP_Call = sP_Call;
     }
 
-    public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync()
+    public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync(int page)
     {
-        string procedureName = "spGetAllRestaurants";
+        string procedureName = "spGetAllRestaurantsPaging";
 
-        return await _sP_Call.ListAsync<Restaurant>(procedureName);
+        DynamicParameters parameters = new DynamicParameters();
+        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+
+        return await _sP_Call.ListAsync<Restaurant>(procedureName, parameters);
     }
 
     public async Task<Restaurant?> GetRestaurantByIdAsync(int id)

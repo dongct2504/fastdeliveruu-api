@@ -5,10 +5,10 @@ namespace FastDeliveruu.Application.Interfaces;
 
 public interface IMenuItemServices
 {
-    Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync();
-    Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetAllMenuItemsWithRestaurantGenreAsync();
+    Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync(int page);
+    Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetAllMenuItemsWithRestaurantGenreAsync(int page);
     Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetFilterMenuItemsWithRestaurantGenreAsync(
-        int? genreId, int? restaurantId, string? search);
+        int? genreId, int? restaurantId, int page);
 
     Task<MenuItem?> GetMenuItemByIdAsync(int id);
     Task<MenuItemWithRestaurantGenreDto?> GetMenuItemWithRestaurantGenreByIdAsync(int id);

@@ -34,17 +34,18 @@ public class MenuItemController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "genreId", "restaurantId" })]
+    [ResponseCache(CacheProfileName = "Default30",
+        VaryByQueryKeys = new[] { "genreId", "restaurantId", "page" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> GetAllMenuItems(int? genreId, int? restaurantId,
-        string? search)
+        int page = 1)
     {
         try
         {
             IEnumerable<MenuItemWithRestaurantGenreDto> menuItemDtos =
                 await _menuItemServices.GetFilterMenuItemsWithRestaurantGenreAsync(
-                    genreId, restaurantId, search);
+                    genreId, restaurantId, page);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
@@ -99,7 +100,7 @@ public class MenuItemController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "admin")]
+    // [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

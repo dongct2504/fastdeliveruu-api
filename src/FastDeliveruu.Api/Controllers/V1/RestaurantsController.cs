@@ -34,17 +34,17 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30")]
+    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "page" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllRestaurants()
+    public async Task<ActionResult<ApiResponse>> GetAllRestaurants(int page = 1)
     {
         try
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
             _apiResponse.Result = _mapper.Map<IEnumerable<RestaurantDto>>(
-                await _restaurantServices.GetAllRestaurantsAsync());
+                await _restaurantServices.GetAllRestaurantsAsync(page));
 
             return Ok(_apiResponse);
         }

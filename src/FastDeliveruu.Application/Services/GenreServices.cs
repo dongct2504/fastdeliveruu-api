@@ -2,6 +2,7 @@
 using Dapper;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 
@@ -16,11 +17,15 @@ public class GenreServices : IGenreServices
         _sP_Call = sP_Call;
     }
 
-    public async Task<IEnumerable<Genre>> GetAllGenresAsync()
+    public async Task<IEnumerable<Genre>> GetAllGenresAsync(int page)
     {
-        string procedureName = "spGetAllGenres";
+        string procedureName = "spGetAllGenresPaging";
 
-        return await _sP_Call.ListAsync<Genre>(procedureName);
+        DynamicParameters parameters = new DynamicParameters();
+        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+
+        return await _sP_Call.ListAsync<Genre>(procedureName, parameters);
     }
 
     public async Task<Genre?> GetGenreByIdAsync(int id)

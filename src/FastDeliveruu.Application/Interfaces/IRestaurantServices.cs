@@ -5,7 +5,7 @@ namespace FastDeliveruu.Application.Interfaces;
 
 public interface IRestaurantServices
 {
-    Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
+    Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync(int page);
     Task<Restaurant?> GetRestaurantByIdAsync(int id);
     Task<RestaurantWithMenuItemsDto?> GetRestaurantWithMenuItemsByIdAsync(int id);
     Task<Restaurant?> GetRestaurantByNameAsync(string name);

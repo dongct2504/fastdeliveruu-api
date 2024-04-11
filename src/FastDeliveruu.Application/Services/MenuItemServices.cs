@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 
@@ -16,25 +17,34 @@ public class MenuItemServices : IMenuItemServices
         _sP_Call = sP_Call;
     }
 
-    public async Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync()
+    public async Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync(int page)
     {
-        string procedureName = "spGetAllMenuItems";
+        string procedureName = "spGetAllMenuItemsPaging";
 
-        return await _sP_Call.ListAsync<MenuItem>(procedureName);
+        DynamicParameters parameters = new DynamicParameters();
+        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+
+        return await _sP_Call.ListAsync<MenuItem>(procedureName, parameters);
     }
 
-    public async Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetAllMenuItemsWithRestaurantGenreAsync()
+    public async Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetAllMenuItemsWithRestaurantGenreAsync(
+        int page)
     {
-        string procedureName = "spGetAllMenuItemsWithRestaurantGenre";
+        string procedureName = "spGetAllMenuItemsWithRestaurantGenrePaging";
 
-        return await _sP_Call.ListAsync<MenuItemWithRestaurantGenreDto>(procedureName);
+        DynamicParameters parameters = new DynamicParameters();
+        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+
+        return await _sP_Call.ListAsync<MenuItemWithRestaurantGenreDto>(procedureName, parameters);
     }
 
     public async Task<IEnumerable<MenuItemWithRestaurantGenreDto>> GetFilterMenuItemsWithRestaurantGenreAsync(
-        int? genreId, int? restaurantId, string? search)
+        int? genreId, int? restaurantId, int page)
     {
         IEnumerable<MenuItemWithRestaurantGenreDto> menuItemDtos = await 
-            GetAllMenuItemsWithRestaurantGenreAsync();
+            GetAllMenuItemsWithRestaurantGenreAsync(page);
 
         if (genreId != null)
         {
@@ -44,11 +54,6 @@ public class MenuItemServices : IMenuItemServices
         if (restaurantId != null)
         {
             menuItemDtos = menuItemDtos.Where(mi => mi.RestaurantId == restaurantId);
-        }
-
-        if (!string.IsNullOrEmpty(search))
-        {
-            menuItemDtos = menuItemDtos.Where(mi => mi.Name.ToLower().Contains(search));
         }
 
         return menuItemDtos;
