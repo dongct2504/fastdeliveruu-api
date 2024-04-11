@@ -48,11 +48,11 @@ public class RestaurantsController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -84,11 +84,11 @@ public class RestaurantsController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -100,6 +100,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateRestaurant(
         [FromForm] RestaurantCreateWithImageDto restaurantCreateWithImageDto)
@@ -122,19 +123,20 @@ public class RestaurantsController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            if (await _restaurantServices.GetRestaurantByNameAsync(
-                restaurantCreateWithImageDto.RestaurantCreateDto.Name) != null)
+            Restaurant? restaurant = await _restaurantServices.GetRestaurantByNameAsync(
+                restaurantCreateWithImageDto.RestaurantCreateDto.Name);
+            if (restaurant != null)
             {
                 string errorMessage = "Can't create the requested restaurant because it already exists.";
 
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
-                return BadRequest(_apiResponse);
+                return Conflict(_apiResponse);
             }
 
-            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantCreateWithImageDto.RestaurantCreateDto);
+            restaurant = _mapper.Map<Restaurant>(restaurantCreateWithImageDto.RestaurantCreateDto);
 
             if (restaurantCreateWithImageDto.ImageFile != null)
             {
@@ -157,11 +159,11 @@ public class RestaurantsController : ControllerBase
 
             return CreatedAtRoute(nameof(GetRestaurantById), new { Id = createdRestaurantId }, _apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -171,6 +173,7 @@ public class RestaurantsController : ControllerBase
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -217,11 +220,11 @@ public class RestaurantsController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -258,11 +261,11 @@ public class RestaurantsController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }

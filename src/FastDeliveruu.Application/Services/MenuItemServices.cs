@@ -22,8 +22,8 @@ public class MenuItemServices : IMenuItemServices
         string procedureName = "spGetAllMenuItemsPaging";
 
         DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
-        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+        parameters.Add("@RowOffSet", PagingConstants.DefaultPageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.DefaultPageSize);
 
         return await _sP_Call.ListAsync<MenuItem>(procedureName, parameters);
     }
@@ -34,8 +34,8 @@ public class MenuItemServices : IMenuItemServices
         string procedureName = "spGetAllMenuItemsWithRestaurantGenrePaging";
 
         DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
-        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+        parameters.Add("@RowOffSet", PagingConstants.DefaultPageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.DefaultPageSize);
 
         return await _sP_Call.ListAsync<MenuItemWithRestaurantGenreDto>(procedureName, parameters);
     }

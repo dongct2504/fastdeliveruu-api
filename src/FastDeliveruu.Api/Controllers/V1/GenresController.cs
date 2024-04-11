@@ -43,11 +43,11 @@ public class GenresController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -79,11 +79,11 @@ public class GenresController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -95,6 +95,7 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateGenre(GenreCreateDto genreCreateDto)
     {
@@ -116,18 +117,19 @@ public class GenresController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            if (await _genreServices.GetGenreByNameAsync(genreCreateDto.Name) != null)
+            Genre? genre = await _genreServices.GetGenreByNameAsync(genreCreateDto.Name);
+            if (genre != null)
             {
                 string errorMessage = "Can't create the requested genre because it already exists.";
 
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
-                return BadRequest(_apiResponse);
+                return Conflict(_apiResponse);
             }
 
-            Genre genre = _mapper.Map<Genre>(genreCreateDto);
+            genre = _mapper.Map<Genre>(genreCreateDto);
             genre.CreatedAt = DateTime.Now;
             genre.UpdatedAt = DateTime.Now;
 
@@ -140,11 +142,11 @@ public class GenresController : ControllerBase
 
             return CreatedAtRoute(nameof(GetGenreById), new { Id = createdGenreId }, _apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -154,6 +156,7 @@ public class GenresController : ControllerBase
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -190,11 +193,11 @@ public class GenresController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -230,11 +233,11 @@ public class GenresController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }

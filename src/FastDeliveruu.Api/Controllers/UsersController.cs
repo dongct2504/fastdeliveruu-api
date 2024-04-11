@@ -12,11 +12,14 @@ public class UsersController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
     private readonly ILocalUserServices _localUserServices;
+    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(ILocalUserServices localUserServices)
+    public UsersController(ILocalUserServices localUserServices,
+        ILogger<UsersController> logger)
     {
         _apiResponse = new ApiResponse();
         _localUserServices = localUserServices;
+        _logger = logger;
     }
 
     [HttpPost("login")]

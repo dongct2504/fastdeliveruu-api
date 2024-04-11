@@ -69,7 +69,7 @@ public class LocalUserServices : ILocalUserServices
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, localUser.LocalUserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, localUser.LocalUserId.ToString()),
                 new Claim(ClaimTypes.Role, localUser.Role)
             }),
             Expires = DateTime.UtcNow.AddDays(7),

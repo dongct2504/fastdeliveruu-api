@@ -13,16 +13,16 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/menu-items")]
-public class MenuItemController : ControllerBase
+public class MenuItemsController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
     private readonly IMenuItemServices _menuItemServices;
-    private readonly ILogger<MenuItemController> _logger;
+    private readonly ILogger<MenuItemsController> _logger;
     private readonly IMapper _mapper;
     private readonly IImageServices _imageServices;
 
-    public MenuItemController(IMenuItemServices menuItemServices,
-        ILogger<MenuItemController> logger,
+    public MenuItemsController(IMenuItemServices menuItemServices,
+        ILogger<MenuItemsController> logger,
         IMapper mapper,
         IImageServices imageServices)
     {
@@ -53,11 +53,11 @@ public class MenuItemController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -89,11 +89,11 @@ public class MenuItemController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -105,6 +105,7 @@ public class MenuItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateMenuItem(
         [FromForm] MenuItemCreateWithImageDto menuItemCreateWithImageDto)
@@ -127,19 +128,20 @@ public class MenuItemController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            if (await _menuItemServices.GetMenuItemByNameAsync(
-                menuItemCreateWithImageDto.MenuItemCreateDto.Name) != null)
+            MenuItem? menuItem = await _menuItemServices.GetMenuItemByNameAsync(
+                menuItemCreateWithImageDto.MenuItemCreateDto.Name);
+            if (menuItem != null)
             {
                 string errorMessage = "Can't create the requested menu item because it already exists.";
 
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
-                return BadRequest(_apiResponse);
+                return Conflict(_apiResponse);
             }
 
-            MenuItem menuItem = _mapper.Map<MenuItem>(menuItemCreateWithImageDto.MenuItemCreateDto);
+            menuItem = _mapper.Map<MenuItem>(menuItemCreateWithImageDto.MenuItemCreateDto);
 
             // create and save image
             if (menuItemCreateWithImageDto.ImageFile != null)
@@ -162,11 +164,11 @@ public class MenuItemController : ControllerBase
 
             return CreatedAtRoute(nameof(GetMenuItemById), new { Id = createdMenuItemId }, _apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -176,6 +178,7 @@ public class MenuItemController : ControllerBase
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -194,11 +197,11 @@ public class MenuItemController : ControllerBase
             {
                 string errorMessage = $"Menu item not found. The requested id: '{id}' does not exist.";
 
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
-                return BadRequest(_apiResponse);
+                return NotFound(_apiResponse);
             }
 
             _mapper.Map(menuItemUpdateWithImageDto.MenuItemUpdateDto, menuItem);
@@ -222,11 +225,11 @@ public class MenuItemController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }
@@ -263,11 +266,11 @@ public class MenuItemController : ControllerBase
 
             return Ok(_apiResponse);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
             _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
 
             return StatusCode(500, _apiResponse);
         }

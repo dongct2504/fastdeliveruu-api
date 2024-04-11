@@ -22,8 +22,8 @@ public class RestaurantServices : IRestaurantServices
         string procedureName = "spGetAllRestaurantsPaging";
 
         DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RowOffSet", PagingConstants.PageSize * (page - 1));
-        parameters.Add("@FetchNextRow", PagingConstants.PageSize);
+        parameters.Add("@RowOffSet", PagingConstants.DefaultPageSize * (page - 1));
+        parameters.Add("@FetchNextRow", PagingConstants.DefaultPageSize);
 
         return await _sP_Call.ListAsync<Restaurant>(procedureName, parameters);
     }

@@ -35,6 +35,10 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(20)]
         [Unicode(false)]
         public string? PaymentStatus { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? PaymentDate { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? PaymentDueDate { get; set; }
         [StringLength(256)]
         [Unicode(false)]
         public string? TransactionId { get; set; }
