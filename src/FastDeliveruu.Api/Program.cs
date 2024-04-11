@@ -1,5 +1,4 @@
 using AutoMapper;
-using FastDeliveruu.Api.Interfaces;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application;
 using FastDeliveruu.Infrastructure;
@@ -11,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Application.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -122,7 +123,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddInfrastructure();
 
     // register automapper
-    builder.Services.AddAutoMapper(typeof(Program));
+    builder.Services.AddAutoMapper(typeof(FastDeliveruuProfile).Assembly);
 
     builder.Services.AddApiVersioning(options =>
     {

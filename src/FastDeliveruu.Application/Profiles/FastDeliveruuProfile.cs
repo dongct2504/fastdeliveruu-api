@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Profiles;
