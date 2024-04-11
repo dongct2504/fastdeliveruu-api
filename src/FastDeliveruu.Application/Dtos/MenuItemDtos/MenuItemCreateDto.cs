@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 
@@ -23,4 +24,6 @@ public class MenuItemCreateDto
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }
+
+    public IFormFile? ImageFile { get; set; }
 }

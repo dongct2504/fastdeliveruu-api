@@ -1,6 +1,4 @@
 using AutoMapper;
-using FastDeliveruu.Api.Dtos;
-using FastDeliveruu.Api.Interfaces;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Common;
@@ -108,7 +106,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateMenuItem(
-        [FromForm] MenuItemCreateWithImageDto menuItemCreateWithImageDto)
+        [FromForm] MenuItemCreateDto menuItemCreateDto)
     {
         try
         {
@@ -117,7 +115,7 @@ public class MenuItemsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            if (menuItemCreateWithImageDto == null)
+            if (menuItemCreateDto == null)
             {
                 string errorMessage = "Can't create the requested menu item because it is null.";
 
@@ -129,7 +127,7 @@ public class MenuItemsController : ControllerBase
             }
 
             MenuItem? menuItem = await _menuItemServices.GetMenuItemByNameAsync(
-                menuItemCreateWithImageDto.MenuItemCreateDto.Name);
+                menuItemCreateDto.Name);
             if (menuItem != null)
             {
                 string errorMessage = "Can't create the requested menu item because it already exists.";
@@ -141,14 +139,14 @@ public class MenuItemsController : ControllerBase
                 return Conflict(_apiResponse);
             }
 
-            menuItem = _mapper.Map<MenuItem>(menuItemCreateWithImageDto.MenuItemCreateDto);
+            menuItem = _mapper.Map<MenuItem>(menuItemCreateDto);
 
             // create and save image
-            if (menuItemCreateWithImageDto.ImageFile != null)
+            if (menuItemCreateDto.ImageFile != null)
             {
                 string uploadImagePath = @"images\menu-items";
                 string? fileNameWithExtension =
-                    await _imageServices.UploadImageAsync(menuItemCreateWithImageDto.ImageFile, uploadImagePath);
+                    await _imageServices.UploadImageAsync(menuItemCreateDto.ImageFile, uploadImagePath);
                 menuItem.ImageUrl = @"\images\menu-items\" + fileNameWithExtension;
             }
 
@@ -183,7 +181,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> UpdateMenuItem(int id,
-        [FromForm] MenuItemUpdateWithImageDto menuItemUpdateWithImageDto)
+        [FromForm] MenuItemUpdateDto menuItemUpdateDto)
     {
         try
         {
@@ -204,15 +202,15 @@ public class MenuItemsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            _mapper.Map(menuItemUpdateWithImageDto.MenuItemUpdateDto, menuItem);
+            _mapper.Map(menuItemUpdateDto, menuItem);
 
-            if (menuItemUpdateWithImageDto.ImageFile != null)
+            if (menuItemUpdateDto.ImageFile != null)
             {
                 _imageServices.DeleteImage(menuItem.ImageUrl); // if it has an old one, delete it
 
                 string uploadImagePath = @"images\menu-items";
                 string? fileNameWithExtension =
-                    await _imageServices.UploadImageAsync(menuItemUpdateWithImageDto.ImageFile, uploadImagePath);
+                    await _imageServices.UploadImageAsync(menuItemUpdateDto.ImageFile, uploadImagePath);
                 menuItem.ImageUrl = @"\images\menu-items\" + fileNameWithExtension;
             }
 

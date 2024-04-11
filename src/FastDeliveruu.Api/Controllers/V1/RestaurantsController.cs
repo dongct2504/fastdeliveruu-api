@@ -1,6 +1,4 @@
 using AutoMapper;
-using FastDeliveruu.Api.Dtos;
-using FastDeliveruu.Api.Interfaces;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Common;
@@ -103,7 +101,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateRestaurant(
-        [FromForm] RestaurantCreateWithImageDto restaurantCreateWithImageDto)
+        [FromForm] RestaurantCreateDto restaurantCreateDto)
     {
         try
         {
@@ -112,7 +110,7 @@ public class RestaurantsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            if (restaurantCreateWithImageDto.RestaurantCreateDto == null)
+            if (restaurantCreateDto == null)
             {
                 string errorMessage = "Can't create the requested restaurant because it is null.";
 
@@ -124,7 +122,7 @@ public class RestaurantsController : ControllerBase
             }
 
             Restaurant? restaurant = await _restaurantServices.GetRestaurantByNameAsync(
-                restaurantCreateWithImageDto.RestaurantCreateDto.Name);
+                restaurantCreateDto.Name);
             if (restaurant != null)
             {
                 string errorMessage = "Can't create the requested restaurant because it already exists.";
@@ -136,14 +134,14 @@ public class RestaurantsController : ControllerBase
                 return Conflict(_apiResponse);
             }
 
-            restaurant = _mapper.Map<Restaurant>(restaurantCreateWithImageDto.RestaurantCreateDto);
+            restaurant = _mapper.Map<Restaurant>(restaurantCreateDto);
 
-            if (restaurantCreateWithImageDto.ImageFile != null)
+            if (restaurantCreateDto.ImageFile != null)
             {
                 // create and save image
                 string uploadImagePath = @"images\restaurants";
                 string? fileNameWithExtension = await _imageServices.UploadImageAsync(
-                    restaurantCreateWithImageDto.ImageFile, uploadImagePath);
+                    restaurantCreateDto.ImageFile, uploadImagePath);
                 restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
             }
 
@@ -178,7 +176,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> UpdateRestaurant(int id,
-        [FromForm] RestaurantUpdateWithImageDto restaurantUpdateWithImageDto)
+        [FromForm] RestaurantUpdateDto restaurantUpdateDto)
     {
         try
         {
@@ -199,15 +197,15 @@ public class RestaurantsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            _mapper.Map(restaurantUpdateWithImageDto.RestaurantUpdateDto, restaurant);
+            _mapper.Map(restaurantUpdateDto, restaurant);
 
-            if (restaurantUpdateWithImageDto.ImageFile != null)
+            if (restaurantUpdateDto.ImageFile != null)
             {
                 _imageServices.DeleteImage(restaurant.ImageUrl); // delete the old ones if it already exist
 
                 string uploadImagePath = @"images\restaurants";
                 string? fileNameWithExtension = await _imageServices.UploadImageAsync(
-                    restaurantUpdateWithImageDto.ImageFile, uploadImagePath);
+                    restaurantUpdateDto.ImageFile, uploadImagePath);
                 restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
             }
 

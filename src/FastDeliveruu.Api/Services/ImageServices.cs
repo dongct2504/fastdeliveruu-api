@@ -1,4 +1,4 @@
-using FastDeliveruu.Api.Interfaces;
+using FastDeliveruu.Application.Interfaces;
 
 namespace FastDeliveruu.Api.Services;
 

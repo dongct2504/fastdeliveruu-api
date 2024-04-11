@@ -1,4 +1,6 @@
-namespace FastDeliveruu.Api.Interfaces;
+using Microsoft.AspNetCore.Http;
+
+namespace FastDeliveruu.Application.Interfaces;
 
 public interface IImageServices
 {

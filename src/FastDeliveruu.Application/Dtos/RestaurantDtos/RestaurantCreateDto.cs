@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
 
@@ -32,4 +33,6 @@ public class RestaurantCreateDto
     [Required(ErrorMessage = "Vui lòng nhập thành phố.")]
     [MaxLength(30, ErrorMessage = "Độ dài phải bé hơn 30.")]
     public string City { get; set; } = null!;
+
+    public IFormFile? ImageFile { get; set; }
 }
