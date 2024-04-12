@@ -101,7 +101,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateRestaurant(
-        [FromForm] RestaurantCreateDto restaurantCreateDto)
+        [FromBody] RestaurantCreateDto restaurantCreateDto)
     {
         try
         {
@@ -176,7 +176,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> UpdateRestaurant(int id,
-        [FromForm] RestaurantUpdateDto restaurantUpdateDto)
+        [FromBody] RestaurantUpdateDto restaurantUpdateDto)
     {
         try
         {
@@ -231,7 +231,7 @@ public class RestaurantsController : ControllerBase
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

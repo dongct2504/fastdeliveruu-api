@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> Login([FromForm] LoginRequestDto loginRequestDto)
+    public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDto loginRequestDto)
     {
         try
         {
@@ -61,7 +61,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> Register(
-        [FromForm] RegisterationRequestDto registerationRequestDto)
+        [FromBody] RegisterationRequestDto registerationRequestDto)
     {
         try
         {

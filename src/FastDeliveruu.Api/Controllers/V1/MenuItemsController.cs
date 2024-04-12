@@ -98,7 +98,7 @@ public class MenuItemsController : ControllerBase
     }
 
     [HttpPost]
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -106,7 +106,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateMenuItem(
-        [FromForm] MenuItemCreateDto menuItemCreateDto)
+        [FromBody] MenuItemCreateDto menuItemCreateDto)
     {
         try
         {
@@ -181,7 +181,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> UpdateMenuItem(int id,
-        [FromForm] MenuItemUpdateDto menuItemUpdateDto)
+        [FromBody] MenuItemUpdateDto menuItemUpdateDto)
     {
         try
         {
@@ -236,7 +236,7 @@ public class MenuItemsController : ControllerBase
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -249,11 +249,11 @@ public class MenuItemsController : ControllerBase
             {
                 string errorMessage = $"Menu item not found. The requested id: '{id}' does not exist.";
 
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
-                return BadRequest(_apiResponse);
+                return NotFound(_apiResponse);
             }
 
             await _menuItemServices.DeleteMenuItemAsync(id);

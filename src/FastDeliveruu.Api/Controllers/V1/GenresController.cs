@@ -97,7 +97,7 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> CreateGenre(GenreCreateDto genreCreateDto)
+    public async Task<ActionResult<ApiResponse>> CreateGenre([FromBody] GenreCreateDto genreCreateDto)
     {
         try
         {
@@ -161,7 +161,7 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> UpdateGenre(int id,
-        GenreUpdateDto genreUpdateDto)
+        [FromBody] GenreUpdateDto genreUpdateDto)
     {
         try
         {
@@ -206,7 +206,7 @@ public class GenresController : ControllerBase
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
