@@ -1,6 +1,6 @@
+using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;

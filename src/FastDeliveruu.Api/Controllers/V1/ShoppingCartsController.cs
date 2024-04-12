@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using AutoMapper;
+using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Common;
 using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

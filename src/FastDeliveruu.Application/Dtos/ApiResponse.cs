@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace FastDeliveruu.Domain.Common;
+namespace FastDeliveruu.Application.Dtos;
 
 public class ApiResponse
 {
