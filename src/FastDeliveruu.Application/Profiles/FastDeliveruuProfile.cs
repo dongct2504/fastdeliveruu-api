@@ -29,7 +29,7 @@ public class FastDeliveruuProfile : Profile
         CreateMap<MenuItem, MenuItemCreateDto>().ReverseMap();
         CreateMap<MenuItem, MenuItemUpdateDto>().ReverseMap();
 
-        CreateMap<LocalUser, LocalUserDto>().ReverseMap();
+        CreateMap<LocalUser, LocalUserDto>();
 
         CreateMap<ShoppingCart, ShoppingCartDto>();
         CreateMap<ShoppingCart, ShoppingCartCreateDto>().ReverseMap();

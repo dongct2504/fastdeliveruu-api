@@ -2,9 +2,11 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using Dapper;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -15,33 +17,34 @@ namespace FastDeliveruu.Application.Services;
 public class LocalUserServices : ILocalUserServices
 {
     private readonly ISP_Call _sP_Call;
+    private readonly IMapper _mapper;
     private readonly string _secretKey;
 
     public LocalUserServices(ISP_Call sP_Call,
+        IMapper mapper,
         IConfiguration configuration)
     {
         _sP_Call = sP_Call;
+        _mapper = mapper;
         _secretKey = configuration["ApiSettings:Secret"];
     }
 
     public async Task<bool> IsUniqueUserAsync(string username)
     {
-        string procedureName = "spGetLocalUserByUserName";
-
         DynamicParameters parameters = new DynamicParameters();
         parameters.Add("@UserName", username);
 
-        return await _sP_Call.OneRecordAsync<LocalUser>(procedureName, parameters) == null;
+        return await _sP_Call.OneRecordAsync<LocalUser>(
+            StoreProcedureNames.SpGetLocalUserByUserName, parameters) == null;
     }
 
     public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
     {
-        string procedureName = "spGetLocalUserByUserName";
-
         DynamicParameters parameters = new DynamicParameters();
         parameters.Add("@UserName", loginRequestDto.UserName);
 
-        LocalUser? localUser = await _sP_Call.OneRecordAsync<LocalUser>(procedureName, parameters);
+        LocalUser? localUser = await _sP_Call.OneRecordAsync<LocalUser>(
+            StoreProcedureNames.SpGetLocalUserByUserName, parameters);
         if (localUser == null)
         {
             return new LoginResponseDto
@@ -79,24 +82,9 @@ public class LocalUserServices : ILocalUserServices
 
         SecurityToken token = tokenHandler.CreateToken(descriptor);
 
-        LocalUserDto localUserDto = new LocalUserDto
-        {
-            LocalUserId = localUser.LocalUserId,
-            FirstName = localUser.FirstName,
-            LastName = localUser.LastName,
-            UserName = localUser.UserName,
-            Email = localUser.Email,
-            PhoneNumber = localUser.PhoneNumber,
-            ImageUrl = localUser.ImageUrl,
-            Address = localUser.Address,
-            Ward = localUser.Ward,
-            District = localUser.District,
-            City = localUser.City,
-        };
-
         LoginResponseDto loginResponseDto = new LoginResponseDto
         {
-            LocalUserDto = localUserDto,
+            LocalUserDto = _mapper.Map<LocalUserDto>(localUser),
             Token = tokenHandler.WriteToken(token)
         };
 
@@ -112,10 +100,8 @@ public class LocalUserServices : ILocalUserServices
             UserName = registerationRequestDto.LastName,
             PhoneNumber = registerationRequestDto.PhoneNumber,
             Email = registerationRequestDto.Email,
-            Role = registerationRequestDto.Role ?? "Customer"
+            Role = registerationRequestDto.Role ?? "customer"
         };
-
-        string procedureName = "spCreateLocalUser";
 
         DynamicParameters parameters = new DynamicParameters();
         parameters.Add("@FirstName", localUserDto.FirstName);
@@ -129,7 +115,7 @@ public class LocalUserServices : ILocalUserServices
         parameters.Add("@UpdatedAt", DateTime.Now);
         parameters.Add("@LocalUserId", DbType.Int32, direction: ParameterDirection.Output);
 
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
+        await _sP_Call.ExecuteAsync(StoreProcedureNames.SpCreateLocalUser, parameters);
 
         localUserDto.LocalUserId = parameters.Get<int>("@LocalUserId");
 
