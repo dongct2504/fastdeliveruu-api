@@ -2,6 +2,7 @@ using AutoMapper;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ namespace FastDeliveruu.Api.Controllers.V1;
 public class MenuItemsController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
+    private readonly PaginationResponse _paginationResponse;
     private readonly IMenuItemServices _menuItemServices;
     private readonly ILogger<MenuItemsController> _logger;
     private readonly IMapper _mapper;
@@ -25,6 +27,7 @@ public class MenuItemsController : ControllerBase
         IImageServices imageServices)
     {
         _apiResponse = new ApiResponse();
+        _paginationResponse = new PaginationResponse();
         _menuItemServices = menuItemServices;
         _logger = logger;
         _mapper = mapper;
@@ -36,28 +39,32 @@ public class MenuItemsController : ControllerBase
         VaryByQueryKeys = new[] { "genreId", "restaurantId", "page" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllMenuItems(int? genreId, int? restaurantId,
+    public async Task<ActionResult<PaginationResponse>> GetAllMenuItems(int? genreId, int? restaurantId,
         int page = 1)
     {
         try
         {
-            IEnumerable<MenuItemWithRestaurantGenreDto> menuItemDtos =
-                await _menuItemServices.GetFilterMenuItemsWithRestaurantGenreAsync(
-                    genreId, restaurantId, page);
+            IEnumerable<MenuItem> menuItems = await _menuItemServices.GetFilterMenuItemsWithRestaurantGenreAsync(
+                genreId, restaurantId, page);
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = menuItemDtos;
+            _paginationResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
+            _paginationResponse.IsSuccess = true;
 
-            return Ok(_apiResponse);
+            _paginationResponse.PageNumber = page;
+            _paginationResponse.PageSize = PagingConstants.DefaultPageSize;
+            _paginationResponse.TotalRecords = await _menuItemServices.GetTotalMenuItemsAsync();
+
+            _paginationResponse.Result = _mapper.Map<IEnumerable<MenuItemDto>>(menuItems);
+
+            return Ok(_paginationResponse);
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
+            _paginationResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
+            _paginationResponse.IsSuccess = false;
+            _paginationResponse.ErrorMessages = new List<string> { ex.Message };
 
-            return StatusCode(500, _apiResponse);
+            return StatusCode(500, _paginationResponse);
         }
     }
 
@@ -69,7 +76,7 @@ public class MenuItemsController : ControllerBase
     {
         try
         {
-            MenuItem? menuItem = await _menuItemServices.GetMenuItemByIdAsync(id);
+            MenuItem? menuItem = await _menuItemServices.GetMenuItemWithRestaurantGenreByIdAsync(id);
             if (menuItem == null)
             {
                 string errorMessage = $"MenuItem not found. The requested id: '{id}' does not exist.";
@@ -83,7 +90,7 @@ public class MenuItemsController : ControllerBase
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _menuItemServices.GetMenuItemWithRestaurantGenreByIdAsync(id);
+            _apiResponse.Result = _mapper.Map<MenuItemDto>(menuItem);
 
             return Ok(_apiResponse);
         }

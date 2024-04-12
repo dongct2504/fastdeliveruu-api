@@ -1,13 +1,12 @@
-﻿using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Domain.Entities;
+﻿using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface IRestaurantServices
 {
-    Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync(int page);
+    Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
     Task<Restaurant?> GetRestaurantByIdAsync(int id);
-    Task<RestaurantWithMenuItemsDto?> GetRestaurantWithMenuItemsByIdAsync(int id);
+    Task<Restaurant?> GetRestaurantWithMenuItemsByIdAsync(int id);
     Task<Restaurant?> GetRestaurantByNameAsync(string name);
     Task<Restaurant?> GetRestaurantByPhoneNumberAsync(string phoneNumber);
 

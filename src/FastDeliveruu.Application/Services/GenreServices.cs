@@ -1,97 +1,66 @@
-﻿using System.Data;
-using Dapper;
-using FastDeliveruu.Application.Dtos.GenreDtos;
+﻿using Dapper;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 
 namespace FastDeliveruu.Application.Services;
 
 public class GenreServices : IGenreServices
 {
-    private readonly ISP_Call _sP_Call;
+    private readonly IGenreRepository _genreRepository;
 
-    public GenreServices(ISP_Call sP_Call)
+    public GenreServices(IGenreRepository genreRepository)
     {
-        _sP_Call = sP_Call;
+        _genreRepository = genreRepository;
     }
 
-    public async Task<IEnumerable<Genre>> GetAllGenresAsync(int page)
+    public async Task<IEnumerable<Genre>> GetAllGenresAsync()
     {
-        string procedureName = "spGetAllGenresPaging";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RowOffSet", PagingConstants.DefaultPageSize * (page - 1));
-        parameters.Add("@FetchNextRow", PagingConstants.DefaultPageSize);
-
-        return await _sP_Call.ListAsync<Genre>(procedureName, parameters);
+        return await _genreRepository.ListAllAsync();
     }
 
     public async Task<Genre?> GetGenreByIdAsync(int id)
     {
-        string procedureName = "spGetGenreById";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@GenreId", id);
-
-        return await _sP_Call.OneRecordAsync<Genre>(procedureName, parameters);
+        return await _genreRepository.GetAsync(id);
     }
 
-    public async Task<GenreWithMenuItemsDto?> GetGenreWithMenuItemsByIdAsync(int id)
+    public async Task<Genre?> GetGenreWithMenuItemsByIdAsync(int id)
     {
-        string procedureName = "spGetGenreWithMenuItemsById";
+        QueryOptions<Genre> options = new QueryOptions<Genre>
+        {
+            SetIncludes = "MenuItems",
+            Where = g => g.GenreId == id
+        };
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@GenreId", id);
-
-        return await _sP_Call.OneRecordAsync<GenreWithMenuItemsDto>(procedureName, parameters);
+        return await _genreRepository.GetAsync(options);
     }
 
     public async Task<Genre?> GetGenreByNameAsync(string name)
     {
-        string procedureName = "spGetGenreByName";
+        QueryOptions<Genre> options = new QueryOptions<Genre>
+        {
+            SetIncludes = "MenuItems",
+            Where = g => g.Name == name
+        };
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@Name", name);
-
-        return await _sP_Call.OneRecordAsync<Genre>(procedureName, parameters);
+        return await _genreRepository.GetAsync(options);
     }
 
     public async Task<int> CreateGenreAsync(Genre genre)
     {
-        string procedureName = "spCreateGenre";
+        Genre createdGenre = await _genreRepository.AddAsync(genre);
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@Name", genre.Name);
-        parameters.Add("@CreatedAt", genre.CreatedAt);
-        parameters.Add("@UpdatedAt", genre.UpdatedAt);
-        parameters.Add("@GenreId", DbType.Int32, direction: ParameterDirection.Output);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
-
-        return parameters.Get<int>("@GenreId");
+        return createdGenre.GenreId;
     }
 
     public async Task UpdateGenreAsync(Genre genre)
     {
-        string procedureName = "spUpdateGenre";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@GenreId", genre.GenreId);
-        parameters.Add("@Name", genre.Name);
-        parameters.Add("@UpdatedAt", genre.UpdatedAt);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
+        await _genreRepository.UpdateAsync(genre);
     }
 
-    public async Task DeleteGenreAsync(int id)
+    public async Task DeleteGenreAsync(Genre genre)
     {
-        string procedureName = "spDeleteGenre";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@GenreId", id);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
+        await _genreRepository.DeleteAsync(genre);
     }
 }

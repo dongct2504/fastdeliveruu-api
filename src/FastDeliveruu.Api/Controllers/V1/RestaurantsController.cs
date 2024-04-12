@@ -32,17 +32,17 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "page" })]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllRestaurants(int page = 1)
+    public async Task<ActionResult<ApiResponse>> GetAllRestaurants()
     {
         try
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
             _apiResponse.Result = _mapper.Map<IEnumerable<RestaurantDto>>(
-                await _restaurantServices.GetAllRestaurantsAsync(page));
+                await _restaurantServices.GetAllRestaurantsAsync());
 
             return Ok(_apiResponse);
         }
@@ -64,7 +64,7 @@ public class RestaurantsController : ControllerBase
     {
         try
         {
-            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
+            Restaurant? restaurant = await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
             if (restaurant == null)
             {
                 string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
@@ -78,7 +78,7 @@ public class RestaurantsController : ControllerBase
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
+            _apiResponse.Result = _mapper.Map<RestaurantDto>(restaurant);
 
             return Ok(_apiResponse);
         }

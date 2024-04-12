@@ -1,123 +1,80 @@
-﻿using System.Data;
-using Dapper;
-using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
+﻿using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 
 namespace FastDeliveruu.Application.Services;
 
 public class RestaurantServices : IRestaurantServices
 {
-    private readonly ISP_Call _sP_Call;
+    private readonly IRestaurantRepository _restaurantRepository;
 
-    public RestaurantServices(ISP_Call sP_Call)
+    public RestaurantServices(IRestaurantRepository restaurantRepository)
     {
-        _sP_Call = sP_Call;
+        _restaurantRepository = restaurantRepository;
     }
 
-    public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync(int page)
+    public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync()
     {
-        string procedureName = "spGetAllRestaurantsPaging";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RowOffSet", PagingConstants.DefaultPageSize * (page - 1));
-        parameters.Add("@FetchNextRow", PagingConstants.DefaultPageSize);
-
-        return await _sP_Call.ListAsync<Restaurant>(procedureName, parameters);
+        return await _restaurantRepository.ListAllAsync();
     }
 
     public async Task<Restaurant?> GetRestaurantByIdAsync(int id)
     {
-        string procedureName = "spGetRestaurantById";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RestaurantId", id);
-
-        return await _sP_Call.OneRecordAsync<Restaurant>(procedureName, parameters);
+        return await _restaurantRepository.GetAsync(id);
     }
 
-    public async Task<RestaurantWithMenuItemsDto?> GetRestaurantWithMenuItemsByIdAsync(int id)
+    public async Task<Restaurant?> GetRestaurantWithMenuItemsByIdAsync(int id)
     {
-        string procedureName = "spGetRestaurantWithMenuItemsById";
+        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
+        {
+            SetIncludes = "MenuItems",
+            Where = r => r.RestaurantId == id
+        };
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RestaurantId", id);
-
-        return await _sP_Call.OneRecordAsync<RestaurantWithMenuItemsDto>(procedureName, parameters);        
+        return await _restaurantRepository.GetAsync(options);
     }
 
     public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
     {
-        string procedureName = "spGetRestaurantByName";
+        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
+        {
+            SetIncludes = "MenuItems",
+            Where = r => r.Name == name
+        };
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@Name", name);
-
-        return await _sP_Call.OneRecordAsync<Restaurant>(procedureName, parameters);
+        return await _restaurantRepository.GetAsync(options);
     }
 
     public async Task<Restaurant?> GetRestaurantByPhoneNumberAsync(string phoneNumber)
     {
-        string procedureName = "spGetRestaurantByName";
+        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
+        {
+            SetIncludes = "MenuItems",
+            Where = r => r.PhoneNumber == phoneNumber
+        };
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@PhoneNumber", phoneNumber);
-
-        return await _sP_Call.OneRecordAsync<Restaurant>(procedureName, parameters);
+        return await _restaurantRepository.GetAsync(options);
     }
 
     public async Task<int> CreateRestaurantAsync(Restaurant restaurant)
     {
-        string procedureName = "spCreateRestaurant";
+        Restaurant createdRestaurant = await _restaurantRepository.AddAsync(restaurant);
 
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@Name", restaurant.Name);
-        parameters.Add("@Description", restaurant.Description);
-        parameters.Add("@PhoneNumber", restaurant.PhoneNumber);
-        parameters.Add("@IsVerify", restaurant.IsVerify);
-        parameters.Add("@ImageUrl", restaurant.ImageUrl);
-        parameters.Add("@Address", restaurant.Address);
-        parameters.Add("@Ward", restaurant.Ward);
-        parameters.Add("@District", restaurant.District);
-        parameters.Add("@City", restaurant.City);
-        parameters.Add("@CreatedAt", restaurant.CreatedAt);
-        parameters.Add("@UpdatedAt", restaurant.UpdatedAt);
-        parameters.Add("@RestaurantId", DbType.Int32, direction: ParameterDirection.Output);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
-
-        return parameters.Get<int>("@RestaurantId");
+        return createdRestaurant.RestaurantId;
     }
 
     public async Task UpdateRestaurantAsync(Restaurant restaurant)
     {
-        string procedureName = "spUpdateRestaurant";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RestaurantId", restaurant.RestaurantId);
-        parameters.Add("@Name", restaurant.Name);
-        parameters.Add("@Description", restaurant.Description);
-        parameters.Add("@PhoneNumber", restaurant.PhoneNumber);
-        parameters.Add("@IsVerify", restaurant.IsVerify);
-        parameters.Add("@ImageUrl", restaurant.ImageUrl);
-        parameters.Add("@Address", restaurant.Address);
-        parameters.Add("@Ward", restaurant.Ward);
-        parameters.Add("@District", restaurant.District);
-        parameters.Add("@City", restaurant.City);
-        parameters.Add("@UpdatedAt", restaurant.UpdatedAt);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
+        await _restaurantRepository.UpdateRestaurant(restaurant);
     }
 
     public async Task DeleteRestaurantAsync(int id)
     {
-        string procedureName = "spDeleteRestaurant";
-
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@RestaurantId", id);
-
-        await _sP_Call.ExecuteAsync(procedureName, parameters);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(id);
+        if (restaurant != null)
+        {
+            await _restaurantRepository.DeleteAsync(restaurant);
+        }
     }
 }

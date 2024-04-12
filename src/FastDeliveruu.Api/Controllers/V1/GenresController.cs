@@ -29,17 +29,17 @@ public class GenresController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30", VaryByQueryKeys = new[] { "page" })]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllGenres(int page = 1)
+    public async Task<ActionResult<ApiResponse>> GetAllGenres()
     {
         try
         {
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
             _apiResponse.Result = _mapper.Map<IEnumerable<GenreDto>>(
-                await _genreServices.GetAllGenresAsync(page));
+                await _genreServices.GetAllGenresAsync());
 
             return Ok(_apiResponse);
         }
@@ -61,7 +61,7 @@ public class GenresController : ControllerBase
     {
         try
         {
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
+            Genre? genre = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
             if (genre == null)
             {
                 string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
@@ -75,7 +75,7 @@ public class GenresController : ControllerBase
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
+            _apiResponse.Result = _mapper.Map<GenreDto>(genre);
 
             return Ok(_apiResponse);
         }
@@ -226,7 +226,7 @@ public class GenresController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            await _genreServices.DeleteGenreAsync(id);
+            await _genreServices.DeleteGenreAsync(genre);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
             _apiResponse.IsSuccess = true;

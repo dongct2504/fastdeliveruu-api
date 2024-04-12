@@ -1,3 +1,5 @@
+using FastDeliveruu.Application.Dtos.MenuItemDtos;
+
 namespace FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 
 public class ShoppingCartDto

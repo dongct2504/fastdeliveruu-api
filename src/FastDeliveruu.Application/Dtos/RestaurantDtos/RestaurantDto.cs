@@ -1,3 +1,5 @@
+using FastDeliveruu.Application.Dtos.MenuItemDtos;
+
 namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
 
 public class RestaurantDto
@@ -21,4 +23,6 @@ public class RestaurantDto
     public string District { get; set; } = null!;
 
     public string City { get; set; } = null!;
+
+    public IEnumerable<MenuItemDto>? MenuItemDtos { get; set; }
 }

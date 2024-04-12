@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Profiles;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 {
