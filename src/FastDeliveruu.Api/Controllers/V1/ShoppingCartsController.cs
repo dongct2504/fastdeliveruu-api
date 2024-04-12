@@ -56,7 +56,8 @@ public class ShoppingCartsController : ControllerBase
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
             _apiResponse.IsSuccess = true;
-            _apiResponse.Result = await _shoppingCartServices.GetAllShoppingCartsByUserIdAsync(userId);
+            _apiResponse.Result = _mapper.Map<IEnumerable<ShoppingCartDto>>(
+                await _shoppingCartServices.GetAllShoppingCartsByUserIdAsync(userId));
 
             return Ok(_apiResponse);
         }
@@ -113,7 +114,7 @@ public class ShoppingCartsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse>> CreateShoppingCart(
-        ShoppingCartCreateDto shoppingCartCreateDto)
+        [FromBody] ShoppingCartCreateDto shoppingCartCreateDto)
     {
         try
         {
@@ -149,10 +150,9 @@ public class ShoppingCartsController : ControllerBase
 
             int userId = int.Parse(claim.Value);
 
-            shoppingCartCreateDto.LocalUserId = userId;
-
+            // get a unique shopping cart through LocalUserId and MenuItemId
             ShoppingCart? shoppingCart = await _shoppingCartServices.GetShoppingCartByUserIdMenuItemIdAsync(
-                shoppingCartCreateDto.LocalUserId, shoppingCartCreateDto.MenuItemId);
+                userId, shoppingCartCreateDto.MenuItemId);
             if (shoppingCart != null)
             {
                 string errorMessage = "Can't create the requested shopping cart because it already exists.";
@@ -165,6 +165,7 @@ public class ShoppingCartsController : ControllerBase
             }
 
             shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartCreateDto);
+            shoppingCart.LocalUserId = userId;
             shoppingCart.CreatedAt = DateTime.Now;
             shoppingCart.UpdatedAt = DateTime.Now;
 
@@ -187,13 +188,13 @@ public class ShoppingCartsController : ControllerBase
         }
     }
 
-    [HttpPost("{localUserId:int}/{menuItemId:int}")]
+    [HttpPut("{menuItemId:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> UpdateShoppingCart(
-        int localUserId, int menuItemId, ShoppingCartUpdateDto shoppingCartUpdateDto)
+    public async Task<ActionResult<ApiResponse>> UpdateShoppingCart(int menuItemId,
+        [FromBody] ShoppingCartUpdateDto shoppingCartUpdateDto)
     {
         try
         {
@@ -216,8 +217,10 @@ public class ShoppingCartsController : ControllerBase
                 return Unauthorized(_apiResponse);
             }
 
+            int userId = int.Parse(claim.Value);
+
             ShoppingCart? shoppingCart = await _shoppingCartServices.
-                GetShoppingCartByUserIdMenuItemIdAsync(localUserId, menuItemId);
+                GetShoppingCartByUserIdMenuItemIdAsync(userId, menuItemId);
             if (shoppingCart == null)
             {
                 string errorMessage = $"shopping cart not found";
@@ -233,6 +236,44 @@ public class ShoppingCartsController : ControllerBase
             shoppingCart.UpdatedAt = DateTime.Now;
 
             await _shoppingCartServices.UpdateShoppingCartAsync(shoppingCart);
+
+            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
+            _apiResponse.IsSuccess = true;
+
+            return Ok(_apiResponse);
+        }
+        catch (Exception ex)
+        {
+            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
+            _apiResponse.IsSuccess = false;
+            _apiResponse.ErrorMessages = new List<string> { ex.Message };
+
+            return StatusCode(500, _apiResponse);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse>> DeleteShoppingCart(int id)
+    {
+        try
+        {
+            ShoppingCart? shoppingCart = await _shoppingCartServices.GetShoppingCartByIdAsync(id);
+            if (shoppingCart == null)
+            {
+                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
+
+                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { errorMessage };
+
+                return NotFound(_apiResponse);
+            }
+
+            await _shoppingCartServices.DeleteShoppingCartAsync(id);
 
             _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
             _apiResponse.IsSuccess = true;
