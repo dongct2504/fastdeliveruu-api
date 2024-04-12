@@ -80,8 +80,8 @@ public class Repository<T> : IRepository<T> where T : class
 
         if (options.HasPaging)
         {
-            query = query.Skip(PagingConstants.DefaultPageSize * (options.PageNumber - 1))
-                .Take(PagingConstants.DefaultPageSize);
+            query = query.Skip(options.PageSize * (options.PageNumber - 1))
+                .Take(options.PageSize);
         }
 
         return query;

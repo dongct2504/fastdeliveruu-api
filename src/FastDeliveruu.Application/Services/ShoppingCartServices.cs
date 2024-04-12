@@ -1,4 +1,5 @@
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
@@ -19,11 +20,13 @@ public class ShoppingCartServices : IShoppingCartServices
         return await _shoppingCartRepository.ListAllAsync();
     }
 
-    public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(int userId)
+    public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(int userId, int page)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
             SetIncludes = "MenuItem",
+            PageNumber = page,
+            PageSize = PagingConstants.ShoppingCartPageSize,
             Where = sc => sc.LocalUserId == userId
         };
 
@@ -44,6 +47,23 @@ public class ShoppingCartServices : IShoppingCartServices
         };
 
         return await _shoppingCartRepository.GetAsync(options);
+    }
+
+    public async Task<int> GetTotalShoppingCartsAsync()
+    {
+        return await _shoppingCartRepository.GetCountAsync();
+    }
+
+    public async Task<int> GetTotalShoppingCartsByUserIdAsync(int userId)
+    {
+        QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
+        {
+            Where = sc => sc.LocalUserId == userId
+        };
+
+        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository.ListAllAsync(options);
+
+        return shoppingCarts.Count();
     }
 
     public async Task<int> CreateShoppingCartAsync(ShoppingCart shoppingCart)

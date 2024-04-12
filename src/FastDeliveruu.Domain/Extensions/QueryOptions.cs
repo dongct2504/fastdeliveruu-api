@@ -14,6 +14,7 @@ public class QueryOptions<T>
     }
 
     public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 
     public List<Expression<Func<T, bool>>> WhereClauses { get; set; } = null!;
 
@@ -32,7 +33,7 @@ public class QueryOptions<T>
 
     // flags
     public bool HasInclude => includes != Array.Empty<string>();
-    public bool HasPaging => PageNumber > 0;
+    public bool HasPaging => PageNumber > 0 && PageSize > 0;
     public bool HasWhereClause => WhereClauses != null;
     public bool HasOrderBy => OrderBy != null;
 }

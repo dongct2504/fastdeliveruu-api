@@ -1,4 +1,5 @@
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
@@ -18,7 +19,8 @@ public class MenuItemServices : IMenuItemServices
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
-            PageNumber = page
+            PageNumber = page,
+            PageSize = PagingConstants.DefaultPageSize
         };
 
         return await _menuItemRepository.ListAllAsync(options);
@@ -30,7 +32,8 @@ public class MenuItemServices : IMenuItemServices
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
             SetIncludes = "Restaurant, Genre",
-            PageNumber = page
+            PageNumber = page,
+            PageSize = PagingConstants.DefaultPageSize
         };
 
         return await _menuItemRepository.ListAllAsync(options);
@@ -42,7 +45,8 @@ public class MenuItemServices : IMenuItemServices
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
             SetIncludes = "Restaurant, Genre",
-            PageNumber = page
+            PageNumber = page,
+            PageSize = PagingConstants.DefaultPageSize
         };
 
         if (genreId != null)
