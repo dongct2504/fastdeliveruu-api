@@ -1,6 +1,6 @@
 namespace FastDeliveruu.Application.Dtos.LocalUserDtos;
 
-public class LoginResponseDto
+public class AuthenticationResult
 {
     public LocalUserDto? LocalUserDto { get; set; }
 

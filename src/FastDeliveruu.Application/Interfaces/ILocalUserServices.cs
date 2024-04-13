@@ -1,12 +1,15 @@
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface ILocalUserServices
 {
-    Task<bool> IsUniqueUserAsync(string username);
+    Task<IEnumerable<LocalUser>> GetAllLocalUserAsync();
+    Task<IEnumerable<LocalUser>> GetAllLocalUserAsync(int page);
 
-    Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto);
+    Task<int> GetTotalLocalUsersAsync();
 
-    Task<LocalUserDto> RegisterAsync(RegisterationRequestDto registerationRequestDto);
+    Task<int> AddUserAsync(LocalUser localUser);
+    Task UpdateUserAsync(LocalUser localUser);
+    Task DeleteUserAsync(LocalUser localUser);
 }

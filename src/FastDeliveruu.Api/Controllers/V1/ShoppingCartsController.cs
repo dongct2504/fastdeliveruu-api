@@ -11,8 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FastDeliveruu.Api.Controllers.V1;
 
 [ApiController]
-[ApiVersion("1.0")]
 [Authorize]
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/shopping-carts")]
 public class ShoppingCartsController : ControllerBase
 {

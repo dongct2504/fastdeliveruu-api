@@ -12,7 +12,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Profiles;
-using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -45,7 +44,7 @@ var builder = WebApplication.CreateBuilder(args);
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
-                    builder.Configuration["ApiSettings:Secret"])),
+                    builder.Configuration["JwtSettings:Secret"])),
                 ValidateIssuer = false,
                 ValidateAudience = false
             };
@@ -121,7 +120,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IImageServices, ImageServices>();
     builder.Services
         .AddApplication()
-        .AddInfrastructure();
+        .AddInfrastructure(builder.Configuration);
 
     // register automapper
     builder.Services.AddAutoMapper(typeof(FastDeliveruuProfile).Assembly);

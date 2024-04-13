@@ -10,8 +10,9 @@ public class MenuItemRepository : Repository<MenuItem>, IMenuItemRepository
     {
     }
 
-    public Task UpdateMenuItem(MenuItem menuItem)
+    public async Task UpdateMenuItem(MenuItem menuItem)
     {
-        throw new NotImplementedException();
+        _dbContext.Update(menuItem);
+        await _dbContext.SaveChangesAsync();
     }
 }
