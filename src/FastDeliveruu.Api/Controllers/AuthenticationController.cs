@@ -1,4 +1,3 @@
-using AutoMapper;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FluentResults;

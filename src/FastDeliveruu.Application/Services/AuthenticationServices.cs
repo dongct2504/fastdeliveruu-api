@@ -1,9 +1,6 @@
-using System.Data;
-using Dapper;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
