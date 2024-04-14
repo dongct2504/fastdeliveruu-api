@@ -79,7 +79,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateRestaurant([FromBody] RestaurantCreateDto restaurantCreateDto)
+    public async Task<IActionResult> CreateRestaurant([FromForm] RestaurantCreateDto restaurantCreateDto)
     {
         try
         {
@@ -131,7 +131,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateRestaurant(Guid id,
-        [FromBody] RestaurantUpdateDto restaurantUpdateDto)
+        [FromForm] RestaurantUpdateDto restaurantUpdateDto)
     {
         try
         {

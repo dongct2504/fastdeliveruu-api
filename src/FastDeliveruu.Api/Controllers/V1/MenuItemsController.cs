@@ -92,7 +92,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateMenuItem([FromBody] MenuItemCreateDto menuItemCreateDto)
+    public async Task<IActionResult> CreateMenuItem([FromForm] MenuItemCreateDto menuItemCreateDto)
     {
         try
         {
@@ -143,7 +143,7 @@ public class MenuItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateMenuItem(Guid id, [FromBody] MenuItemUpdateDto menuItemUpdateDto)
+    public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] MenuItemUpdateDto menuItemUpdateDto)
     {
         try
         {
