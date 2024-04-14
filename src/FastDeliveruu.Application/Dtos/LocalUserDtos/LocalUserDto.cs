@@ -2,7 +2,7 @@ namespace FastDeliveruu.Application.Dtos.LocalUserDtos;
 
 public class LocalUserDto
 {
-    public int LocalUserId { get; set; }
+    public Guid LocalUserId { get; set; }
 
     public string FirstName { get; set; } = null!;
 

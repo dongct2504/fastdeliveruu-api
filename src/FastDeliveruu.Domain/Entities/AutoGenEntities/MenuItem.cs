@@ -17,8 +17,8 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public int MenuItemId { get; set; }
-        public int RestaurantId { get; set; }
+        public Guid MenuItemId { get; set; }
+        public Guid RestaurantId { get; set; }
         public int GenreId { get; set; }
         [StringLength(50)]
         public string Name { get; set; } = null!;

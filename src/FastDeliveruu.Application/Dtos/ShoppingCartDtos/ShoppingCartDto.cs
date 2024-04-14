@@ -6,9 +6,11 @@ public class ShoppingCartDto
 {
     public int ShoppingCartId { get; set; }
 
-    public int MenuItemId { get; set; }
+    public Guid MenuItemId { get; set; }
 
-    public int LocalUserId { get; set; }
+    public Guid LocalUserId { get; set; }
 
     public int Quantity { get; set; }
+
+    public MenuItemDto? MenuItemDto { get; set; }
 }

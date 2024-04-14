@@ -1,7 +1,7 @@
 using AutoMapper;
-using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;
@@ -11,14 +11,12 @@ namespace FastDeliveruu.Api.Controllers;
 [Route("api/v{version:apiVersion}/user-auth")]
 public class AuthenticationController : ControllerBase
 {
-    private readonly ApiResponse _apiResponse;
     private readonly IAuthenticationServices _authenticationServices;
     private readonly ILogger<AuthenticationController> _logger;
 
     public AuthenticationController(IAuthenticationServices authenticationServices,
         ILogger<AuthenticationController> logger)
     {
-        _apiResponse = new ApiResponse();
         _authenticationServices = authenticationServices;
         _logger = logger;
     }
@@ -28,8 +26,7 @@ public class AuthenticationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> Register(
-        [FromBody] RegisterationRequestDto registerationRequestDto)
+    public async Task<IActionResult> Register([FromBody] RegisterationRequestDto registerationRequestDto)
     {
         try
         {
@@ -38,36 +35,25 @@ public class AuthenticationController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            AuthenticationResult authenticationResult = await _authenticationServices.
+            Result<AuthenticationResult> authenticationResult = await _authenticationServices.
                 RegisterAsync(registerationRequestDto);
-            if (authenticationResult.LocalUserDto == null || string.IsNullOrEmpty(authenticationResult.Token))
+            if (authenticationResult.IsFailed)
             {
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages.Add("Username is already exists.");
-
-                return Conflict(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status409Conflict,
+                    detail: authenticationResult.Errors[0].Message);
             }
 
             AuthenticationResponse registerationResponseDto = new AuthenticationResponse
             {
-                LocalUserDto = authenticationResult.LocalUserDto,
-                Token = authenticationResult.Token
+                LocalUserDto = authenticationResult.Value.LocalUserDto,
+                Token = authenticationResult.Value.Token
             };
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = registerationResponseDto;
-
-            return Ok(_apiResponse);
+            return Ok(registerationResponseDto);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
@@ -75,40 +61,29 @@ public class AuthenticationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDto loginRequestDto)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
     {
         try
         {
-            AuthenticationResult authenticationResult = await _authenticationServices
+            Result<AuthenticationResult> authenticationResult = await _authenticationServices
                 .LoginAsync(loginRequestDto);
-            if (authenticationResult.LocalUserDto == null || string.IsNullOrEmpty(authenticationResult.Token))
+            if (authenticationResult.IsFailed)
             {
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages.Add("Username of password is incorrect.");
-
-                return BadRequest(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status400BadRequest,
+                    detail: authenticationResult.Errors[0].Message);
             }
 
             AuthenticationResponse loginResponseDto = new AuthenticationResponse
             {
-                LocalUserDto = authenticationResult.LocalUserDto,
-                Token = authenticationResult.Token
+                LocalUserDto = authenticationResult.Value.LocalUserDto,
+                Token = authenticationResult.Value.Token
             };
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = loginResponseDto;
-
-            return Ok(_apiResponse);
+            return Ok(loginResponseDto);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { e.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 }

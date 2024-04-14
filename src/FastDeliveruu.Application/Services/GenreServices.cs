@@ -1,8 +1,9 @@
-﻿using Dapper;
+﻿using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FluentResults;
 
 namespace FastDeliveruu.Application.Services;
 
@@ -20,12 +21,18 @@ public class GenreServices : IGenreServices
         return await _genreRepository.ListAllAsync();
     }
 
-    public async Task<Genre?> GetGenreByIdAsync(int id)
+    public async Task<Result<Genre>> GetGenreByIdAsync(int id)
     {
-        return await _genreRepository.GetAsync(id);
+        Genre? genre = await _genreRepository.GetAsync(id);
+        if (genre == null)
+        {
+            return Result.Fail<Genre>(new NotFoundError($"The requested genre '{id}' is not found."));
+        }
+
+        return genre;
     }
 
-    public async Task<Genre?> GetGenreWithMenuItemsByIdAsync(int id)
+    public async Task<Result<Genre>> GetGenreWithMenuItemsByIdAsync(int id)
     {
         QueryOptions<Genre> options = new QueryOptions<Genre>
         {
@@ -33,10 +40,16 @@ public class GenreServices : IGenreServices
             Where = g => g.GenreId == id
         };
 
-        return await _genreRepository.GetAsync(options);
+        Genre? genre = await _genreRepository.GetAsync(id);
+        if (genre == null)
+        {
+            return Result.Fail<Genre>(new NotFoundError($"The requested genre '{id}' is not found."));
+        }
+
+        return genre;
     }
 
-    public async Task<Genre?> GetGenreByNameAsync(string name)
+    public async Task<Result<Genre>> GetGenreByNameAsync(string name)
     {
         QueryOptions<Genre> options = new QueryOptions<Genre>
         {
@@ -44,23 +57,54 @@ public class GenreServices : IGenreServices
             Where = g => g.Name == name
         };
 
-        return await _genreRepository.GetAsync(options);
+        Genre? genre = await _genreRepository.GetAsync(options);
+        if (genre == null)
+        {
+            return Result.Fail<Genre>(new NotFoundError($"The requested genre '{name}' is not found."));
+        }
+
+        return genre;
     }
 
-    public async Task<int> CreateGenreAsync(Genre genre)
+    public async Task<Result<int>> CreateGenreAsync(Genre genre)
     {
+        Genre? checkGenre = await _genreRepository.GetAsync(new QueryOptions<Genre> {
+            Where = g => g.Name == genre.Name
+        });
+        if (checkGenre != null)
+        {
+            return Result.Fail<int>(
+                new DuplicateError($"The requested genre '{genre.Name}' is already exists."));
+        }
+
         Genre createdGenre = await _genreRepository.AddAsync(genre);
 
         return createdGenre.GenreId;
     }
 
-    public async Task UpdateGenreAsync(Genre genre)
+    public async Task<Result> UpdateGenreAsync(int id, Genre genre)
     {
+        Genre? isGenreExist = await _genreRepository.GetAsync(id);
+        if (isGenreExist == null)
+        {
+            Result.Fail(new NotFoundError($"The requested genre '{id}' is not found."));
+        }
+
         await _genreRepository.UpdateAsync(genre);
+
+        return Result.Ok();
     }
 
-    public async Task DeleteGenreAsync(Genre genre)
+    public async Task<Result> DeleteGenreAsync(int id)
     {
+        Genre? genre = await _genreRepository.GetAsync(id);
+        if (genre == null)
+        {
+            return Result.Fail(new NotFoundError($"The requested genre '{id}' is not found."));
+        }
+
         await _genreRepository.DeleteAsync(genre);
+
+        return Result.Ok();
     }
 }

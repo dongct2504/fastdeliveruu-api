@@ -16,9 +16,9 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public int OrderId { get; set; }
-        public int ShipperId { get; set; }
-        public int LocalUserId { get; set; }
+        public Guid OrderId { get; set; }
+        public Guid ShipperId { get; set; }
+        public Guid LocalUserId { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime OrderDate { get; set; }
         [StringLength(15)]
@@ -35,10 +35,6 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(20)]
         [Unicode(false)]
         public string? PaymentStatus { get; set; }
-        [Column(TypeName = "datetime")]
-        public DateTime? PaymentDate { get; set; }
-        [Column(TypeName = "datetime")]
-        public DateTime? PaymentDueDate { get; set; }
         [StringLength(256)]
         [Unicode(false)]
         public string? TransactionId { get; set; }

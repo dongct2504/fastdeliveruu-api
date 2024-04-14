@@ -1,10 +1,11 @@
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FluentResults;
 
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface IAuthenticationServices
 {
-    Task<AuthenticationResult> RegisterAsync(RegisterationRequestDto registerationRequestDto);
+    Task<Result<AuthenticationResult>> RegisterAsync(RegisterationRequestDto registerationRequestDto);
 
-    Task<AuthenticationResult> LoginAsync(LoginRequestDto loginRequestDto);
+    Task<Result<AuthenticationResult>> LoginAsync(LoginRequestDto loginRequestDto);
 }

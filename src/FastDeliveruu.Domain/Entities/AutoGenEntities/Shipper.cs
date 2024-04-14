@@ -14,7 +14,7 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public int ShipperId { get; set; }
+        public Guid ShipperId { get; set; }
         [StringLength(50)]
         public string FirstName { get; set; } = null!;
         [StringLength(50)]

@@ -1,10 +1,13 @@
+using FastDeliveruu.Application.Dtos.GenreDtos;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
+
 namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 
-public class MenuItemDto
+public class MenuItemDetailDto
 {
     public Guid MenuItemId { get; set; }
 
-    public Guid RestaurantId { get; set; }
+    public int RestaurantId { get; set; }
 
     public int GenreId { get; set; }
 
@@ -20,7 +23,7 @@ public class MenuItemDto
 
     public string? ImageUrl { get; set; }
 
-    public string? GenreName { get; set; }
+    public GenreDto? GenreDto { get; set; }
 
-    public string? RestaurantName { get; set; }
+    public RestaurantDto? RestaurantDto { get; set; }
 }

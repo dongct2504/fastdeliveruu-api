@@ -1,4 +1,4 @@
-namespace FastDeliveruu.Domain.Constants;
+namespace FastDeliveruu.Application.Common.Roles;
 
 public static class RoleConstants
 {

@@ -113,7 +113,7 @@ var builder = WebApplication.CreateBuilder(args);
         Password = builder.Configuration["Password"]
     };
 
-    builder.Services.AddDbContext<FastdeliveruuContext>(options =>
+    builder.Services.AddDbContext<FastDeliveruuContext>(options =>
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers
@@ -123,7 +123,10 @@ var builder = WebApplication.CreateBuilder(args);
         .AddInfrastructure(builder.Configuration);
 
     // register automapper
-    builder.Services.AddAutoMapper(typeof(FastDeliveruuProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg =>
+    {
+        cfg.EnableNullPropagationForQueryMapping = true;
+    }, typeof(FastDeliveruuProfile).Assembly);
 
     builder.Services.AddApiVersioning(options =>
     {

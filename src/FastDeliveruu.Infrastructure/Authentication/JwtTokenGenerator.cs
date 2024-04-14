@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -19,7 +19,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _jwtSettings = jwtOptions.Value;
     }
 
-    public string GenerateTokenAsync(LocalUserDto localUserDto)
+    public string GenerateTokenAsync(LocalUser localUser)
     {
         SigningCredentials signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
@@ -28,10 +28,11 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         Claim[] claims = new Claim[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, localUserDto.LocalUserId.ToString()),
-            new Claim(JwtRegisteredClaimNames.GivenName, localUserDto.FirstName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, localUserDto.LastName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, localUser.LocalUserId.ToString()),
+            new Claim(JwtRegisteredClaimNames.GivenName, localUser.FirstName),
+            new Claim(JwtRegisteredClaimNames.FamilyName, localUser.LastName),
+            new Claim(ClaimTypes.Role, localUser.Role),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
         JwtSecurityToken securityToken = new JwtSecurityToken(

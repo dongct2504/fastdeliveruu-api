@@ -1,6 +1,6 @@
 namespace FastDeliveruu.Application.Dtos;
 
-public class PaginationResponse : ApiResponse
+public class PaginationResponse<T>
 {
     public int PageNumber { get; set; }
 
@@ -9,4 +9,6 @@ public class PaginationResponse : ApiResponse
     public int TotalRecords { get; set; }
 
     public int TotalPages => (PageSize + TotalRecords - 1) / PageSize;
+
+    public IEnumerable<T>? Values { get; set; }
 }

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
+using FastDeliveruu.Application.Common.Roles;
 using FastDeliveruu.Domain.Entities;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +14,6 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/genres")]
 public class GenresController : ControllerBase
 {
-    private readonly ApiResponse _apiResponse;
     private readonly IGenreServices _genreServices;
     private readonly ILogger<GenresController> _logger;
     private readonly IMapper _mapper;
@@ -23,7 +22,6 @@ public class GenresController : ControllerBase
         ILogger<GenresController> logger,
         IMapper mapper)
     {
-        _apiResponse = new ApiResponse();
         _genreServices = genreServices;
         _logger = logger;
         _mapper = mapper;
@@ -33,60 +31,38 @@ public class GenresController : ControllerBase
     [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllGenres()
+    public async Task<IActionResult> GetAllGenres()
     {
         try
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<IEnumerable<GenreDto>>(
-                await _genreServices.GetAllGenresAsync());
-
-            return Ok(_apiResponse);
+            return Ok(_mapper.Map<IEnumerable<GenreDto>>(await _genreServices.GetAllGenresAsync()));
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetGenreById")]
+    [HttpGet("{id}", Name = "GetGenreById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetGenreById(int id)
+    public async Task<IActionResult> GetGenreById(int id)
     {
         try
         {
-            Genre? genre = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
-            if (genre == null)
+            Result<Genre> getGenreResult = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
+            if (getGenreResult.IsFailed)
             {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: getGenreResult.Errors[0].Message);
             }
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<GenreDto>(genre);
-
-            return Ok(_apiResponse);
+            return Ok(_mapper.Map<GenreDetailDto>(getGenreResult.Value));
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
@@ -94,11 +70,11 @@ public class GenresController : ControllerBase
     [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> CreateGenre([FromBody] GenreCreateDto genreCreateDto)
+    public async Task<IActionResult> CreateGenre([FromBody] GenreCreateDto genreCreateDto)
     {
         try
         {
@@ -107,53 +83,29 @@ public class GenresController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            if (genreCreateDto == null)
-            {
-                string errorMessage = "Can't create the requested genre because it is null.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return BadRequest(_apiResponse);
-            }
-
-            Genre? genre = await _genreServices.GetGenreByNameAsync(genreCreateDto.Name);
-            if (genre != null)
-            {
-                string errorMessage = "Can't create the requested genre because it already exists.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return Conflict(_apiResponse);
-            }
-
-            genre = _mapper.Map<Genre>(genreCreateDto);
+            Genre genre = _mapper.Map<Genre>(genreCreateDto);
             genre.CreatedAt = DateTime.Now;
             genre.UpdatedAt = DateTime.Now;
 
-            int createdGenreId = await _genreServices.CreateGenreAsync(genre);
-            genre.GenreId = createdGenreId;
+            Result<int> genreResult = await _genreServices.CreateGenreAsync(genre);
+            if (genreResult.IsFailed)
+            {
+                return Problem(statusCode: StatusCodes.Status409Conflict,
+                    detail: genreResult.Errors[0].Message);
+            }
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Created;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<GenreDto>(genre);
+            genre.GenreId = genreResult.Value;
+            GenreDto genreDto = _mapper.Map<GenreDto>(genre);
 
-            return CreatedAtRoute(nameof(GetGenreById), new { Id = createdGenreId }, _apiResponse);
+            return CreatedAtRoute(nameof(GetGenreById), new { Id = genreDto.GenreId }, genreDto);
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id}")]
     [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -161,8 +113,7 @@ public class GenresController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> UpdateGenre(int id,
-        [FromBody] GenreUpdateDto genreUpdateDto)
+    public async Task<IActionResult> UpdateGenre(int id, [FromBody] GenreUpdateDto genreUpdateDto)
     {
         try
         {
@@ -171,76 +122,47 @@ public class GenresController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
-            if (genre == null)
-            {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
-            }
-
-            // Source -> Target
-            _mapper.Map(genreUpdateDto, genre);
+            Genre genre = _mapper.Map<Genre>(genreUpdateDto);
             genre.UpdatedAt = DateTime.Now;
 
-            await _genreServices.UpdateGenreAsync(genre);
+            Result genreResult = await _genreServices.UpdateGenreAsync(id, genre);
+            if (genreResult.IsFailed)
+            {
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: genreResult.Errors[0].Message);
+            }
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
-            _apiResponse.IsSuccess = true;
-
-            return Ok(_apiResponse);
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> DeleteGenre(int id)
+    public async Task<IActionResult> DeleteGenre(int id)
     {
         try
         {
-            Genre? genre = await _genreServices.GetGenreByIdAsync(id);
-            if (genre == null)
+            Result genreResult = await _genreServices.DeleteGenreAsync(id);
+            if (genreResult.IsFailed)
             {
-                string errorMessage = $"Genre not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: genreResult.Errors[0].Message);
             }
 
-            await _genreServices.DeleteGenreAsync(genre);
-
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
-            _apiResponse.IsSuccess = true;
-
-            return Ok(_apiResponse);
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 }

@@ -12,8 +12,8 @@ namespace FastDeliveruu.Domain.Entities
     {
         [Key]
         public int ShoppingCartId { get; set; }
-        public int MenuItemId { get; set; }
-        public int LocalUserId { get; set; }
+        public Guid MenuItemId { get; set; }
+        public Guid LocalUserId { get; set; }
         public int Quantity { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; }

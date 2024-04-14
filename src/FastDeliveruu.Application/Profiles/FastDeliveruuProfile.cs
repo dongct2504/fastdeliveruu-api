@@ -13,12 +13,14 @@ public class FastDeliveruuProfile : Profile
     public FastDeliveruuProfile()
     {
         // Source -> Target
-        CreateMap<Genre, GenreDto>()
+        CreateMap<Genre, GenreDto>();
+        CreateMap<Genre, GenreDetailDto>()
             .ForMember(dest => dest.MenuItemDtos, opt => opt.MapFrom(src => src.MenuItems));
         CreateMap<Genre, GenreCreateDto>().ReverseMap();
         CreateMap<Genre, GenreUpdateDto>().ReverseMap();
 
-        CreateMap<Restaurant, RestaurantDto>()
+        CreateMap<Restaurant, RestaurantDto>();
+        CreateMap<Restaurant, RestaurantDetailDto>()
             .ForMember(dest => dest.MenuItemDtos, opt => opt.MapFrom(src => src.MenuItems));
         CreateMap<Restaurant, RestaurantCreateDto>().ReverseMap();
         CreateMap<Restaurant, RestaurantUpdateDto>().ReverseMap();

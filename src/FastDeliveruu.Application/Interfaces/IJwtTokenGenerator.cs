@@ -1,8 +1,8 @@
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateTokenAsync(LocalUserDto localUserDto);
+    string GenerateTokenAsync(LocalUser localUser);
 }

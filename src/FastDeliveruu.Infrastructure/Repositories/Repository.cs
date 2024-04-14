@@ -9,13 +9,13 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    protected readonly FastdeliveruuContext _dbContext;
+    protected readonly FastDeliveruuContext _dbContext;
 
     private readonly DbSet<T> _dbSet;
 
     private int count;
 
-    public Repository(FastdeliveruuContext context)
+    public Repository(FastDeliveruuContext context)
     {
         _dbContext = context;
         _dbSet = _dbContext.Set<T>();
@@ -43,7 +43,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
 
     public virtual async Task<T?> GetAsync(int id) => await _dbSet.FindAsync(id);
-    public virtual async Task<T?> GetAsync(string id) => await _dbSet.FindAsync(id);
+    public virtual async Task<T?> GetAsync(Guid id) => await _dbSet.FindAsync(id);
     public virtual async Task<T?> GetAsync(QueryOptions<T> options) =>
         await BuildQuery(options).FirstOrDefaultAsync();
 

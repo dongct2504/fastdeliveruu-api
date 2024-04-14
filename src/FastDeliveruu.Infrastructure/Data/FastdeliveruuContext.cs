@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FastDeliveruu.Infrastructure.Data
 {
-    public partial class FastdeliveruuContext : DbContext
+    public partial class FastDeliveruuContext : DbContext
     {
-        public FastdeliveruuContext()
+        public FastDeliveruuContext()
         {
         }
 
-        public FastdeliveruuContext(DbContextOptions<FastdeliveruuContext> options)
+        public FastDeliveruuContext(DbContextOptions<FastDeliveruuContext> options)
             : base(options)
         {
         }
@@ -35,11 +35,15 @@ namespace FastDeliveruu.Infrastructure.Data
         {
             modelBuilder.Entity<LocalUser>(entity =>
             {
+                entity.Property(e => e.LocalUserId).HasDefaultValueSql("(newid())");
+
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<MenuItem>(entity =>
             {
+                entity.Property(e => e.MenuItemId).HasDefaultValueSql("(newid())");
+
                 entity.HasOne(d => d.Genre)
                     .WithMany(p => p.MenuItems)
                     .HasForeignKey(d => d.GenreId)
@@ -53,6 +57,8 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<Order>(entity =>
             {
+                entity.Property(e => e.OrderId).HasDefaultValueSql("(newid())");
+
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
 
                 entity.HasOne(d => d.LocalUser)
@@ -68,6 +74,8 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
+                entity.Property(e => e.OrderDetailId).HasDefaultValueSql("(newid())");
+
                 entity.HasOne(d => d.MenuItem)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.MenuItemId)
@@ -81,11 +89,15 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<Restaurant>(entity =>
             {
+                entity.Property(e => e.RestaurantId).HasDefaultValueSql("(newid())");
+
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<Shipper>(entity =>
             {
+                entity.Property(e => e.ShipperId).HasDefaultValueSql("(newid())");
+
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 

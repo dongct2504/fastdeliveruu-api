@@ -1,9 +1,9 @@
 using AutoMapper;
-using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
+using FastDeliveruu.Application.Common.Roles;
 using FastDeliveruu.Domain.Entities;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +14,6 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/restaurants")]
 public class RestaurantsController : ControllerBase
 {
-    private readonly ApiResponse _apiResponse;
     private readonly IRestaurantServices _restaurantServices;
     private readonly ILogger<RestaurantsController> _logger;
     private readonly IMapper _mapper;
@@ -25,7 +24,6 @@ public class RestaurantsController : ControllerBase
         IMapper mapper,
         IImageServices imageServices)
     {
-        _apiResponse = new ApiResponse();
         _restaurantServices = restaurantServices;
         _logger = logger;
         _mapper = mapper;
@@ -36,60 +34,40 @@ public class RestaurantsController : ControllerBase
     [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetAllRestaurants()
+    public async Task<IActionResult> GetAllRestaurants()
     {
         try
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<IEnumerable<RestaurantDto>>(
-                await _restaurantServices.GetAllRestaurantsAsync());
-
-            return Ok(_apiResponse);
+            return Ok(_mapper.Map<IEnumerable<RestaurantDto>>(
+                await _restaurantServices.GetAllRestaurantsAsync()));
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetRestaurantById")]
+    [HttpGet("{id}", Name = "GetRestaurantById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> GetRestaurantById(int id)
+    public async Task<IActionResult> GetRestaurantById(Guid id)
     {
         try
         {
-            Restaurant? restaurant = await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
-            if (restaurant == null)
+            Result<Restaurant> restaurantResult =
+                await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
+            if (restaurantResult.IsFailed)
             {
-                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: restaurantResult.Errors[0].Message);
             }
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<RestaurantDto>(restaurant);
-
-            return Ok(_apiResponse);
+            return Ok(_mapper.Map<RestaurantDetailDto>(restaurantResult.Value));
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
@@ -101,8 +79,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> CreateRestaurant(
-        [FromBody] RestaurantCreateDto restaurantCreateDto)
+    public async Task<IActionResult> CreateRestaurant([FromBody] RestaurantCreateDto restaurantCreateDto)
     {
         try
         {
@@ -111,32 +88,7 @@ public class RestaurantsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            if (restaurantCreateDto == null)
-            {
-                string errorMessage = "Can't create the requested restaurant because it is null.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.BadRequest;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return BadRequest(_apiResponse);
-            }
-
-            Restaurant? restaurant = await _restaurantServices.GetRestaurantByNameAsync(
-                restaurantCreateDto.Name);
-            if (restaurant != null)
-            {
-                string errorMessage = "Can't create the requested restaurant because it already exists.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Conflict;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return Conflict(_apiResponse);
-            }
-
-            restaurant = _mapper.Map<Restaurant>(restaurantCreateDto);
-
+            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantCreateDto);
             if (restaurantCreateDto.ImageFile != null)
             {
                 // create and save image
@@ -145,30 +97,32 @@ public class RestaurantsController : ControllerBase
                     restaurantCreateDto.ImageFile, uploadImagePath);
                 restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
             }
-
             restaurant.CreatedAt = DateTime.Now;
             restaurant.UpdatedAt = DateTime.Now;
 
-            int createdRestaurantId = await _restaurantServices.CreateRestaurantAsync(restaurant);
-            restaurant.RestaurantId = createdRestaurantId;
+            Result<Guid> restaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
+            if (restaurantResult.IsFailed)
+            {
+                _imageServices.DeleteImage(restaurant.ImageUrl);
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.Created;
-            _apiResponse.IsSuccess = true;
-            _apiResponse.Result = _mapper.Map<RestaurantDto>(restaurant);
+                return Problem(statusCode: StatusCodes.Status409Conflict,
+                    detail: restaurantResult.Errors[0].Message);
+            }
 
-            return CreatedAtRoute(nameof(GetRestaurantById), new { Id = createdRestaurantId }, _apiResponse);
+            restaurant.RestaurantId = restaurantResult.Value;
+
+            RestaurantDto restaurantDto = _mapper.Map<RestaurantDto>(restaurant);
+
+            return CreatedAtRoute(nameof(GetRestaurantById),
+                new { Id = restaurant.RestaurantId }, restaurantDto);
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id}")]
     [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -176,7 +130,7 @@ public class RestaurantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> UpdateRestaurant(int id,
+    public async Task<IActionResult> UpdateRestaurant(Guid id,
         [FromBody] RestaurantUpdateDto restaurantUpdateDto)
     {
         try
@@ -186,87 +140,70 @@ public class RestaurantsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
-            if (restaurant == null)
+            Result<Restaurant> oldRestaurantResult = await _restaurantServices.GetRestaurantByIdAsync(id);
+            if (oldRestaurantResult.IsFailed)
             {
-                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: oldRestaurantResult.Errors[0].Message);
             }
 
-            _mapper.Map(restaurantUpdateDto, restaurant);
-
+            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantUpdateDto);
             if (restaurantUpdateDto.ImageFile != null)
             {
-                _imageServices.DeleteImage(restaurant.ImageUrl); // delete the old ones if it already exist
+                // delete the old ones if it already exist
+                _imageServices.DeleteImage(oldRestaurantResult.Value.ImageUrl);
 
                 string uploadImagePath = @"images\restaurants";
                 string? fileNameWithExtension = await _imageServices.UploadImageAsync(
                     restaurantUpdateDto.ImageFile, uploadImagePath);
                 restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
             }
-
             restaurant.UpdatedAt = DateTime.Now;
 
-            await _restaurantServices.UpdateRestaurantAsync(restaurant);
+            Result restaurantResult = await _restaurantServices.UpdateRestaurantAsync(id, restaurant);
+            if (restaurantResult.IsFailed)
+            {
+                _imageServices.DeleteImage(restaurant.ImageUrl);
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
-            _apiResponse.IsSuccess = true;
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: restaurantResult.Errors[0].Message);
+            }
 
-            return Ok(_apiResponse);
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 
-    [HttpDelete("{id:int}")]
-    [Authorize(Roles = "admin")]
+    [HttpDelete("{id}")]
+    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse>> DeleteRestaurant(int id)
+    public async Task<IActionResult> DeleteRestaurant(Guid id)
     {
         try
         {
-            Restaurant? restaurant = await _restaurantServices.GetRestaurantByIdAsync(id);
-            if (restaurant == null)
+            Result<Restaurant> restaurantDeleteResult = await _restaurantServices.GetRestaurantByIdAsync(id);
+
+            Result restaurantResult = await _restaurantServices.DeleteRestaurantAsync(id);
+            if (restaurantResult.IsFailed)
             {
-                string errorMessage = $"Restaurant not found. The requested id: '{id}' does not exist.";
-
-                _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NotFound;
-                _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { errorMessage };
-
-                return NotFound(_apiResponse);
+                return Problem(statusCode: StatusCodes.Status404NotFound,
+                    detail: restaurantResult.Errors[0].Message);
             }
 
-            await _restaurantServices.DeleteRestaurantAsync(id);
-            _imageServices.DeleteImage(restaurant.ImageUrl);
+            _imageServices.DeleteImage(restaurantDeleteResult.Value.ImageUrl);
 
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.NoContent;
-            _apiResponse.IsSuccess = true;
-
-            return Ok(_apiResponse);
+            return NoContent();
         }
         catch (Exception ex)
         {
-            _apiResponse.HttpStatusCode = System.Net.HttpStatusCode.InternalServerError;
-            _apiResponse.IsSuccess = false;
-            _apiResponse.ErrorMessages = new List<string> { ex.Message };
-
-            return StatusCode(500, _apiResponse);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
     }
 }

@@ -15,7 +15,7 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public int LocalUserId { get; set; }
+        public Guid LocalUserId { get; set; }
         [StringLength(50)]
         public string FirstName { get; set; } = null!;
         [StringLength(50)]

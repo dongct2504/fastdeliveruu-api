@@ -1,7 +1,9 @@
-﻿using FastDeliveruu.Application.Interfaces;
+﻿using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FluentResults;
 
 namespace FastDeliveruu.Application.Services;
 
@@ -19,12 +21,18 @@ public class RestaurantServices : IRestaurantServices
         return await _restaurantRepository.ListAllAsync();
     }
 
-    public async Task<Restaurant?> GetRestaurantByIdAsync(int id)
+    public async Task<Result<Restaurant>> GetRestaurantByIdAsync(Guid id)
     {
-        return await _restaurantRepository.GetAsync(id);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(id);
+        if (restaurant == null)
+        {
+            return Result.Fail<Restaurant>(new NotFoundError($"the requested restaurant '{id}' is not found."));
+        }
+
+        return restaurant;
     }
 
-    public async Task<Restaurant?> GetRestaurantWithMenuItemsByIdAsync(int id)
+    public async Task<Result<Restaurant>> GetRestaurantWithMenuItemsByIdAsync(Guid id)
     {
         QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
         {
@@ -32,10 +40,16 @@ public class RestaurantServices : IRestaurantServices
             Where = r => r.RestaurantId == id
         };
 
-        return await _restaurantRepository.GetAsync(options);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(options);
+        if (restaurant == null)
+        {
+            return Result.Fail<Restaurant>(new NotFoundError($"the requested restaurant '{id}' is not found."));
+        }
+
+        return restaurant;
     }
 
-    public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
+    public async Task<Result<Restaurant>> GetRestaurantByNameAsync(string name)
     {
         QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
         {
@@ -43,10 +57,17 @@ public class RestaurantServices : IRestaurantServices
             Where = r => r.Name == name
         };
 
-        return await _restaurantRepository.GetAsync(options);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(options);
+        if (restaurant == null)
+        {
+            return Result.Fail<Restaurant>(
+                new NotFoundError($"the requested restaurant '{name}' is not found."));
+        }
+
+        return restaurant;
     }
 
-    public async Task<Restaurant?> GetRestaurantByPhoneNumberAsync(string phoneNumber)
+    public async Task<Result<Restaurant>> GetRestaurantByPhoneNumberAsync(string phoneNumber)
     {
         QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
         {
@@ -54,27 +75,60 @@ public class RestaurantServices : IRestaurantServices
             Where = r => r.PhoneNumber == phoneNumber
         };
 
-        return await _restaurantRepository.GetAsync(options);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(options);
+        if (restaurant == null)
+        {
+            return Result.Fail<Restaurant>(
+                new NotFoundError($"the requested restaurant '{phoneNumber}' is not found."));
+        }
+
+        return restaurant;
     }
 
-    public async Task<int> CreateRestaurantAsync(Restaurant restaurant)
+    public async Task<Result<Guid>> CreateRestaurantAsync(Restaurant restaurant)
     {
+        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
+        {
+            Where = r => r.Name == restaurant.Name && r.PhoneNumber == restaurant.PhoneNumber
+        };
+
+        Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(options);
+        if (isRestaurantExist != null)
+        {
+            return Result.Fail<Guid>(
+                new DuplicateError($"the requested restaurant '{restaurant.Name}' is already exists."));
+        }
+
         Restaurant createdRestaurant = await _restaurantRepository.AddAsync(restaurant);
 
         return createdRestaurant.RestaurantId;
     }
 
-    public async Task UpdateRestaurantAsync(Restaurant restaurant)
+    public async Task<Result> UpdateRestaurantAsync(Guid id, Restaurant restaurant)
     {
-        await _restaurantRepository.UpdateRestaurant(restaurant);
+        Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(id);
+        if (isRestaurantExist == null)
+        {
+            return Result.Fail(
+                new NotFoundError($"the requested restaurant '{id}' is not found."));
+        }
+
+        await _restaurantRepository.UpdateRestaurantAsync(restaurant);
+
+        return Result.Ok();
     }
 
-    public async Task DeleteRestaurantAsync(int id)
+    public async Task<Result> DeleteRestaurantAsync(Guid id)
     {
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(id);
-        if (restaurant != null)
+        Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(id);
+        if (isRestaurantExist == null)
         {
-            await _restaurantRepository.DeleteAsync(restaurant);
+            return Result.Fail(
+                new NotFoundError($"the requested restaurant '{id}' is not found."));
         }
+
+        await _restaurantRepository.DeleteAsync(isRestaurantExist);
+
+        return Result.Ok();
     }
 }

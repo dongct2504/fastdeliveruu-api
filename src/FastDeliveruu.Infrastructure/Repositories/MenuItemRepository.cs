@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class MenuItemRepository : Repository<MenuItem>, IMenuItemRepository
 {
-    public MenuItemRepository(FastdeliveruuContext context) : base(context)
+    public MenuItemRepository(FastDeliveruuContext context) : base(context)
     {
     }
 

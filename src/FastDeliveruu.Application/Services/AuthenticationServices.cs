@@ -1,71 +1,68 @@
 using System.Data;
 using Dapper;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
+using FluentResults;
 
 namespace FastDeliveruu.Application.Services;
 
 public class AuthenticationServices : IAuthenticationServices
 {
     private readonly ISP_Call _sP_Call;
+    private readonly ILocalUserServices _localUserServices;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public AuthenticationServices(ISP_Call sP_Call,
-        IJwtTokenGenerator jwtTokenGenerator)
+        IJwtTokenGenerator jwtTokenGenerator,
+        ILocalUserServices localUserServices)
     {
         _sP_Call = sP_Call;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _localUserServices = localUserServices;
     }
 
-    public async Task<AuthenticationResult> RegisterAsync(RegisterationRequestDto registerationRequestDto)
+    public async Task<Result<AuthenticationResult>> RegisterAsync(
+        RegisterationRequestDto registerationRequestDto)
     {
-        // check if the user already exist
-        DynamicParameters checkUserparameters = new DynamicParameters();
-        checkUserparameters.Add("@UserName" ,registerationRequestDto.UserName);
-
-        LocalUser? localUser = await _sP_Call.OneRecordAsync<LocalUser>(
-            StoreProcedureNames.SpGetLocalUserByUserName, checkUserparameters);
-        if (localUser != null)
-        {
-            return new AuthenticationResult
-            {
-                LocalUserDto = null,
-                Token = string.Empty
-            };
-        }
-
-        // create user
-        LocalUserDto localUserDto = new LocalUserDto
+        LocalUser localUser = new LocalUser
         {
             FirstName = registerationRequestDto.FirstName,
             LastName = registerationRequestDto.LastName,
-            UserName = registerationRequestDto.LastName,
+            UserName = registerationRequestDto.UserName,
             Email = registerationRequestDto.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerationRequestDto.Password),
             PhoneNumber = registerationRequestDto.PhoneNumber,
-            Role = registerationRequestDto.Role ?? "Customer"
+            Role = registerationRequestDto.Role ?? "Customer",
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
         };
 
-        DynamicParameters AddUserparameters = new DynamicParameters();
-        AddUserparameters.Add("@FirstName", localUserDto.FirstName);
-        AddUserparameters.Add("@LastName", localUserDto.LastName);
-        AddUserparameters.Add("@UserName", localUserDto.UserName);
-        AddUserparameters.Add("@Email", localUserDto.Email);
-        AddUserparameters.Add("@PasswordHash", BCrypt.Net.BCrypt.HashPassword(registerationRequestDto.Password));
-        AddUserparameters.Add("@PhoneNumber", localUserDto.PhoneNumber);
-        AddUserparameters.Add("@Role", localUserDto.Role);
-        AddUserparameters.Add("@CreatedAt", DateTime.Now);
-        AddUserparameters.Add("@UpdatedAt", DateTime.Now);
-        AddUserparameters.Add("@LocalUserId", DbType.Int32, direction: ParameterDirection.Output);
+        Result<Guid> result = await _localUserServices.AddUserAsync(localUser);
+        if (result.IsFailed)
+        {
+            return Result.Fail<AuthenticationResult>(
+                new DuplicateError("The user is already existed."));
+        }
 
-        await _sP_Call.ExecuteAsync(StoreProcedureNames.SpCreateLocalUser, AddUserparameters);
-
-        localUserDto.LocalUserId = AddUserparameters.Get<int>("@LocalUserId");
+        localUser.LocalUserId = result.Value;
 
         // create JWT token
-        string token = _jwtTokenGenerator.GenerateTokenAsync(localUserDto);
+        string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
+
+        LocalUserDto localUserDto = new LocalUserDto
+        {
+            LocalUserId = localUser.LocalUserId,
+            FirstName = localUser.FirstName,
+            LastName = localUser.LastName,
+            UserName = localUser.UserName,
+            Email = localUser.Email,
+            PhoneNumber = localUser.PhoneNumber,
+            Role = localUser.Role
+        };
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {
@@ -76,31 +73,26 @@ public class AuthenticationServices : IAuthenticationServices
         return authenticationResult;
     }
 
-    public async Task<AuthenticationResult> LoginAsync(LoginRequestDto loginRequestDto)
+    public async Task<Result<AuthenticationResult>> LoginAsync(LoginRequestDto loginRequestDto)
     {
-        DynamicParameters parameters = new DynamicParameters();
-        parameters.Add("@UserName", loginRequestDto.UserName);
-
-        LocalUser? localUser = await _sP_Call.OneRecordAsync<LocalUser>(
-            StoreProcedureNames.SpGetLocalUserByUserName, parameters);
-        if (localUser == null)
+        Result<LocalUser> localUserResult = await _localUserServices.GetLocalUser(loginRequestDto.UserName);
+        if (localUserResult.IsFailed)
         {
-            return new AuthenticationResult
-            {
-                LocalUserDto = null,
-                Token = string.Empty
-            };
+            return Result.Fail<AuthenticationResult>(
+                new NotFoundError("The username is incorrect."));
         }
+
+        LocalUser localUser = localUserResult.Value;
 
         bool verified = BCrypt.Net.BCrypt.Verify(loginRequestDto.Password, localUser.PasswordHash);
         if (!verified)
         {
-            return new AuthenticationResult
-            {
-                LocalUserDto = null,
-                Token = string.Empty
-            };
+            return Result.Fail<AuthenticationResult>(
+                new NotFoundError("The password is incorredt."));
         }
+
+        // generate JWT token
+        string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
 
         LocalUserDto localUserDto = new LocalUserDto
         {
@@ -117,9 +109,6 @@ public class AuthenticationServices : IAuthenticationServices
             District = localUser.District,
             City = localUser.City
         };
-
-        // generate JWT token
-        string token = _jwtTokenGenerator.GenerateTokenAsync(localUserDto);
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {

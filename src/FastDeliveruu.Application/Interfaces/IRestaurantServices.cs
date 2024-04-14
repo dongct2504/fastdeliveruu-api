@@ -1,16 +1,17 @@
 ﻿using FastDeliveruu.Domain.Entities;
+using FluentResults;
 
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface IRestaurantServices
 {
     Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
-    Task<Restaurant?> GetRestaurantByIdAsync(int id);
-    Task<Restaurant?> GetRestaurantWithMenuItemsByIdAsync(int id);
-    Task<Restaurant?> GetRestaurantByNameAsync(string name);
-    Task<Restaurant?> GetRestaurantByPhoneNumberAsync(string phoneNumber);
+    Task<Result<Restaurant>> GetRestaurantByIdAsync(Guid id);
+    Task<Result<Restaurant>> GetRestaurantWithMenuItemsByIdAsync(Guid id);
+    Task<Result<Restaurant>> GetRestaurantByNameAsync(string name);
+    Task<Result<Restaurant>> GetRestaurantByPhoneNumberAsync(string phoneNumber);
 
-    Task<int> CreateRestaurantAsync(Restaurant restaurant);
-    Task UpdateRestaurantAsync(Restaurant restaurant);
-    Task DeleteRestaurantAsync(int id);
+    Task<Result<Guid>> CreateRestaurantAsync(Restaurant restaurant);
+    Task<Result> UpdateRestaurantAsync(Guid id, Restaurant restaurant);
+    Task<Result> DeleteRestaurantAsync(Guid id);
 }

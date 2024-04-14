@@ -9,7 +9,7 @@ public interface IRepository<T> where T : class
     Task<int> GetCountAsync();
 
     Task<T?> GetAsync(int id);
-    Task<T?> GetAsync(string id);
+    Task<T?> GetAsync(Guid id);
     Task<T?> GetAsync(QueryOptions<T> options);
 
     Task<T> AddAsync(T entity);
