@@ -4,8 +4,6 @@ namespace FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 
 public class ShoppingCartDto
 {
-    public int ShoppingCartId { get; set; }
-
     public Guid MenuItemId { get; set; }
 
     public Guid LocalUserId { get; set; }

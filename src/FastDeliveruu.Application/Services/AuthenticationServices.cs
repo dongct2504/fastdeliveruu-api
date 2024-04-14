@@ -9,15 +9,12 @@ namespace FastDeliveruu.Application.Services;
 
 public class AuthenticationServices : IAuthenticationServices
 {
-    private readonly ISP_Call _sP_Call;
     private readonly ILocalUserServices _localUserServices;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
-    public AuthenticationServices(ISP_Call sP_Call,
-        IJwtTokenGenerator jwtTokenGenerator,
+    public AuthenticationServices(IJwtTokenGenerator jwtTokenGenerator,
         ILocalUserServices localUserServices)
     {
-        _sP_Call = sP_Call;
         _jwtTokenGenerator = jwtTokenGenerator;
         _localUserServices = localUserServices;
     }

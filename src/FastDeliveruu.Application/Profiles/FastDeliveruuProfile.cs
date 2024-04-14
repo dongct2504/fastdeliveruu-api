@@ -28,12 +28,16 @@ public class FastDeliveruuProfile : Profile
         CreateMap<MenuItem, MenuItemDto>()
             .ForMember(dest => dest.GenreName, opt => opt.MapFrom(src => src.Genre.Name))
             .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant.Name));
+        CreateMap<MenuItem, MenuItemDetailDto>()
+            .ForMember(dest => dest.GenreDto, opt => opt.MapFrom(src => src.Genre))
+            .ForMember(dest => dest.RestaurantDto, opt => opt.MapFrom(src => src.Restaurant));
         CreateMap<MenuItem, MenuItemCreateDto>().ReverseMap();
         CreateMap<MenuItem, MenuItemUpdateDto>().ReverseMap();
 
         CreateMap<LocalUser, LocalUserDto>();
 
-        CreateMap<ShoppingCart, ShoppingCartDto>();
+        CreateMap<ShoppingCart, ShoppingCartDto>()
+            .ForMember(dest => dest.MenuItemDto, opt => opt.MapFrom(src => src.MenuItem));
         CreateMap<ShoppingCart, ShoppingCartCreateDto>().ReverseMap();
         CreateMap<ShoppingCart, ShoppingCartUpdateDto>().ReverseMap();
     }

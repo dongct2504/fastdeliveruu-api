@@ -35,18 +35,6 @@ public class ShoppingCartServices : IShoppingCartServices
         return await _shoppingCartRepository.ListAllAsync(options);
     }
 
-    public async Task<Result<ShoppingCart>> GetShoppingCartByIdAsync(int id)
-    {
-        ShoppingCart? shoppingCart = await _shoppingCartRepository.GetAsync(id);
-        if (shoppingCart == null)
-        {
-            return Result.Fail<ShoppingCart>(
-                new NotFoundError($"the requested shopping cart '{id}' is not found."));
-        }
-
-        return shoppingCart;
-    }
-
     public async Task<Result<ShoppingCart>> GetShoppingCartByUserIdMenuItemIdAsync(Guid userId, Guid menuItemId)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
@@ -82,7 +70,7 @@ public class ShoppingCartServices : IShoppingCartServices
         return shoppingCarts.Count();
     }
 
-    public async Task<Result<int>> CreateShoppingCartAsync(ShoppingCart shoppingCart)
+    public async Task<Result> CreateShoppingCartAsync(ShoppingCart shoppingCart)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
@@ -93,13 +81,13 @@ public class ShoppingCartServices : IShoppingCartServices
         ShoppingCart? isExistshoppingCart = await _shoppingCartRepository.GetAsync(options);
         if (isExistshoppingCart != null)
         {
-            return Result.Fail<int>(
+            return Result.Fail(
                 new DuplicateError($"the requested shopping cart is already exist."));
         }
 
         ShoppingCart createdShoppingCart = await _shoppingCartRepository.AddAsync(shoppingCart);
 
-        return createdShoppingCart.ShoppingCartId;
+        return Result.Ok();
     }
 
     public async Task<Result> UpdateShoppingCartAsync(Guid menuItemId, ShoppingCart shoppingCart)
@@ -121,16 +109,21 @@ public class ShoppingCartServices : IShoppingCartServices
         return Result.Ok();
     }
 
-    public async Task<Result> DeleteShoppingCartAsync(int id)
+    public async Task<Result> DeleteShoppingCartAsync(Guid userId, Guid menuItemId)
     {
-        ShoppingCart? isShoppingCartExist = await _shoppingCartRepository.GetAsync(id);
-        if (isShoppingCartExist == null)
+        QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
+        {
+            Where = sc => sc.LocalUserId == userId && sc.MenuItemId == menuItemId
+        };
+
+        ShoppingCart? isExistshoppingCart = await _shoppingCartRepository.GetAsync(options);
+        if (isExistshoppingCart == null)
         {
             return Result.Fail(
                 new NotFoundError($"the requested shopping cart is not found."));
         }
 
-        await _shoppingCartRepository.UpdateShoppingCart(isShoppingCartExist);
+        await _shoppingCartRepository.UpdateShoppingCart(isExistshoppingCart);
 
         return Result.Ok();
 

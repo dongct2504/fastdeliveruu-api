@@ -11,8 +11,8 @@ namespace FastDeliveruu.Domain.Entities
     public partial class OrderDetail
     {
         [Key]
-        public Guid OrderDetailId { get; set; }
         public Guid MenuItemId { get; set; }
+        [Key]
         public Guid OrderId { get; set; }
         [Column(TypeName = "money")]
         public decimal Price { get; set; }

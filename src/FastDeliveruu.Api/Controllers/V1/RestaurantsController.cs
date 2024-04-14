@@ -9,10 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
-[ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/restaurants")]
-public class RestaurantsController : ControllerBase
+public class RestaurantsController : ApiController
 {
     private readonly IRestaurantServices _restaurantServices;
     private readonly ILogger<RestaurantsController> _logger;
@@ -55,15 +54,14 @@ public class RestaurantsController : ControllerBase
     {
         try
         {
-            Result<Restaurant> restaurantResult =
+            Result<Restaurant> getRestaurantResult =
                 await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
-            if (restaurantResult.IsFailed)
+            if (getRestaurantResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: restaurantResult.Errors[0].Message);
+                return Problem(getRestaurantResult.Errors);
             }
 
-            return Ok(_mapper.Map<RestaurantDetailDto>(restaurantResult.Value));
+            return Ok(_mapper.Map<RestaurantDetailDto>(getRestaurantResult.Value));
         }
         catch (Exception ex)
         {
@@ -100,16 +98,15 @@ public class RestaurantsController : ControllerBase
             restaurant.CreatedAt = DateTime.Now;
             restaurant.UpdatedAt = DateTime.Now;
 
-            Result<Guid> restaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
-            if (restaurantResult.IsFailed)
+            Result<Guid> createRestaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
+            if (createRestaurantResult.IsFailed)
             {
                 _imageServices.DeleteImage(restaurant.ImageUrl);
 
-                return Problem(statusCode: StatusCodes.Status409Conflict,
-                    detail: restaurantResult.Errors[0].Message);
+                return Problem(createRestaurantResult.Errors);
             }
 
-            restaurant.RestaurantId = restaurantResult.Value;
+            restaurant.RestaurantId = createRestaurantResult.Value;
 
             RestaurantDto restaurantDto = _mapper.Map<RestaurantDto>(restaurant);
 
@@ -143,11 +140,13 @@ public class RestaurantsController : ControllerBase
             Result<Restaurant> oldRestaurantResult = await _restaurantServices.GetRestaurantByIdAsync(id);
             if (oldRestaurantResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: oldRestaurantResult.Errors[0].Message);
+                return Problem(oldRestaurantResult.Errors);
             }
 
-            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantUpdateDto);
+            Restaurant restaurant = oldRestaurantResult.Value;
+            
+            _mapper.Map(restaurantUpdateDto, restaurant);
+
             if (restaurantUpdateDto.ImageFile != null)
             {
                 // delete the old ones if it already exist
@@ -160,13 +159,10 @@ public class RestaurantsController : ControllerBase
             }
             restaurant.UpdatedAt = DateTime.Now;
 
-            Result restaurantResult = await _restaurantServices.UpdateRestaurantAsync(id, restaurant);
-            if (restaurantResult.IsFailed)
+            Result updateRestaurantResult = await _restaurantServices.UpdateRestaurantAsync(id, restaurant);
+            if (updateRestaurantResult.IsFailed)
             {
-                _imageServices.DeleteImage(restaurant.ImageUrl);
-
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: restaurantResult.Errors[0].Message);
+                return Problem(updateRestaurantResult.Errors);
             }
 
             return NoContent();
@@ -189,13 +185,12 @@ public class RestaurantsController : ControllerBase
         try
         {
             Result<Restaurant> restaurantDeleteResult = await _restaurantServices.GetRestaurantByIdAsync(id);
-
-            Result restaurantResult = await _restaurantServices.DeleteRestaurantAsync(id);
-            if (restaurantResult.IsFailed)
+            if (restaurantDeleteResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: restaurantResult.Errors[0].Message);
+                return Problem(restaurantDeleteResult.Errors);
             }
+
+            await _restaurantServices.DeleteRestaurantAsync(id);
 
             _imageServices.DeleteImage(restaurantDeleteResult.Value.ImageUrl);
 

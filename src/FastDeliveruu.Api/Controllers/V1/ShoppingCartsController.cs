@@ -11,11 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
-[ApiController]
 [Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/shopping-carts")]
-public class ShoppingCartsController : ControllerBase
+public class ShoppingCartsController : ApiController
 {
     private readonly PaginationResponse<ShoppingCartDto> _paginationResponse;
     private readonly IShoppingCartServices _shoppingCartServices;
@@ -65,22 +64,28 @@ public class ShoppingCartsController : ControllerBase
         }
     }
 
-    [HttpGet("{id}", Name = "GetShoppingCartById")]
+    [HttpGet("{menuItemId}", Name = "GetShoppingCartById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetShoppingCartById(int id)
+    public async Task<IActionResult> GetShoppingCartById(Guid menuItemId)
     {
         try
         {
-            Result<ShoppingCart> shoppingCartResult = await _shoppingCartServices.GetShoppingCartByIdAsync(id);
-            if (shoppingCartResult.IsFailed)
+            Guid userId = GetAuthenticationUserId();
+            if (userId == Guid.Empty)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: shoppingCartResult.Errors[0].Message);
+                Unauthorized();
             }
 
-            return Ok(_mapper.Map<ShoppingCartDto>(shoppingCartResult.Value));
+            Result<ShoppingCart> getShoppingCartResult = await _shoppingCartServices.
+                GetShoppingCartByUserIdMenuItemIdAsync(userId, menuItemId);
+            if (getShoppingCartResult.IsFailed)
+            {
+                return Problem(getShoppingCartResult.Errors);
+            }
+
+            return Ok(_mapper.Map<ShoppingCartDto>(getShoppingCartResult.Value));
         }
         catch (Exception ex)
         {
@@ -111,33 +116,22 @@ public class ShoppingCartsController : ControllerBase
                 return Unauthorized();
             }
 
-            Result<MenuItem> menuItemResult =
-                await _menuItemServices.GetMenuItemByIdAsync(shoppingCartCreateDto.MenuItemId);
-            if (menuItemResult.IsFailed)
-            {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: menuItemResult.Errors[0].Message);
-            }
-
             ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartCreateDto);
             shoppingCart.LocalUserId = userId;
             shoppingCart.CreatedAt = DateTime.Now;
             shoppingCart.UpdatedAt = DateTime.Now;
 
-            Result<int> shoppingCartResult =
+            Result<int> createShoppingCartResult =
                 await _shoppingCartServices.CreateShoppingCartAsync(shoppingCart);
-            if (shoppingCartResult.IsFailed)
+            if (createShoppingCartResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status409Conflict,
-                    detail: shoppingCartResult.Errors[0].Message);
+                return Problem(createShoppingCartResult.Errors);
             }
-
-            shoppingCart.ShoppingCartId = shoppingCartResult.Value;
 
             ShoppingCartDto shoppingCartDto = _mapper.Map<ShoppingCartDto>(shoppingCart);
 
             return CreatedAtRoute(nameof(GetShoppingCartById),
-                new { Id = shoppingCartDto.ShoppingCartId }, shoppingCartDto);
+                new { menuItemId = shoppingCart.MenuItemId }, shoppingCartDto);
         }
         catch (Exception ex)
         {
@@ -167,16 +161,25 @@ public class ShoppingCartsController : ControllerBase
                 return Unauthorized();
             }
 
-            ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartUpdateDto);
-            shoppingCart.LocalUserId = userId;
+            Result<ShoppingCart> getShoppingCartResult = await
+                _shoppingCartServices.GetShoppingCartByUserIdMenuItemIdAsync(userId, menuItemId);
+            if (getShoppingCartResult.IsFailed)
+            {
+                return Problem(getShoppingCartResult.Errors);
+            }
+
+            ShoppingCart shoppingCart = getShoppingCartResult.Value;
+
+            _mapper.Map(shoppingCartUpdateDto, shoppingCart);
+
             shoppingCart.Quantity += shoppingCartUpdateDto.Quantity;
             shoppingCart.UpdatedAt = DateTime.Now;
 
-            Result result = await _shoppingCartServices.UpdateShoppingCartAsync(menuItemId, shoppingCart);
-            if (result.IsFailed)
+            Result updateShoppingCartresult = 
+                await _shoppingCartServices.UpdateShoppingCartAsync(menuItemId, shoppingCart);
+            if (updateShoppingCartresult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: result.Errors[0].Message);
+                return Problem(updateShoppingCartresult.Errors);
             }
 
             return NoContent();
@@ -187,20 +190,26 @@ public class ShoppingCartsController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{menuItem}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteShoppingCart(int id)
+    public async Task<IActionResult> DeleteShoppingCart(Guid menuItem)
     {
         try
         {
-            Result result = await _shoppingCartServices.DeleteShoppingCartAsync(id);
-            if (result.IsFailed)
+            Guid userId = GetAuthenticationUserId();
+            if (userId == Guid.Empty)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: result.Errors[0].Message);
+                return Unauthorized();
+            }
+
+            Result deleteShoppingCartresult =
+                await _shoppingCartServices.DeleteShoppingCartAsync(userId, menuItem);
+            if (deleteShoppingCartresult.IsFailed)
+            {
+                return Problem(deleteShoppingCartresult.Errors);
             }
 
             return NoContent();

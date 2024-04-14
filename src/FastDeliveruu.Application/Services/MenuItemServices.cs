@@ -11,10 +11,17 @@ namespace FastDeliveruu.Application.Dtos;
 public class MenuItemServices : IMenuItemServices
 {
     private readonly IMenuItemRepository _menuItemRepository;
+    private readonly IGenreRepository _genreRepository;
+    private readonly IRestaurantRepository _restaurantRepository;
 
-    public MenuItemServices(IMenuItemRepository menuItemRepository)
+    public MenuItemServices(
+        IMenuItemRepository menuItemRepository,
+        IGenreRepository genreRepository,
+        IRestaurantRepository restaurantRepository)
     {
         _menuItemRepository = menuItemRepository;
+        _genreRepository = genreRepository;
+        _restaurantRepository = restaurantRepository;
     }
 
     public async Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync(int page)
@@ -138,6 +145,24 @@ public class MenuItemServices : IMenuItemServices
                 new DuplicateError($"the requested menu item '{menuItem.Name}' is already exists."));
         }
 
+        Genre? isGenreExist = await _genreRepository.GetAsync(new QueryOptions<Genre>
+        {
+            Where = g => g.GenreId == menuItem.GenreId
+        });
+        if (isGenreExist == null)
+        {
+            return Result.Fail<Guid>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+        }
+
+        Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(new QueryOptions<Restaurant>
+        {
+            Where = r => r.RestaurantId == menuItem.RestaurantId
+        });
+        if (isRestaurantExist == null)
+        {
+            return Result.Fail<Guid>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+        }
+
         MenuItem createdMenuItem = await _menuItemRepository.AddAsync(menuItem);
 
         return createdMenuItem.MenuItemId;
@@ -151,6 +176,25 @@ public class MenuItemServices : IMenuItemServices
             return Result.Fail(
                 new NotFoundError($"the requested menu item '{menuItem.Name}' is not found."));
         }
+
+        Genre? isGenreExist = await _genreRepository.GetAsync(new QueryOptions<Genre>
+        {
+            Where = g => g.GenreId == menuItem.GenreId
+        });
+        if (isGenreExist == null)
+        {
+            return Result.Fail(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+        }
+
+        Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(new QueryOptions<Restaurant>
+        {
+            Where = r => r.RestaurantId == menuItem.RestaurantId
+        });
+        if (isRestaurantExist == null)
+        {
+            return Result.Fail(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+        }
+
 
         await _menuItemRepository.UpdateMenuItem(menuItem);
 

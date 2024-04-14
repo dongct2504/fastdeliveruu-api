@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;
 
-[ApiController]
 [ApiVersionNeutral]
 [Route("api/v{version:apiVersion}/user-auth")]
-public class AuthenticationController : ControllerBase
+public class AuthenticationController : ApiController
 {
     private readonly IAuthenticationServices _authenticationServices;
     private readonly ILogger<AuthenticationController> _logger;
@@ -38,8 +37,7 @@ public class AuthenticationController : ControllerBase
                 RegisterAsync(registerationRequestDto);
             if (authenticationResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status409Conflict,
-                    detail: authenticationResult.Errors[0].Message);
+                return Problem(authenticationResult.Errors);
             }
 
             AuthenticationResponse registerationResponseDto = new AuthenticationResponse
@@ -68,8 +66,7 @@ public class AuthenticationController : ControllerBase
                 .LoginAsync(loginRequestDto);
             if (authenticationResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status400BadRequest,
-                    detail: authenticationResult.Errors[0].Message);
+                return Problem(authenticationResult.Errors);
             }
 
             AuthenticationResponse loginResponseDto = new AuthenticationResponse

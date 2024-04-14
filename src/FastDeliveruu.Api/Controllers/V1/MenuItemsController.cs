@@ -11,10 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
-[ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/menu-items")]
-public class MenuItemsController : ControllerBase
+public class MenuItemsController : ApiController
 {
     private readonly PaginationResponse<MenuItemDto> _paginationResponse;
     private readonly IMenuItemServices _menuItemServices;
@@ -68,15 +67,14 @@ public class MenuItemsController : ControllerBase
     {
         try
         {
-            Result<MenuItem> menuItemResult =
+            Result<MenuItem> getMenuItemResult =
                 await _menuItemServices.GetMenuItemWithRestaurantGenreByIdAsync(id);
-            if (menuItemResult.IsFailed)
+            if (getMenuItemResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: menuItemResult.Errors[0].Message);
+                return Problem(getMenuItemResult.Errors);
             }
 
-            return Ok(_mapper.Map<MenuItemDetailDto>(menuItemResult.Value));
+            return Ok(_mapper.Map<MenuItemDetailDto>(getMenuItemResult.Value));
         }
         catch (Exception ex)
         {
@@ -114,16 +112,15 @@ public class MenuItemsController : ControllerBase
             menuItem.CreatedAt = DateTime.Now;
             menuItem.UpdatedAt = DateTime.Now;
 
-            Result<Guid> createdMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
-            if (createdMenuItemResult.IsFailed)
+            Result<Guid> createMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
+            if (createMenuItemResult.IsFailed)
             {
                 _imageServices.DeleteImage(menuItem.ImageUrl);
 
-                return Problem(statusCode: StatusCodes.Status409Conflict,
-                    detail: createdMenuItemResult.Errors[0].Message);
+                return Problem(createMenuItemResult.Errors);
             }
 
-            menuItem.MenuItemId = createdMenuItemResult.Value;
+            menuItem.MenuItemId = createMenuItemResult.Value;
 
             MenuItemDto menuItemDto = _mapper.Map<MenuItemDto>(menuItem);
 
@@ -155,11 +152,13 @@ public class MenuItemsController : ControllerBase
             Result<MenuItem> oldMenuItemResult = await _menuItemServices.GetMenuItemByIdAsync(id);
             if (oldMenuItemResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: oldMenuItemResult.Errors[0].Message);
+                return Problem(oldMenuItemResult.Errors);
             }
 
-            MenuItem menuItem = _mapper.Map<MenuItem>(menuItemUpdateDto);
+            MenuItem menuItem = oldMenuItemResult.Value;
+
+            _mapper.Map(menuItemUpdateDto, menuItem);
+
             if (menuItemUpdateDto.ImageFile != null)
             {
                 // if it has an old one, delete it
@@ -175,8 +174,7 @@ public class MenuItemsController : ControllerBase
             Result updateMenuItemResult = await _menuItemServices.UpdateMenuItemAsync(id, menuItem);
             if (updateMenuItemResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: updateMenuItemResult.Errors[0].Message);
+                return Problem(updateMenuItemResult.Errors);
             }
 
             return NoContent();
@@ -199,13 +197,12 @@ public class MenuItemsController : ControllerBase
         try
         {
             Result<MenuItem> menuItemDeleteResult = await _menuItemServices.GetMenuItemByIdAsync(id);
-
-            Result deletedMenuItemResult = await _menuItemServices.DeleteMenuItemAsync(id);
-            if (deletedMenuItemResult.IsFailed)
+            if (menuItemDeleteResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: deletedMenuItemResult.Errors[0].Message);
+                return Problem(menuItemDeleteResult.Errors);
             }
+
+            await _menuItemServices.DeleteMenuItemAsync(id);
 
             _imageServices.DeleteImage(menuItemDeleteResult.Value.ImageUrl);
 

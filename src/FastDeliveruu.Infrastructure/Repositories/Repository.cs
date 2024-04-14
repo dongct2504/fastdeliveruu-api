@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Infrastructure.Data;

@@ -74,7 +74,8 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.Property(e => e.OrderDetailId).HasDefaultValueSql("(newid())");
+                entity.HasKey(e => new { e.MenuItemId, e.OrderId })
+                    .HasName("PK_ORDERDETAILS");
 
                 entity.HasOne(d => d.MenuItem)
                     .WithMany(p => p.OrderDetails)
@@ -103,6 +104,9 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<ShoppingCart>(entity =>
             {
+                entity.HasKey(e => new { e.MenuItemId, e.LocalUserId })
+                    .HasName("PK_SHOPPINGCARTS");
+
                 entity.HasOne(d => d.LocalUser)
                     .WithMany(p => p.ShoppingCarts)
                     .HasForeignKey(d => d.LocalUserId)

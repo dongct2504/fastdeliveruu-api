@@ -9,10 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
-[ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/genres")]
-public class GenresController : ControllerBase
+public class GenresController : ApiController
 {
     private readonly IGenreServices _genreServices;
     private readonly ILogger<GenresController> _logger;
@@ -54,8 +53,7 @@ public class GenresController : ControllerBase
             Result<Genre> getGenreResult = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
             if (getGenreResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: getGenreResult.Errors[0].Message);
+                return Problem(getGenreResult.Errors);
             }
 
             return Ok(_mapper.Map<GenreDetailDto>(getGenreResult.Value));
@@ -87,14 +85,13 @@ public class GenresController : ControllerBase
             genre.CreatedAt = DateTime.Now;
             genre.UpdatedAt = DateTime.Now;
 
-            Result<int> genreResult = await _genreServices.CreateGenreAsync(genre);
-            if (genreResult.IsFailed)
+            Result<int> createGenreResult = await _genreServices.CreateGenreAsync(genre);
+            if (createGenreResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status409Conflict,
-                    detail: genreResult.Errors[0].Message);
+                return Problem(createGenreResult.Errors);
             }
 
-            genre.GenreId = genreResult.Value;
+            genre.GenreId = createGenreResult.Value;
             GenreDto genreDto = _mapper.Map<GenreDto>(genre);
 
             return CreatedAtRoute(nameof(GetGenreById), new { Id = genreDto.GenreId }, genreDto);
@@ -122,14 +119,22 @@ public class GenresController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            Genre genre = _mapper.Map<Genre>(genreUpdateDto);
+            Result<Genre> getGenreResult = await _genreServices.GetGenreByIdAsync(id);
+            if (getGenreResult.IsFailed)
+            {
+                return Problem(getGenreResult.Errors);
+            }
+
+            Genre genre = getGenreResult.Value;
+
+            _mapper.Map(genreUpdateDto, genre);
+
             genre.UpdatedAt = DateTime.Now;
 
-            Result genreResult = await _genreServices.UpdateGenreAsync(id, genre);
-            if (genreResult.IsFailed)
+            Result updateGenreResult = await _genreServices.UpdateGenreAsync(id, genre);
+            if (updateGenreResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: genreResult.Errors[0].Message);
+                return Problem(updateGenreResult.Errors);
             }
 
             return NoContent();
@@ -141,7 +146,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -151,11 +156,10 @@ public class GenresController : ControllerBase
     {
         try
         {
-            Result genreResult = await _genreServices.DeleteGenreAsync(id);
-            if (genreResult.IsFailed)
+            Result deleteGenreResult = await _genreServices.DeleteGenreAsync(id);
+            if (deleteGenreResult.IsFailed)
             {
-                return Problem(statusCode: StatusCodes.Status404NotFound,
-                    detail: genreResult.Errors[0].Message);
+                return Problem(deleteGenreResult.Errors);
             }
 
             return NoContent();

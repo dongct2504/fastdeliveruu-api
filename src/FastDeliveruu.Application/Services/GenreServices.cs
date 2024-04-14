@@ -68,10 +68,10 @@ public class GenreServices : IGenreServices
 
     public async Task<Result<int>> CreateGenreAsync(Genre genre)
     {
-        Genre? checkGenre = await _genreRepository.GetAsync(new QueryOptions<Genre> {
+        Genre? isGenreExist = await _genreRepository.GetAsync(new QueryOptions<Genre> {
             Where = g => g.Name == genre.Name
         });
-        if (checkGenre != null)
+        if (isGenreExist != null)
         {
             return Result.Fail<int>(
                 new DuplicateError($"The requested genre '{genre.Name}' is already exists."));

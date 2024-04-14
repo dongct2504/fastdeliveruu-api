@@ -7,7 +7,7 @@ public class MenuItemDetailDto
 {
     public Guid MenuItemId { get; set; }
 
-    public int RestaurantId { get; set; }
+    public Guid RestaurantId { get; set; }
 
     public int GenreId { get; set; }
 
