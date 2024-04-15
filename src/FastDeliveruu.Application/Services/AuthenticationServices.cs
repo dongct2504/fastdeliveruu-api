@@ -1,8 +1,8 @@
+using AutoMapper;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 
 namespace FastDeliveruu.Application.Services;
@@ -11,29 +11,24 @@ public class AuthenticationServices : IAuthenticationServices
 {
     private readonly ILocalUserServices _localUserServices;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IMapper _mapper;
 
     public AuthenticationServices(IJwtTokenGenerator jwtTokenGenerator,
-        ILocalUserServices localUserServices)
+        ILocalUserServices localUserServices,
+        IMapper mapper)
     {
         _jwtTokenGenerator = jwtTokenGenerator;
         _localUserServices = localUserServices;
+        _mapper = mapper;
     }
 
     public async Task<Result<AuthenticationResult>> RegisterAsync(
         RegisterationRequestDto registerationRequestDto)
     {
-        LocalUser localUser = new LocalUser
-        {
-            FirstName = registerationRequestDto.FirstName,
-            LastName = registerationRequestDto.LastName,
-            UserName = registerationRequestDto.UserName,
-            Email = registerationRequestDto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerationRequestDto.Password),
-            PhoneNumber = registerationRequestDto.PhoneNumber,
-            Role = registerationRequestDto.Role ?? "Customer",
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
-        };
+        LocalUser localUser = _mapper.Map<LocalUser>(registerationRequestDto);
+        localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerationRequestDto.Password);
+        localUser.CreatedAt = DateTime.Now;
+        localUser.UpdatedAt = DateTime.Now;
 
         Result<Guid> result = await _localUserServices.AddUserAsync(localUser);
         if (result.IsFailed)
@@ -47,16 +42,7 @@ public class AuthenticationServices : IAuthenticationServices
         // create JWT token
         string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
 
-        LocalUserDto localUserDto = new LocalUserDto
-        {
-            LocalUserId = localUser.LocalUserId,
-            FirstName = localUser.FirstName,
-            LastName = localUser.LastName,
-            UserName = localUser.UserName,
-            Email = localUser.Email,
-            PhoneNumber = localUser.PhoneNumber,
-            Role = localUser.Role
-        };
+        LocalUserDto localUserDto = _mapper.Map<LocalUserDto>(localUser);
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {
@@ -73,7 +59,7 @@ public class AuthenticationServices : IAuthenticationServices
         if (localUserResult.IsFailed)
         {
             return Result.Fail<AuthenticationResult>(
-                new NotFoundError("The username is incorrect."));
+                new BadRequestError("The username is incorrect."));
         }
 
         LocalUser localUser = localUserResult.Value;
@@ -82,27 +68,13 @@ public class AuthenticationServices : IAuthenticationServices
         if (!verified)
         {
             return Result.Fail<AuthenticationResult>(
-                new NotFoundError("The password is incorredt."));
+                new BadRequestError("The password is incorredt."));
         }
 
         // generate JWT token
         string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
 
-        LocalUserDto localUserDto = new LocalUserDto
-        {
-            LocalUserId = localUser.LocalUserId,
-            FirstName = localUser.FirstName,
-            LastName = localUser.LastName,
-            UserName = localUser.UserName,
-            PhoneNumber = localUser.PhoneNumber,
-            Email = localUser.Email,
-            Role = localUser.Role,
-            ImageUrl = localUser.ImageUrl,
-            Address = localUser.Address,
-            Ward = localUser.Ward,
-            District = localUser.District,
-            City = localUser.City
-        };
+        LocalUserDto localUserDto = _mapper.Map<LocalUserDto>(localUser);
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {

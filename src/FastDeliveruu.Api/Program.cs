@@ -31,25 +31,6 @@ var builder = WebApplication.CreateBuilder(args);
         .AddNewtonsoftJson()
         .AddXmlDataContractSerializerFormatters();
 
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-        .AddJwtBearer(options =>
-        {
-            options.RequireHttpsMetadata = false;
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
-                    builder.Configuration["JwtSettings:Secret"])),
-                ValidateIssuer = false,
-                ValidateAudience = false
-            };
-        });
-
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
@@ -164,6 +145,6 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
-}
 
-app.Run();
+    app.Run();
+}
