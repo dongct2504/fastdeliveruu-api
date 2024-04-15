@@ -11,15 +11,18 @@ public class AuthenticationServices : IAuthenticationServices
 {
     private readonly ILocalUserServices _localUserServices;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IEmailSender _emailSender;
     private readonly IMapper _mapper;
 
     public AuthenticationServices(IJwtTokenGenerator jwtTokenGenerator,
         ILocalUserServices localUserServices,
-        IMapper mapper)
+        IMapper mapper,
+        IEmailSender emailSender)
     {
         _jwtTokenGenerator = jwtTokenGenerator;
         _localUserServices = localUserServices;
         _mapper = mapper;
+        _emailSender = emailSender;
     }
 
     public async Task<Result<AuthenticationResult>> RegisterAsync(
@@ -43,6 +46,11 @@ public class AuthenticationServices : IAuthenticationServices
         string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
 
         LocalUserDto localUserDto = _mapper.Map<LocalUserDto>(localUser);
+
+        string receiver = localUser.Email;
+        string subject = "this is a subject";
+        string message = "this is a message";
+        await _emailSender.SendEmailAsync(receiver, subject, message);
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Infrastructure.Common;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

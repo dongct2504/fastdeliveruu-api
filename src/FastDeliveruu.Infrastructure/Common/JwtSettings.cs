@@ -1,4 +1,4 @@
-namespace FastDeliveruu.Infrastructure.Authentication;
+namespace FastDeliveruu.Infrastructure.Common;
 
 public class JwtSettings
 {

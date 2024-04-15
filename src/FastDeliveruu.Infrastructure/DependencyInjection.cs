@@ -2,6 +2,7 @@
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Infrastructure.Authentication;
+using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Infrastructure.Repositories;
 using FastDeliveruu.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +20,9 @@ public static class DependencyInjection
     {
         services.AddAuth(configuration);
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.AddSingleton<IEmailSender, EmailSender>();
 
         services.AddScoped<ISP_Call, SP_Call>();
         services.AddScoped<IGenreRepository, GenreRepository>();

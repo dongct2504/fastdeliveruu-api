@@ -68,7 +68,8 @@ public class GenreServices : IGenreServices
 
     public async Task<Result<int>> CreateGenreAsync(Genre genre)
     {
-        Genre? isGenreExist = await _genreRepository.GetAsync(new QueryOptions<Genre> {
+        Genre? isGenreExist = await _genreRepository.GetAsync(new QueryOptions<Genre>
+        {
             Where = g => g.Name == genre.Name
         });
         if (isGenreExist != null)
