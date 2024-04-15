@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using AutoMapper;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
@@ -11,18 +13,15 @@ public class AuthenticationServices : IAuthenticationServices
 {
     private readonly ILocalUserServices _localUserServices;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly IEmailSender _emailSender;
     private readonly IMapper _mapper;
 
     public AuthenticationServices(IJwtTokenGenerator jwtTokenGenerator,
         ILocalUserServices localUserServices,
-        IMapper mapper,
-        IEmailSender emailSender)
+        IMapper mapper)
     {
         _jwtTokenGenerator = jwtTokenGenerator;
         _localUserServices = localUserServices;
         _mapper = mapper;
-        _emailSender = emailSender;
     }
 
     public async Task<Result<AuthenticationResult>> RegisterAsync(
@@ -42,15 +41,9 @@ public class AuthenticationServices : IAuthenticationServices
 
         localUser.LocalUserId = result.Value;
 
-        // create JWT token
-        string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
+        string token = _jwtTokenGenerator.GenerateEmailConfirmationToken(localUser);
 
         LocalUserDto localUserDto = _mapper.Map<LocalUserDto>(localUser);
-
-        string receiver = localUser.Email;
-        string subject = "this is a subject";
-        string message = "this is a message";
-        await _emailSender.SendEmailAsync(receiver, subject, message);
 
         AuthenticationResult authenticationResult = new AuthenticationResult
         {
@@ -63,7 +56,8 @@ public class AuthenticationServices : IAuthenticationServices
 
     public async Task<Result<AuthenticationResult>> LoginAsync(LoginRequestDto loginRequestDto)
     {
-        Result<LocalUser> localUserResult = await _localUserServices.GetLocalUserByUserNameAsync(loginRequestDto.UserName);
+        Result<LocalUser> localUserResult =
+            await _localUserServices.GetLocalUserByUserNameAsync(loginRequestDto.UserName);
         if (localUserResult.IsFailed)
         {
             return Result.Fail<AuthenticationResult>(
@@ -76,11 +70,18 @@ public class AuthenticationServices : IAuthenticationServices
         if (!verified)
         {
             return Result.Fail<AuthenticationResult>(
-                new BadRequestError("The password is incorredt."));
+                new BadRequestError("The password is incorrect."));
+        }
+
+        bool isConfirmEmail = localUserResult.Value.IsConfirmEmail;
+        if (!isConfirmEmail)
+        {
+            return Result.Fail<AuthenticationResult>(
+                new BadRequestError("The email is not yet confirmed."));
         }
 
         // generate JWT token
-        string token = _jwtTokenGenerator.GenerateTokenAsync(localUser);
+        string token = _jwtTokenGenerator.GenerateToken(localUser);
 
         LocalUserDto localUserDto = _mapper.Map<LocalUserDto>(localUser);
 
@@ -91,5 +92,42 @@ public class AuthenticationServices : IAuthenticationServices
         };
 
         return authenticationResult;
+    }
+
+    public async Task<Result<bool>> IsEmailConfirm(string token, string email)
+    {
+        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
+
+        // Retrieve the user ID and email from the token
+        Claim? userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId");
+        Claim? emailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email);
+
+        if (userIdClaim == null || emailClaim == null)
+        {
+            return Result.Fail<bool>(new BadRequestError("Invalid token format."));
+        }
+
+        // Retrieve the user based on email
+        Result<LocalUser> getLocalUserResult =
+            await _localUserServices.GetLocalUserByEmailAsync(email);
+        if (getLocalUserResult.IsFailed)
+        {
+            return Result.Fail<bool>(new NotFoundError("User not found."));
+        }
+
+        // Verify the email confirmation token
+        if (emailClaim.Value != email)
+        {
+            return Result.Fail<bool>(new BadRequestError("Email not match."));
+        }
+
+        // Update the user's email confirmation status
+        getLocalUserResult.Value.IsConfirmEmail = true;
+        getLocalUserResult.Value.UpdatedAt = DateTime.Now;
+
+        await _localUserServices.UpdateUserAsync(Guid.Parse(userIdClaim.Value), getLocalUserResult.Value);
+
+        return true;
     }
 }

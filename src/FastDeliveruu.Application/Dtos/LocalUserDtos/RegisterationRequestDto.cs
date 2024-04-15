@@ -4,12 +4,6 @@ namespace FastDeliveruu.Application.Dtos.LocalUserDtos;
 
 public class RegisterationRequestDto
 {
-    [Required(ErrorMessage = "Vui lòng nhập tên.")]
-    public string FirstName { get; set; } = null!;
-
-    [Required(ErrorMessage = "Vui lòng nhập họ.")]
-    public string LastName { get; set; } = null!;
-
     [Required(ErrorMessage = "Vui lòng nhập username.")]
     public string UserName { get; set; } = null!;
 

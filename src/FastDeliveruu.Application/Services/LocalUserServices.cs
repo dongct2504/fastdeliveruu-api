@@ -45,6 +45,22 @@ public class localUserServices : ILocalUserServices
         return localUser;
     }
 
+    public async Task<Result<LocalUser>> GetLocalUserByEmailAsync(string email)
+    {
+        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
+        {
+            Where = u => u.Email == email
+        };
+
+        LocalUser? localUser = await _localUserRepository.GetAsync(options);
+        if (localUser == null)
+        {
+            return Result.Fail<LocalUser>(new NotFoundError("The requested local user is not found."));
+        }
+
+        return localUser;
+    }
+
     public async Task<Result<LocalUser>> GetLocalUserByUserNameAsync(string username)
     {
         QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
