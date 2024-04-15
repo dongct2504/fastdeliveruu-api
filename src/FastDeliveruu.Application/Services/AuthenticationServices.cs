@@ -63,7 +63,7 @@ public class AuthenticationServices : IAuthenticationServices
 
     public async Task<Result<AuthenticationResult>> LoginAsync(LoginRequestDto loginRequestDto)
     {
-        Result<LocalUser> localUserResult = await _localUserServices.GetLocalUser(loginRequestDto.UserName);
+        Result<LocalUser> localUserResult = await _localUserServices.GetLocalUserByUserNameAsync(loginRequestDto.UserName);
         if (localUserResult.IsFailed)
         {
             return Result.Fail<AuthenticationResult>(

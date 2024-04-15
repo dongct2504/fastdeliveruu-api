@@ -34,7 +34,18 @@ public class localUserServices : ILocalUserServices
         return await _localUserRepository.ListAllAsync(options);
     }
 
-    public async Task<Result<LocalUser>> GetLocalUser(string username)
+    public async Task<Result<LocalUser>> GetLocalUserByIdAsync(Guid id)
+    {
+        LocalUser? localUser = await _localUserRepository.GetAsync(id);
+        if (localUser == null)
+        {
+            return Result.Fail<LocalUser>(new NotFoundError("The requested local user is not found."));
+        }
+
+        return localUser;
+    }
+
+    public async Task<Result<LocalUser>> GetLocalUserByUserNameAsync(string username)
     {
         QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
         {
@@ -44,13 +55,13 @@ public class localUserServices : ILocalUserServices
         LocalUser? localUser = await _localUserRepository.GetAsync(options);
         if (localUser == null)
         {
-            return Result.Fail<LocalUser>(new NotFoundError("the requested local user is not found."));
+            return Result.Fail<LocalUser>(new NotFoundError("The requested local user is not found."));
         }
 
         return localUser;
     }
 
-    public async Task<bool> IsUserUnique(string username)
+    public async Task<bool> IsUserUniqueAsync(string username)
     {
         QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
         {

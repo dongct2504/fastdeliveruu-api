@@ -144,14 +144,12 @@ public class RestaurantsController : ApiController
             }
 
             Restaurant restaurant = oldRestaurantResult.Value;
-            
+            string? oldImagePath = oldRestaurantResult.Value.ImageUrl;
+
             _mapper.Map(restaurantUpdateDto, restaurant);
 
             if (restaurantUpdateDto.ImageFile != null)
             {
-                // delete the old ones if it already exist
-                _imageServices.DeleteImage(oldRestaurantResult.Value.ImageUrl);
-
                 string uploadImagePath = @"images\restaurants";
                 string? fileNameWithExtension = await _imageServices.UploadImageAsync(
                     restaurantUpdateDto.ImageFile, uploadImagePath);
@@ -162,7 +160,18 @@ public class RestaurantsController : ApiController
             Result updateRestaurantResult = await _restaurantServices.UpdateRestaurantAsync(id, restaurant);
             if (updateRestaurantResult.IsFailed)
             {
+                if (restaurantUpdateDto.ImageFile != null)
+                {
+                    _imageServices.DeleteImage(restaurant.ImageUrl);
+                }
+
                 return Problem(updateRestaurantResult.Errors);
+            }
+
+            if (restaurantUpdateDto.ImageFile != null)
+            {
+                // if it has an old one, delete it after successfully updated
+                _imageServices.DeleteImage(oldImagePath);
             }
 
             return NoContent();

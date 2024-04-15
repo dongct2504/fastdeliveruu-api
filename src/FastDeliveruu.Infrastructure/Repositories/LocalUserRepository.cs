@@ -10,8 +10,9 @@ public class LocalUserRepository : Repository<LocalUser>, ILocalUserRepository
     {
     }
 
-    public Task UpdateLocalUser(LocalUser localUser)
+    public async Task UpdateLocalUser(LocalUser localUser)
     {
-        throw new NotImplementedException();
+        _dbContext.Update(localUser);
+        await _dbContext.SaveChangesAsync();
     }
 }

@@ -8,9 +8,10 @@ public interface ILocalUserServices
     Task<IEnumerable<LocalUser>> GetAllLocalUserAsync();
     Task<IEnumerable<LocalUser>> GetAllLocalUserAsync(int page);
 
-    Task<Result<LocalUser>> GetLocalUser(string username);
+    Task<Result<LocalUser>> GetLocalUserByIdAsync(Guid id);
+    Task<Result<LocalUser>> GetLocalUserByUserNameAsync(string username);
 
-    Task<bool> IsUserUnique(string username);
+    Task<bool> IsUserUniqueAsync(string username);
 
     Task<int> GetTotalLocalUsersAsync();
 

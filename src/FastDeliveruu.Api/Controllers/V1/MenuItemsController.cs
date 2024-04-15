@@ -156,14 +156,12 @@ public class MenuItemsController : ApiController
             }
 
             MenuItem menuItem = oldMenuItemResult.Value;
+            string? oldImagePath = oldMenuItemResult.Value.ImageUrl;
 
             _mapper.Map(menuItemUpdateDto, menuItem);
 
             if (menuItemUpdateDto.ImageFile != null)
             {
-                // if it has an old one, delete it
-                _imageServices.DeleteImage(oldMenuItemResult.Value.ImageUrl);
-
                 string uploadImagePath = @"images\menu-items";
                 string? fileNameWithExtension =
                     await _imageServices.UploadImageAsync(menuItemUpdateDto.ImageFile, uploadImagePath);
@@ -174,7 +172,18 @@ public class MenuItemsController : ApiController
             Result updateMenuItemResult = await _menuItemServices.UpdateMenuItemAsync(id, menuItem);
             if (updateMenuItemResult.IsFailed)
             {
+                if (menuItemUpdateDto.ImageFile != null)
+                {
+                    _imageServices.DeleteImage(menuItem.ImageUrl);
+                }
+
                 return Problem(updateMenuItemResult.Errors);
+            }
+
+            if (menuItemUpdateDto.ImageFile != null)
+            {
+                // if it has an old one, delete it after successfully updated
+                _imageServices.DeleteImage(oldImagePath);
             }
 
             return NoContent();
