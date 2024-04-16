@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Profiles;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -100,6 +101,13 @@ var builder = WebApplication.CreateBuilder(args);
         .AddApplication()
         .AddInfrastructure(builder.Configuration);
 
+    Log.Logger = new LoggerConfiguration()
+        .ReadFrom
+        .Configuration(builder.Configuration)
+        .CreateLogger();
+
+    builder.Host.UseSerilog();
+
     // register automapper
     builder.Services.AddAutoMapper(cfg =>
     {
@@ -131,6 +139,8 @@ var app = builder.Build();
             options.SwaggerEndpoint("/swagger/v2/swagger.json", "FastDeliveruuApiV2");
         });
     }
+
+    app.UseSerilogRequestLogging();
 
     app.UseHttpsRedirection();
 

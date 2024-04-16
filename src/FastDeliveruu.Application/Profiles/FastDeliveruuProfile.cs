@@ -35,7 +35,8 @@ public class FastDeliveruuProfile : Profile
         CreateMap<MenuItem, MenuItemUpdateDto>().ReverseMap();
 
         CreateMap<LocalUser, LocalUserDto>();
-        CreateMap<RegisterationRequestDto, LocalUser>();
+        CreateMap<RegisterationRequestDto, LocalUser>()
+            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role ?? "Customer"));
         CreateMap<LocalUserUpdateDto, LocalUser>();
 
         CreateMap<ShoppingCart, ShoppingCartDto>()
