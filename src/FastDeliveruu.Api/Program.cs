@@ -140,9 +140,9 @@ var app = builder.Build();
         });
     }
 
-    app.UseSerilogRequestLogging();
-
     app.UseHttpsRedirection();
+
+    app.UseSerilogRequestLogging();
 
     app.UseResponseCaching();
 

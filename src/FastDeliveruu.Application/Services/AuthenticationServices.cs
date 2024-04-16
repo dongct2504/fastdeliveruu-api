@@ -36,7 +36,7 @@ public class AuthenticationServices : IAuthenticationServices
         if (result.IsFailed)
         {
             return Result.Fail<AuthenticationResult>(
-                new DuplicateError("The user is already existed."));
+                new DuplicateError(result.Errors[0].Message));
         }
 
         localUser.LocalUserId = result.Value;
