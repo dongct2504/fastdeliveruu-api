@@ -25,9 +25,7 @@ public class FastDeliveruuProfile : Profile
         CreateMap<Restaurant, RestaurantCreateDto>().ReverseMap();
         CreateMap<Restaurant, RestaurantUpdateDto>().ReverseMap();
 
-        CreateMap<MenuItem, MenuItemDto>()
-            .ForMember(dest => dest.GenreName, opt => opt.MapFrom(src => src.Genre.Name))
-            .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant.Name));
+        CreateMap<MenuItem, MenuItemDto>();
         CreateMap<MenuItem, MenuItemDetailDto>()
             .ForMember(dest => dest.GenreDto, opt => opt.MapFrom(src => src.Genre))
             .ForMember(dest => dest.RestaurantDto, opt => opt.MapFrom(src => src.Restaurant));

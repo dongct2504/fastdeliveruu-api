@@ -42,7 +42,7 @@ public class MenuItemsController : ApiController
     {
         try
         {
-            IEnumerable<MenuItem> menuItems = await _menuItemServices.GetFilterMenuItemsWithRestaurantGenreAsync(
+            IEnumerable<MenuItem> menuItems = await _menuItemServices.GetAllFilterMenuItemsAsync(
                 genreId, restaurantId, page);
 
             _paginationResponse.PageNumber = page;

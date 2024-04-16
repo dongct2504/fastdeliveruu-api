@@ -35,12 +35,11 @@ public class MenuItemServices : IMenuItemServices
         return await _menuItemRepository.ListAllAsync(options);
     }
 
-    public async Task<IEnumerable<MenuItem>> GetFilterMenuItemsWithRestaurantGenreAsync(
+    public async Task<IEnumerable<MenuItem>> GetAllFilterMenuItemsAsync(
         int? genreId, Guid? restaurantId, int page)
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
-            SetIncludes = "Restaurant, Genre",
             PageNumber = page,
             PageSize = PagingConstants.DefaultPageSize
         };
@@ -62,7 +61,6 @@ public class MenuItemServices : IMenuItemServices
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
-            SetIncludes = "Restaurant, Genre",
             Where = mi => mi.Name.Contains(name),
             PageNumber = page
         };
@@ -85,8 +83,8 @@ public class MenuItemServices : IMenuItemServices
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
-            SetIncludes = "Restaurant, Genre",
-            Where = g => g.MenuItemId == id
+            SetIncludes = "Genre, Restaurant",
+            Where = mi => mi.MenuItemId == id
         };
 
         MenuItem? menuItem = await _menuItemRepository.GetAsync(options);

@@ -19,8 +19,4 @@ public class MenuItemDto
     public decimal DiscountPercent { get; set; }
 
     public string? ImageUrl { get; set; }
-
-    public string? GenreName { get; set; }
-
-    public string? RestaurantName { get; set; }
 }

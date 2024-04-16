@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.Interfaces;
 public interface IMenuItemServices
 {
     Task<IEnumerable<MenuItem>> GetAllMenuItemsAsync(int page);
-    Task<IEnumerable<MenuItem>> GetFilterMenuItemsWithRestaurantGenreAsync(
+    Task<IEnumerable<MenuItem>> GetAllFilterMenuItemsAsync(
         int? genreId, Guid? restaurantId, int page);
     Task<IEnumerable<MenuItem>> SearchMenuItem(string name, int page);
 

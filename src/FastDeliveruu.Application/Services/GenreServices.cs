@@ -40,7 +40,7 @@ public class GenreServices : IGenreServices
             Where = g => g.GenreId == id
         };
 
-        Genre? genre = await _genreRepository.GetAsync(id);
+        Genre? genre = await _genreRepository.GetAsync(options);
         if (genre == null)
         {
             return Result.Fail<Genre>(new NotFoundError($"The requested genre '{id}' is not found."));
