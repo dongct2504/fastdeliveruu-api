@@ -50,8 +50,6 @@ public class AuthenticationController : ApiController
                     token = authenticationResult.Value.Token,
                     email = authenticationResult.Value.LocalUserDto.Email
                 },
-                // protocol: "https",
-                // host: "16f6-116-110-43-52.ngrok-free.app",
                 Request.Scheme);
 
             string receiver = authenticationResult.Value.LocalUserDto.Email;

@@ -94,11 +94,16 @@ public class localUserServices : ILocalUserServices
 
     public async Task<Result<Guid>> AddUserAsync(LocalUser localUser)
     {
-        LocalUser? isLocalUserExist = await _localUserRepository.GetAsync(localUser.LocalUserId);
+        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
+        {
+            Where = u => u.UserName == localUser.UserName || u.Email == localUser.Email
+        };
+
+        LocalUser? isLocalUserExist = await _localUserRepository.GetAsync(options);
         if (isLocalUserExist != null)
         {
             return Result.Fail<Guid>(
-                new DuplicateError($"the requested user is already exist."));
+                new DuplicateError($"The email or username is already exist."));
         }
 
         LocalUser createdUser = await _localUserRepository.AddAsync(localUser);
