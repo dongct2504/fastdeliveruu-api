@@ -98,9 +98,8 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateShoppingCart(
+    public async Task<IActionResult> AddToCart(
         [FromBody] ShoppingCartCreateDto shoppingCartCreateDto)
     {
         try
@@ -121,11 +120,11 @@ public class ShoppingCartsController : ApiController
             shoppingCart.CreatedAt = DateTime.Now;
             shoppingCart.UpdatedAt = DateTime.Now;
 
-            Result<int> createShoppingCartResult =
-                await _shoppingCartServices.CreateShoppingCartAsync(shoppingCart);
-            if (createShoppingCartResult.IsFailed)
+            Result<ShoppingCart> addToCartResult = 
+                await _shoppingCartServices.AddToShoppingCartAsync(shoppingCart);
+            if (addToCartResult.IsFailed)
             {
-                return Problem(createShoppingCartResult.Errors);
+                return Problem(addToCartResult.Errors);
             }
 
             ShoppingCartDto shoppingCartDto = _mapper.Map<ShoppingCartDto>(shoppingCart);
@@ -171,8 +170,6 @@ public class ShoppingCartsController : ApiController
             ShoppingCart shoppingCart = getShoppingCartResult.Value;
 
             _mapper.Map(shoppingCartUpdateDto, shoppingCart);
-
-            shoppingCart.Quantity += shoppingCartUpdateDto.Quantity;
             shoppingCart.UpdatedAt = DateTime.Now;
 
             Result updateShoppingCartresult = 

@@ -11,10 +11,13 @@ namespace FastDeliveruu.Application.Services;
 public class ShoppingCartServices : IShoppingCartServices
 {
     private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IMenuItemRepository _menuItemRepository;
 
-    public ShoppingCartServices(IShoppingCartRepository shoppingCartRepository)
+    public ShoppingCartServices(IShoppingCartRepository shoppingCartRepository,
+        IMenuItemRepository menuItemRepository)
     {
         _shoppingCartRepository = shoppingCartRepository;
+        _menuItemRepository = menuItemRepository;
     }
 
     public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsAsync()
@@ -70,8 +73,14 @@ public class ShoppingCartServices : IShoppingCartServices
         return shoppingCarts.Count();
     }
 
-    public async Task<Result> CreateShoppingCartAsync(ShoppingCart shoppingCart)
+    public async Task<Result> AddToShoppingCartAsync(ShoppingCart shoppingCart)
     {
+        MenuItem? menuItem = await _menuItemRepository.GetAsync(shoppingCart.MenuItemId);
+        if (menuItem == null)
+        {
+            return Result.Fail(new BadRequestError("MenuItem not found."));
+        }
+
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
             Where = sc => sc.LocalUserId == shoppingCart.LocalUserId &&
@@ -79,19 +88,27 @@ public class ShoppingCartServices : IShoppingCartServices
         };
 
         ShoppingCart? isExistshoppingCart = await _shoppingCartRepository.GetAsync(options);
-        if (isExistshoppingCart != null)
+        if (isExistshoppingCart != null) // already exist
         {
-            return Result.Fail(
-                new DuplicateError($"the requested shopping cart is already exist."));
+            isExistshoppingCart.Quantity += shoppingCart.Quantity;
+            await _shoppingCartRepository.UpdateShoppingCart(isExistshoppingCart);
+
+            return Result.Ok();
         }
 
-        ShoppingCart createdShoppingCart = await _shoppingCartRepository.AddAsync(shoppingCart);
+        await _shoppingCartRepository.AddAsync(shoppingCart);
 
         return Result.Ok();
     }
 
     public async Task<Result> UpdateShoppingCartAsync(Guid menuItemId, ShoppingCart shoppingCart)
     {
+        MenuItem? menuItem = await _menuItemRepository.GetAsync(shoppingCart.MenuItemId);
+        if (menuItem == null)
+        {
+            return Result.Fail(new BadRequestError("MenuItem not found."));
+        }
+
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
             Where = sc => sc.LocalUserId == shoppingCart.LocalUserId &&

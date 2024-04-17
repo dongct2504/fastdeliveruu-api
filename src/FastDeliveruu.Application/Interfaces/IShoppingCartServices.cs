@@ -13,7 +13,7 @@ public interface IShoppingCartServices
     Task<int> GetTotalShoppingCartsAsync();
     Task<int> GetTotalShoppingCartsByUserIdAsync(Guid userId);
 
-    Task<Result> CreateShoppingCartAsync(ShoppingCart shoppingCart);
+    Task<Result> AddToShoppingCartAsync(ShoppingCart shoppingCart);
     Task<Result> UpdateShoppingCartAsync(Guid menuItemId, ShoppingCart shoppingCart);
     Task<Result> DeleteShoppingCartAsync(Guid userId, Guid menuItemId);
 }
