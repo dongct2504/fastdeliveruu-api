@@ -3,7 +3,6 @@ using AutoMapper;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +15,6 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/shopping-carts")]
 public class ShoppingCartsController : ApiController
 {
-    private readonly PaginationResponse<ShoppingCartDto> _paginationResponse;
     private readonly IShoppingCartServices _shoppingCartServices;
     private readonly IMenuItemServices _menuItemServices;
     private readonly ILogger<ShoppingCartsController> _logger;
@@ -27,7 +25,6 @@ public class ShoppingCartsController : ApiController
         ILogger<ShoppingCartsController> logger,
         IMapper mapper)
     {
-        _paginationResponse = new PaginationResponse<ShoppingCartDto>();
         _shoppingCartServices = shoppingCartServices;
         _menuItemServices = menuItemServices;
         _logger = logger;
@@ -38,7 +35,7 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllShoppingCartsByUserId(int page = 1)
+    public async Task<IActionResult> GetAllShoppingCartsByUserId()
     {
         try
         {
@@ -48,15 +45,8 @@ public class ShoppingCartsController : ApiController
                 return Unauthorized();
             }
 
-            _paginationResponse.PageNumber = page;
-            _paginationResponse.PageSize = PagingConstants.ShoppingCartPageSize;
-            _paginationResponse.TotalRecords = await _shoppingCartServices.
-                GetTotalShoppingCartsByUserIdAsync(userId);
-
-            _paginationResponse.Values = _mapper.Map<IEnumerable<ShoppingCartDto>>(
-                await _shoppingCartServices.GetAllShoppingCartsByUserIdAsync(userId, page));
-
-            return Ok(_paginationResponse);
+            return Ok(_mapper.Map<IEnumerable<ShoppingCartDto>>(
+                await _shoppingCartServices.GetAllShoppingCartsByUserIdAsync(userId)));
         }
         catch (Exception ex)
         {
@@ -120,7 +110,7 @@ public class ShoppingCartsController : ApiController
             shoppingCart.CreatedAt = DateTime.Now;
             shoppingCart.UpdatedAt = DateTime.Now;
 
-            Result<ShoppingCart> addToCartResult = 
+            Result<ShoppingCart> addToCartResult =
                 await _shoppingCartServices.AddToShoppingCartAsync(shoppingCart);
             if (addToCartResult.IsFailed)
             {
@@ -172,7 +162,7 @@ public class ShoppingCartsController : ApiController
             _mapper.Map(shoppingCartUpdateDto, shoppingCart);
             shoppingCart.UpdatedAt = DateTime.Now;
 
-            Result updateShoppingCartresult = 
+            Result updateShoppingCartresult =
                 await _shoppingCartServices.UpdateShoppingCartAsync(menuItemId, shoppingCart);
             if (updateShoppingCartresult.IsFailed)
             {

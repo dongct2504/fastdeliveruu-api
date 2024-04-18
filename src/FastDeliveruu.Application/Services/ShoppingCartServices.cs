@@ -25,13 +25,11 @@ public class ShoppingCartServices : IShoppingCartServices
         return await _shoppingCartRepository.ListAllAsync();
     }
 
-    public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(Guid userId, int page)
+    public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(Guid userId)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
             SetIncludes = "MenuItem",
-            PageNumber = page,
-            PageSize = PagingConstants.ShoppingCartPageSize,
             Where = sc => sc.LocalUserId == userId
         };
 
@@ -91,7 +89,7 @@ public class ShoppingCartServices : IShoppingCartServices
         if (isExistshoppingCart != null) // already exist
         {
             isExistshoppingCart.Quantity += shoppingCart.Quantity;
-            await _shoppingCartRepository.UpdateShoppingCart(isExistshoppingCart);
+            await _shoppingCartRepository.UpdateAsync(isExistshoppingCart);
 
             return Result.Ok();
         }
@@ -121,7 +119,7 @@ public class ShoppingCartServices : IShoppingCartServices
             return Result.Fail(new NotFoundError($"the requested shopping cart is not found."));
         }
 
-        await _shoppingCartRepository.UpdateShoppingCart(shoppingCart);
+        await _shoppingCartRepository.UpdateAsync(shoppingCart);
 
         return Result.Ok();
     }
@@ -140,7 +138,7 @@ public class ShoppingCartServices : IShoppingCartServices
                 new NotFoundError($"the requested shopping cart is not found."));
         }
 
-        await _shoppingCartRepository.UpdateShoppingCart(isExistshoppingCart);
+        await _shoppingCartRepository.UpdateAsync(isExistshoppingCart);
 
         return Result.Ok();
 

@@ -113,7 +113,7 @@ public class RestaurantServices : IRestaurantServices
                 new NotFoundError($"the requested restaurant '{id}' is not found."));
         }
 
-        await _restaurantRepository.UpdateRestaurantAsync(restaurant);
+        await _restaurantRepository.UpdateAsync(restaurant);
 
         return Result.Ok();
     }

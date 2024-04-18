@@ -115,7 +115,7 @@ public class MenuItemsController : ApiController
             Result<Guid> createMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
             if (createMenuItemResult.IsFailed)
             {
-                _imageServices.DeleteImage(menuItem.ImageUrl);
+                await _imageServices.DeleteImage(menuItem.ImageUrl);
 
                 return Problem(createMenuItemResult.Errors);
             }
@@ -174,7 +174,7 @@ public class MenuItemsController : ApiController
             {
                 if (menuItemUpdateDto.ImageFile != null)
                 {
-                    _imageServices.DeleteImage(menuItem.ImageUrl);
+                    await _imageServices.DeleteImage(menuItem.ImageUrl);
                 }
 
                 return Problem(updateMenuItemResult.Errors);
@@ -183,7 +183,7 @@ public class MenuItemsController : ApiController
             if (menuItemUpdateDto.ImageFile != null)
             {
                 // if it has an old one, delete it after successfully updated
-                _imageServices.DeleteImage(oldImagePath);
+                await _imageServices.DeleteImage(oldImagePath);
             }
 
             return NoContent();
@@ -213,7 +213,7 @@ public class MenuItemsController : ApiController
 
             await _menuItemServices.DeleteMenuItemAsync(id);
 
-            _imageServices.DeleteImage(menuItemDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImage(menuItemDeleteResult.Value.ImageUrl);
 
             return NoContent();
         }

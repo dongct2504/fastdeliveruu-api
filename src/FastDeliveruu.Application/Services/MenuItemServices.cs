@@ -194,7 +194,7 @@ public class MenuItemServices : IMenuItemServices
         }
 
 
-        await _menuItemRepository.UpdateMenuItem(menuItem);
+        await _menuItemRepository.UpdateAsync(menuItem);
 
         return Result.Ok();
     }

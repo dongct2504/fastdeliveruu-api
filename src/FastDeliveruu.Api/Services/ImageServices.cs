@@ -33,7 +33,7 @@ public class ImageServices : IImageServices
         return null;
     }
 
-    public void DeleteImage(string? imageUrl)
+    public async Task DeleteImage(string? imageUrl)
     {
         string webRootPath = _hostEnvironment.WebRootPath;
 
@@ -42,7 +42,7 @@ public class ImageServices : IImageServices
             string oldImagePath = Path.Combine(webRootPath, imageUrl.TrimStart('\\'));
             if (File.Exists(oldImagePath))
             {
-                File.Delete(oldImagePath);
+                await Task.Run(() => File.Delete(oldImagePath));
             }
         }
     }

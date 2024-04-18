@@ -120,7 +120,7 @@ public class localUserServices : ILocalUserServices
                 new NotFoundError($"the requested user is not found."));
         }
 
-        await _localUserRepository.UpdateLocalUser(localUser);
+        await _localUserRepository.UpdateAsync(localUser);
 
         return Result.Ok();
     }

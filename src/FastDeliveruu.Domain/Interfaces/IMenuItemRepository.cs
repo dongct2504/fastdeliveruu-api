@@ -4,5 +4,5 @@ namespace FastDeliveruu.Domain.Interfaces;
 
 public interface IMenuItemRepository : IRepository<MenuItem>
 {
-    Task UpdateMenuItem(MenuItem menuItem);
+    Task UpdateAsync(MenuItem menuItem);
 }

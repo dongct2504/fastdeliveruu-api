@@ -10,7 +10,7 @@ public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRep
     {
     }
 
-    public async Task UpdateShoppingCart(ShoppingCart shoppingCart)
+    public async Task UpdateAsync(ShoppingCart shoppingCart)
     {
         _dbContext.Update(shoppingCart);
         await _dbContext.SaveChangesAsync();

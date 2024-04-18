@@ -10,7 +10,7 @@ public class LocalUserRepository : Repository<LocalUser>, ILocalUserRepository
     {
     }
 
-    public async Task UpdateLocalUser(LocalUser localUser)
+    public async Task UpdateAsync(LocalUser localUser)
     {
         _dbContext.Update(localUser);
         await _dbContext.SaveChangesAsync();

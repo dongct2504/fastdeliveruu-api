@@ -10,7 +10,7 @@ public class MenuItemRepository : Repository<MenuItem>, IMenuItemRepository
     {
     }
 
-    public async Task UpdateMenuItem(MenuItem menuItem)
+    public async Task UpdateAsync(MenuItem menuItem)
     {
         _dbContext.Update(menuItem);
         await _dbContext.SaveChangesAsync();

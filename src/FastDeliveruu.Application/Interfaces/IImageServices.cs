@@ -5,5 +5,5 @@ namespace FastDeliveruu.Application.Interfaces;
 public interface IImageServices
 {
     Task<string?> UploadImageAsync(IFormFile? imageFile, string uploadImagePath);
-    void DeleteImage(string? ImageUrl);
+    Task DeleteImage(string? ImageUrl);
 }
