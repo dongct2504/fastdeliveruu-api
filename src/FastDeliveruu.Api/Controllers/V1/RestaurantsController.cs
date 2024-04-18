@@ -101,7 +101,7 @@ public class RestaurantsController : ApiController
             Result<Guid> createRestaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
             if (createRestaurantResult.IsFailed)
             {
-                await _imageServices.DeleteImage(restaurant.ImageUrl);
+                await _imageServices.DeleteImageAsync(restaurant.ImageUrl);
 
                 return Problem(createRestaurantResult.Errors);
             }
@@ -162,7 +162,7 @@ public class RestaurantsController : ApiController
             {
                 if (restaurantUpdateDto.ImageFile != null)
                 {
-                    await _imageServices.DeleteImage(restaurant.ImageUrl);
+                    await _imageServices.DeleteImageAsync(restaurant.ImageUrl);
                 }
 
                 return Problem(updateRestaurantResult.Errors);
@@ -171,7 +171,7 @@ public class RestaurantsController : ApiController
             if (restaurantUpdateDto.ImageFile != null)
             {
                 // if it has an old one, delete it after successfully updated
-                await _imageServices.DeleteImage(oldImagePath);
+                await _imageServices.DeleteImageAsync(oldImagePath);
             }
 
             return NoContent();
@@ -201,7 +201,7 @@ public class RestaurantsController : ApiController
 
             await _restaurantServices.DeleteRestaurantAsync(id);
 
-            await _imageServices.DeleteImage(restaurantDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImageAsync(restaurantDeleteResult.Value.ImageUrl);
 
             return NoContent();
         }

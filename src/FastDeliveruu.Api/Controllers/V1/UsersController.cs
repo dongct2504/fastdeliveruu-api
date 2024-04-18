@@ -121,7 +121,7 @@ public class UsersController : ApiController
             {
                 if (localUserUpdateDto.ImageFile != null)
                 {
-                    await _imageServices.DeleteImage(localUser.ImageUrl);
+                    await _imageServices.DeleteImageAsync(localUser.ImageUrl);
                 }
 
                 return Problem(updateUserResult.Errors);
@@ -129,7 +129,7 @@ public class UsersController : ApiController
 
             if (localUserUpdateDto.ImageFile != null)
             {
-                await _imageServices.DeleteImage(oldImagePath);
+                await _imageServices.DeleteImageAsync(oldImagePath);
             }
 
             return NoContent();
@@ -159,7 +159,7 @@ public class UsersController : ApiController
 
             await _localUserServices.DeleteUserAsync(id);
 
-            await _imageServices.DeleteImage(userDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImageAsync(userDeleteResult.Value.ImageUrl);
 
             return NoContent();
         }

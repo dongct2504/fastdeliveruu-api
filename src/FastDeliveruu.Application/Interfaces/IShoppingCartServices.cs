@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.Interfaces;
 public interface IShoppingCartServices
 {
     Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsAsync();
-    Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(Guid userId, int page);
+    Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsByUserIdAsync(Guid userId);
 
     Task<Result<ShoppingCart>> GetShoppingCartByUserIdMenuItemIdAsync(Guid userId, Guid menuItemId);
 

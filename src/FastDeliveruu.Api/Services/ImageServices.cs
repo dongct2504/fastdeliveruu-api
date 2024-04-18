@@ -33,7 +33,7 @@ public class ImageServices : IImageServices
         return null;
     }
 
-    public async Task DeleteImage(string? imageUrl)
+    public async Task DeleteImageAsync(string? imageUrl)
     {
         string webRootPath = _hostEnvironment.WebRootPath;
 
