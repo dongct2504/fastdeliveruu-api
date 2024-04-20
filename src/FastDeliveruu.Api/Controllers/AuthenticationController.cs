@@ -26,7 +26,7 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Register([FromBody] RegisterationRequestDto registerationRequestDto)
+    public async Task<IActionResult> Register([FromForm] RegisterationRequestDto registerationRequestDto)
     {
         try
         {
@@ -76,7 +76,7 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+    public async Task<IActionResult> Login([FromForm] LoginRequestDto loginRequestDto)
     {
         try
         {

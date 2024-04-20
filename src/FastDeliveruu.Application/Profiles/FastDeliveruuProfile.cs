@@ -2,8 +2,11 @@
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
+// using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
+using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
+// using FastDeliveruu.Application.Dtos.VnPayResponses;
 using FastDeliveruu.Domain.Entities;
 
 namespace FastDeliveruu.Application.Profiles;
@@ -41,5 +44,15 @@ public class FastDeliveruuProfile : Profile
             .ForMember(dest => dest.MenuItemDto, opt => opt.MapFrom(src => src.MenuItem));
         CreateMap<ShoppingCart, ShoppingCartCreateDto>().ReverseMap();
         CreateMap<ShoppingCart, ShoppingCartUpdateDto>().ReverseMap();
+
+        CreateMap<Shipper, ShipperDto>();
+        CreateMap<Shipper, ShipperCreateDto>().ReverseMap();
+        CreateMap<Shipper, ShipperUpdateDto>().ReverseMap();
+
+        // CreateMap<Order, OrderDto>()
+        //     .ForMember(dest => dest.LocalUserDto, opt => opt.MapFrom(src => src.LocalUser))
+        //     .ForMember(dest => dest.ShipperDto, opt => opt.MapFrom(src => src.Shipper));
+        // CreateMap<OrderCreateDto, Order>();
+        // CreateMap<VnPayResponse, Order>();
     }
 }

@@ -11,6 +11,7 @@ using FluentResults;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/users")]
 public class UsersController : ApiController
@@ -80,8 +81,7 @@ public class UsersController : ApiController
         }
     }
 
-    [HttpPut]
-    [Authorize]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -151,15 +151,15 @@ public class UsersController : ApiController
     {
         try
         {
-            Result<LocalUser> userDeleteResult = await _localUserServices.GetLocalUserByIdAsync(id);
-            if (userDeleteResult.IsFailed)
+            Result<LocalUser> getUserResult = await _localUserServices.GetLocalUserByIdAsync(id);
+            if (getUserResult.IsFailed)
             {
-                return Problem(userDeleteResult.Errors);
+                return Problem(getUserResult.Errors);
             }
 
             await _localUserServices.DeleteUserAsync(id);
 
-            await _imageServices.DeleteImageAsync(userDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImageAsync(getUserResult.Value.ImageUrl);
 
             return NoContent();
         }

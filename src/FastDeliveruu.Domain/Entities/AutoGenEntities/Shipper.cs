@@ -22,11 +22,17 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(15)]
         [Unicode(false)]
         public string PhoneNumber { get; set; } = null!;
-        [Column(TypeName = "datetime")]
-        public DateTime ShippingDate { get; set; }
         [StringLength(126)]
         [Unicode(false)]
         public string? VehicleType { get; set; }
+        [StringLength(128)]
+        public string Address { get; set; } = null!;
+        [StringLength(50)]
+        public string Ward { get; set; } = null!;
+        [StringLength(30)]
+        public string District { get; set; } = null!;
+        [StringLength(30)]
+        public string City { get; set; } = null!;
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; }
         [Column(TypeName = "datetime")]

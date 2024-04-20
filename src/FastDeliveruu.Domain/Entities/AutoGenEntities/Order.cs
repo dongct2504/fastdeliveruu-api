@@ -19,8 +19,13 @@ namespace FastDeliveruu.Domain.Entities
         public Guid OrderId { get; set; }
         public Guid ShipperId { get; set; }
         public Guid LocalUserId { get; set; }
+        [StringLength(128)]
+        public string ReceiverName { get; set; } = null!;
         [Column(TypeName = "datetime")]
         public DateTime OrderDate { get; set; }
+        [StringLength(256)]
+        [Unicode(false)]
+        public string OrderDescription { get; set; } = null!;
         [StringLength(15)]
         [Unicode(false)]
         public string PhoneNumber { get; set; } = null!;
@@ -35,6 +40,9 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(20)]
         [Unicode(false)]
         public string? PaymentStatus { get; set; }
+        [StringLength(25)]
+        [Unicode(false)]
+        public string? PaymentMethod { get; set; }
         [StringLength(256)]
         [Unicode(false)]
         public string? TransactionId { get; set; }

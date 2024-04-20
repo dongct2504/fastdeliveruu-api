@@ -24,12 +24,17 @@ public static class DependencyInjection
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
+        services.Configure<VnPaySettings>(configuration.GetSection(VnPaySettings.SectionName));
+        services.AddSingleton<IVnPayServices, VnPayServices>();
+
         services.AddScoped<ISP_Call, SP_Call>();
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<IMenuItemRepository, MenuItemRepository>();
         services.AddScoped<ILocalUserRepository, LocalUserRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+        services.AddScoped<IShipperRepository, ShipperRepository>();
+        // services.AddScoped<IOrderRepository, OrderRepository>();
 
         return services;
     }

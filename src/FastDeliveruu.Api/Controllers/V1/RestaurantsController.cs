@@ -193,15 +193,15 @@ public class RestaurantsController : ApiController
     {
         try
         {
-            Result<Restaurant> restaurantDeleteResult = await _restaurantServices.GetRestaurantByIdAsync(id);
-            if (restaurantDeleteResult.IsFailed)
+            Result<Restaurant> getRestaurantResult = await _restaurantServices.GetRestaurantByIdAsync(id);
+            if (getRestaurantResult.IsFailed)
             {
-                return Problem(restaurantDeleteResult.Errors);
+                return Problem(getRestaurantResult.Errors);
             }
 
             await _restaurantServices.DeleteRestaurantAsync(id);
 
-            await _imageServices.DeleteImageAsync(restaurantDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImageAsync(getRestaurantResult.Value.ImageUrl);
 
             return NoContent();
         }

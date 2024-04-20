@@ -205,15 +205,15 @@ public class MenuItemsController : ApiController
     {
         try
         {
-            Result<MenuItem> menuItemDeleteResult = await _menuItemServices.GetMenuItemByIdAsync(id);
-            if (menuItemDeleteResult.IsFailed)
+            Result<MenuItem> getMenuItemResult = await _menuItemServices.GetMenuItemByIdAsync(id);
+            if (getMenuItemResult.IsFailed)
             {
-                return Problem(menuItemDeleteResult.Errors);
+                return Problem(getMenuItemResult.Errors);
             }
 
             await _menuItemServices.DeleteMenuItemAsync(id);
 
-            await _imageServices.DeleteImageAsync(menuItemDeleteResult.Value.ImageUrl);
+            await _imageServices.DeleteImageAsync(getMenuItemResult.Value.ImageUrl);
 
             return NoContent();
         }
