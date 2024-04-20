@@ -50,7 +50,7 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetRestaurantById(Guid id)
+    public async Task<IActionResult> GetRestaurantById(int id)
     {
         try
         {
@@ -98,7 +98,7 @@ public class RestaurantsController : ApiController
             restaurant.CreatedAt = DateTime.Now;
             restaurant.UpdatedAt = DateTime.Now;
 
-            Result<Guid> createRestaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
+            Result<int> createRestaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
             if (createRestaurantResult.IsFailed)
             {
                 await _imageServices.DeleteImageAsync(restaurant.ImageUrl);
@@ -127,7 +127,7 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateRestaurant(Guid id,
+    public async Task<IActionResult> UpdateRestaurant(int id,
         [FromForm] RestaurantUpdateDto restaurantUpdateDto)
     {
         try
@@ -189,7 +189,7 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteRestaurant(Guid id)
+    public async Task<IActionResult> DeleteRestaurant(int id)
     {
         try
         {

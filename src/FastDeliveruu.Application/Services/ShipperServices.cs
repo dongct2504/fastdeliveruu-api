@@ -51,17 +51,41 @@ public class ShipperServices : IShipperService
     public async Task<Result<Shipper>> GetNearestShipperAsync(string Address, string Ward,
         string District, string City)
     {
-        QueryOptions<Shipper> options = new QueryOptions<Shipper>
+        IEnumerable<Shipper> shippers = await _shipperRepository.ListAllAsync();
+        if (!shippers.Any())
         {
-            Where = s => s.District == s.District && s.City == City
-        };
-        Shipper? shipper = await _shipperRepository.GetAsync(options);
-        if (shipper == null)
-        {
-            return Result.Fail<Shipper>(new NotFoundError("Not found any nearby shipper."));
+            return Result.Fail<Shipper>(new NotFoundError("not found any nearby shipper."));
         }
 
-        return shipper;
+        Shipper? nearestShipper = null;
+
+        nearestShipper = shippers.FirstOrDefault(s => s.Address == Address && s.Ward == Ward &&
+            s.District == District && s.City == City);
+        if (nearestShipper != null)
+        {
+            return nearestShipper;
+        }
+
+        nearestShipper = shippers.FirstOrDefault(s => s.Ward == Ward && s.District == District &&
+            s.City == City);
+        if (nearestShipper != null)
+        {
+            return nearestShipper;
+        }
+
+        nearestShipper = shippers.FirstOrDefault(s => s.District == District && s.City == City);
+        if (nearestShipper != null)
+        {
+            return nearestShipper;
+        }
+
+        nearestShipper = shippers.FirstOrDefault(s => s.City == City);
+        if (nearestShipper != null)
+        {
+            return nearestShipper;
+        }
+
+        return shippers.First();
     }
 
     public async Task<Result<Guid>> CreateShipperAsync(Shipper shipper)

@@ -36,7 +36,7 @@ public class MenuItemServices : IMenuItemServices
     }
 
     public async Task<IEnumerable<MenuItem>> GetAllFilterMenuItemsAsync(
-        int? genreId, Guid? restaurantId, int page)
+        int? genreId, int? restaurantId, int page)
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
@@ -68,7 +68,7 @@ public class MenuItemServices : IMenuItemServices
         return await _menuItemRepository.ListAllAsync(options);
     }
 
-    public async Task<Result<MenuItem>> GetMenuItemByIdAsync(Guid id)
+    public async Task<Result<MenuItem>> GetMenuItemByIdAsync(long id)
     {
         MenuItem? menuItem = await _menuItemRepository.GetAsync(id);
         if (menuItem == null)
@@ -79,7 +79,7 @@ public class MenuItemServices : IMenuItemServices
         return menuItem;
     }
 
-    public async Task<Result<MenuItem>> GetMenuItemWithRestaurantGenreByIdAsync(Guid id)
+    public async Task<Result<MenuItem>> GetMenuItemWithRestaurantGenreByIdAsync(long id)
     {
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
@@ -134,12 +134,12 @@ public class MenuItemServices : IMenuItemServices
         return await _menuItemRepository.GetCountAsync();
     }
 
-    public async Task<Result<Guid>> CreateMenuItemAsync(MenuItem menuItem)
+    public async Task<Result<long>> CreateMenuItemAsync(MenuItem menuItem)
     {
         MenuItem? isMenuItemExist = await _menuItemRepository.GetAsync(menuItem.MenuItemId);
         if (isMenuItemExist != null)
         {
-            return Result.Fail<Guid>(
+            return Result.Fail<long>(
                 new DuplicateError($"the requested menu item '{menuItem.Name}' is already exists."));
         }
 
@@ -149,7 +149,7 @@ public class MenuItemServices : IMenuItemServices
         });
         if (isGenreExist == null)
         {
-            return Result.Fail<Guid>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+            return Result.Fail<long>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
         }
 
         Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(new QueryOptions<Restaurant>
@@ -158,7 +158,7 @@ public class MenuItemServices : IMenuItemServices
         });
         if (isRestaurantExist == null)
         {
-            return Result.Fail<Guid>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
+            return Result.Fail<long>(new BadRequestError($"Not found genre {menuItem.GenreId}."));
         }
 
         MenuItem createdMenuItem = await _menuItemRepository.AddAsync(menuItem);
@@ -166,7 +166,7 @@ public class MenuItemServices : IMenuItemServices
         return createdMenuItem.MenuItemId;
     }
 
-    public async Task<Result> UpdateMenuItemAsync(Guid id, MenuItem menuItem)
+    public async Task<Result> UpdateMenuItemAsync(long id, MenuItem menuItem)
     {
         MenuItem? isMenuItemExist = await _menuItemRepository.GetAsync(id);
         if (isMenuItemExist == null)
@@ -199,7 +199,7 @@ public class MenuItemServices : IMenuItemServices
         return Result.Ok();
     }
 
-    public async Task<Result> DeleteMenuItemAsync(Guid id)
+    public async Task<Result> DeleteMenuItemAsync(long id)
     {
         MenuItem? menuItem = await _menuItemRepository.GetAsync(id);
         if (menuItem == null)

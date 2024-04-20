@@ -2,7 +2,7 @@ namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
 
 public class RestaurantDto
 {
-    public Guid RestaurantId { get; set; }
+    public int RestaurantId { get; set; }
 
     public string Name { get; set; } = null!;
 

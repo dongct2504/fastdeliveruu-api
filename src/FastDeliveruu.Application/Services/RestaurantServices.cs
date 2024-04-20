@@ -21,7 +21,7 @@ public class RestaurantServices : IRestaurantServices
         return await _restaurantRepository.ListAllAsync();
     }
 
-    public async Task<Result<Restaurant>> GetRestaurantByIdAsync(Guid id)
+    public async Task<Result<Restaurant>> GetRestaurantByIdAsync(int id)
     {
         Restaurant? restaurant = await _restaurantRepository.GetAsync(id);
         if (restaurant == null)
@@ -32,7 +32,7 @@ public class RestaurantServices : IRestaurantServices
         return restaurant;
     }
 
-    public async Task<Result<Restaurant>> GetRestaurantWithMenuItemsByIdAsync(Guid id)
+    public async Task<Result<Restaurant>> GetRestaurantWithMenuItemsByIdAsync(int id)
     {
         QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
         {
@@ -85,7 +85,7 @@ public class RestaurantServices : IRestaurantServices
         return restaurant;
     }
 
-    public async Task<Result<Guid>> CreateRestaurantAsync(Restaurant restaurant)
+    public async Task<Result<int>> CreateRestaurantAsync(Restaurant restaurant)
     {
         QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
         {
@@ -95,7 +95,7 @@ public class RestaurantServices : IRestaurantServices
         Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(options);
         if (isRestaurantExist != null)
         {
-            return Result.Fail<Guid>(
+            return Result.Fail<int>(
                 new DuplicateError($"the requested restaurant '{restaurant.Name}' is already exists."));
         }
 
@@ -104,7 +104,7 @@ public class RestaurantServices : IRestaurantServices
         return createdRestaurant.RestaurantId;
     }
 
-    public async Task<Result> UpdateRestaurantAsync(Guid id, Restaurant restaurant)
+    public async Task<Result> UpdateRestaurantAsync(int id, Restaurant restaurant)
     {
         Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(id);
         if (isRestaurantExist == null)
@@ -118,7 +118,7 @@ public class RestaurantServices : IRestaurantServices
         return Result.Ok();
     }
 
-    public async Task<Result> DeleteRestaurantAsync(Guid id)
+    public async Task<Result> DeleteRestaurantAsync(int id)
     {
         Restaurant? isRestaurantExist = await _restaurantRepository.GetAsync(id);
         if (isRestaurantExist == null)

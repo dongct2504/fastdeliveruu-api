@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using AutoMapper;
-using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -58,7 +57,7 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetShoppingCartById(Guid menuItemId)
+    public async Task<IActionResult> GetShoppingCartById(long menuItemId)
     {
         try
         {
@@ -134,7 +133,7 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateShoppingCart(Guid menuItemId,
+    public async Task<IActionResult> UpdateShoppingCart(long menuItemId,
         [FromBody] ShoppingCartUpdateDto shoppingCartUpdateDto)
     {
         try
@@ -182,7 +181,7 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteShoppingCart(Guid menuItem)
+    public async Task<IActionResult> DeleteShoppingCart(long menuItem)
     {
         try
         {

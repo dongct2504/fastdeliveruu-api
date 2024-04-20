@@ -11,7 +11,7 @@ namespace FastDeliveruu.Domain.Entities
     public partial class ShoppingCart
     {
         [Key]
-        public Guid MenuItemId { get; set; }
+        public long MenuItemId { get; set; }
         [Key]
         public Guid LocalUserId { get; set; }
         public int Quantity { get; set; }

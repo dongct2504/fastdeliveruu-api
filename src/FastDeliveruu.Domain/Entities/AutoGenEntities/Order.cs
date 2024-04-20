@@ -16,16 +16,15 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public Guid OrderId { get; set; }
+        public long OrderId { get; set; }
         public Guid ShipperId { get; set; }
         public Guid LocalUserId { get; set; }
         [StringLength(128)]
         public string ReceiverName { get; set; } = null!;
         [Column(TypeName = "datetime")]
-        public DateTime OrderDate { get; set; }
+        public DateTime? OrderDate { get; set; }
         [StringLength(256)]
-        [Unicode(false)]
-        public string OrderDescription { get; set; } = null!;
+        public string? OrderDescription { get; set; }
         [StringLength(15)]
         [Unicode(false)]
         public string PhoneNumber { get; set; } = null!;

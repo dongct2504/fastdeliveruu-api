@@ -16,9 +16,9 @@ namespace FastDeliveruu.Domain.Entities
         [Key]
         public Guid ShipperId { get; set; }
         [StringLength(50)]
-        public string FirstName { get; set; } = null!;
+        public string? FirstName { get; set; }
         [StringLength(50)]
-        public string LastName { get; set; } = null!;
+        public string? LastName { get; set; }
         [StringLength(15)]
         [Unicode(false)]
         public string PhoneNumber { get; set; } = null!;
@@ -26,13 +26,13 @@ namespace FastDeliveruu.Domain.Entities
         [Unicode(false)]
         public string? VehicleType { get; set; }
         [StringLength(128)]
-        public string Address { get; set; } = null!;
+        public string? Address { get; set; }
         [StringLength(50)]
-        public string Ward { get; set; } = null!;
+        public string? Ward { get; set; }
         [StringLength(30)]
-        public string District { get; set; } = null!;
+        public string? District { get; set; }
         [StringLength(30)]
-        public string City { get; set; } = null!;
+        public string? City { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; }
         [Column(TypeName = "datetime")]

@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 public class MenuItemUpdateDto
 {
     [Required(ErrorMessage = "Vui lòng chọn cửa hàng.")]
-    public Guid RestaurantId { get; set; }
+    public int RestaurantId { get; set; }
 
     [Required(ErrorMessage = "Vui lòng chọn thể loại.")]
     public int GenreId { get; set; }

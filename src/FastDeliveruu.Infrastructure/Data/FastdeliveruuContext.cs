@@ -41,8 +41,6 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<MenuItem>(entity =>
             {
-                entity.Property(e => e.MenuItemId).HasDefaultValueSql("(newid())");
-
                 entity.HasOne(d => d.Genre)
                     .WithMany(p => p.MenuItems)
                     .HasForeignKey(d => d.GenreId)
@@ -56,8 +54,6 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.Property(e => e.OrderId).HasDefaultValueSql("(newid())");
-
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
 
                 entity.HasOne(d => d.LocalUser)
@@ -89,16 +85,12 @@ namespace FastDeliveruu.Infrastructure.Data
 
             modelBuilder.Entity<Restaurant>(entity =>
             {
-                entity.Property(e => e.RestaurantId).HasDefaultValueSql("(newid())");
-
                 entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<Shipper>(entity =>
             {
                 entity.Property(e => e.ShipperId).HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<ShoppingCart>(entity =>

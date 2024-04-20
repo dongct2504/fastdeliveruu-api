@@ -38,7 +38,7 @@ public class MenuItemsController : ApiController
         VaryByQueryKeys = new[] { "genreId", "restaurantId", "page" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllMenuItems(int? genreId, Guid? restaurantId, int page = 1)
+    public async Task<IActionResult> GetAllMenuItems(int? genreId, int? restaurantId, int page = 1)
     {
         try
         {
@@ -63,7 +63,7 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetMenuItemById(Guid id)
+    public async Task<IActionResult> GetMenuItemById(long id)
     {
         try
         {
@@ -112,7 +112,7 @@ public class MenuItemsController : ApiController
             menuItem.CreatedAt = DateTime.Now;
             menuItem.UpdatedAt = DateTime.Now;
 
-            Result<Guid> createMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
+            Result<long> createMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
             if (createMenuItemResult.IsFailed)
             {
                 await _imageServices.DeleteImageAsync(menuItem.ImageUrl);
@@ -140,7 +140,7 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] MenuItemUpdateDto menuItemUpdateDto)
+    public async Task<IActionResult> UpdateMenuItem(long id, [FromForm] MenuItemUpdateDto menuItemUpdateDto)
     {
         try
         {
@@ -201,7 +201,7 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteMenuItem(Guid id)
+    public async Task<IActionResult> DeleteMenuItem(long id)
     {
         try
         {

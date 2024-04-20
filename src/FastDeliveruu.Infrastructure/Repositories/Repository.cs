@@ -42,6 +42,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
 
     public virtual async Task<T?> GetAsync(int id) => await _dbSet.FindAsync(id);
+    public virtual async Task<T?> GetAsync(long id) => await _dbSet.FindAsync(id);
     public virtual async Task<T?> GetAsync(Guid id) => await _dbSet.FindAsync(id);
     public virtual async Task<T?> GetAsync(QueryOptions<T> options) =>
         await BuildQuery(options).FirstOrDefaultAsync();

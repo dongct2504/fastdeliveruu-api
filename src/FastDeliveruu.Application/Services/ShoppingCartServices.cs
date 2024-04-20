@@ -1,6 +1,5 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
@@ -36,7 +35,7 @@ public class ShoppingCartServices : IShoppingCartServices
         return await _shoppingCartRepository.ListAllAsync(options);
     }
 
-    public async Task<Result<ShoppingCart>> GetShoppingCartByUserIdMenuItemIdAsync(Guid userId, Guid menuItemId)
+    public async Task<Result<ShoppingCart>> GetShoppingCartByUserIdMenuItemIdAsync(Guid userId, long menuItemId)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
@@ -99,7 +98,7 @@ public class ShoppingCartServices : IShoppingCartServices
         return Result.Ok();
     }
 
-    public async Task<Result> UpdateShoppingCartAsync(Guid menuItemId, ShoppingCart shoppingCart)
+    public async Task<Result> UpdateShoppingCartAsync(long menuItemId, ShoppingCart shoppingCart)
     {
         MenuItem? menuItem = await _menuItemRepository.GetAsync(shoppingCart.MenuItemId);
         if (menuItem == null)
@@ -124,7 +123,7 @@ public class ShoppingCartServices : IShoppingCartServices
         return Result.Ok();
     }
 
-    public async Task<Result> DeleteShoppingCartAsync(Guid userId, Guid menuItemId)
+    public async Task<Result> DeleteShoppingCartAsync(Guid userId, long menuItemId)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {

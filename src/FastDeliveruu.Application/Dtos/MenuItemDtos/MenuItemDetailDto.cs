@@ -5,9 +5,9 @@ namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 
 public class MenuItemDetailDto
 {
-    public Guid MenuItemId { get; set; }
+    public long MenuItemId { get; set; }
 
-    public Guid RestaurantId { get; set; }
+    public int RestaurantId { get; set; }
 
     public int GenreId { get; set; }
 
