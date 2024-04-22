@@ -32,7 +32,7 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(15)]
         [Unicode(false)]
         public string PhoneNumber { get; set; } = null!;
-        public bool IsPhoneNumberConfirmed { get; set; }
+        public bool IsConfirmPhoneNumber { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? DateOfBirth { get; set; }
         [Column(TypeName = "datetime")]

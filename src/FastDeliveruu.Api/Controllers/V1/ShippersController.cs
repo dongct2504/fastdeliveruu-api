@@ -66,44 +66,6 @@ public class ShippersController : ApiController
         }
     }
 
-    [HttpPost]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateShipper([FromForm] ShipperCreateDto shipperCreateDto)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Shipper shipper = _mapper.Map<Shipper>(shipperCreateDto);
-            shipper.CreatedAt = DateTime.Now;
-            shipper.UpdatedAt = DateTime.Now;
-
-            Result<Guid> createShipperResult = await _shipperService.CreateShipperAsync(shipper);
-            if (createShipperResult.IsFailed)
-            {
-                return Problem(createShipperResult.Errors);
-            }
-
-            shipper.ShipperId = createShipperResult.Value;
-            ShipperDto shipperDto = _mapper.Map<ShipperDto>(shipper);
-
-            return CreatedAtRoute(nameof(GetShipperById), new { Id = shipperDto.ShipperId }, shipperDto);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
-    }
-
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 
 namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
@@ -10,6 +9,8 @@ public class OrderCreateDto
     public string ReceiverName { get; set; } = null!;
 
     [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+    [MaxLength(15, ErrorMessage = "Vui lòng nhập số điện thoại ít hơn 15 kí tự.")]
+    [Phone(ErrorMessage = "Vui lòng nhập số điện thoại hợp lệ.")]
     public string PhoneNumber { get; set; } = null!;
 
     [Required]

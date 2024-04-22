@@ -1,9 +1,7 @@
-using FastDeliveruu.Domain.Entities;
-
 namespace FastDeliveruu.Application.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(LocalUser localUser);
-    string GenerateEmailConfirmationToken(LocalUser localUser);
+    string GenerateToken(Guid id, string email, string userName, string role);
+    string GenerateEmailConfirmationToken(Guid id, string email);
 }

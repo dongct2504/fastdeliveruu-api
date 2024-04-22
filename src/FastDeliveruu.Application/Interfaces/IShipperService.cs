@@ -8,6 +8,8 @@ public interface IShipperService
     Task<IEnumerable<Shipper>> GetAllShippersAsync();
 
     Task<Result<Shipper>> GetShipperByIdAsync(Guid id);
+    Task<Result<Shipper>> GetShipperByUserNameAsync(string username);
+    Task<Result<Shipper>> GetShipperByEmailAsync(string email);
     Task<Result<Shipper>> GetShipperWithOrdersByIdAsync(Guid id);
     Task<Result<Shipper>> GetNearestShipperAsync(string Address, string Ward, string District, string City);
 

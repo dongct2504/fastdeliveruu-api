@@ -42,7 +42,7 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(25)]
         [Unicode(false)]
         public string? PaymentMethod { get; set; }
-        [StringLength(256)]
+        [StringLength(20)]
         [Unicode(false)]
         public string? TransactionId { get; set; }
         [StringLength(128)]

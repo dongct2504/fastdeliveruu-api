@@ -48,6 +48,36 @@ public class ShipperServices : IShipperService
         return shipper;
     }
 
+    public async Task<Result<Shipper>> GetShipperByUserNameAsync(string username)
+    {
+        QueryOptions<Shipper> options = new QueryOptions<Shipper>
+        {
+            Where = s => s.UserName == username
+        };
+        Shipper? shipper = await _shipperRepository.GetAsync(options);
+        if (shipper == null)
+        {
+            return Result.Fail<Shipper>(new NotFoundError("Not found any shipper."));
+        }
+
+        return shipper;
+    }
+
+    public async Task<Result<Shipper>> GetShipperByEmailAsync(string email)
+    {
+        QueryOptions<Shipper> options = new QueryOptions<Shipper>
+        {
+            Where = s => s.Email == email
+        };
+        Shipper? shipper = await _shipperRepository.GetAsync(options);
+        if (shipper == null)
+        {
+            return Result.Fail<Shipper>(new NotFoundError("Not found any shipper."));
+        }
+
+        return shipper;
+    }
+
     public async Task<Result<Shipper>> GetNearestShipperAsync(string Address, string Ward,
         string District, string City)
     {
@@ -92,8 +122,7 @@ public class ShipperServices : IShipperService
     {
         QueryOptions<Shipper> options = new QueryOptions<Shipper>
         {
-            Where = s => s.FirstName == shipper.FirstName && s.LastName == shipper.LastName &&
-                s.PhoneNumber == shipper.PhoneNumber
+            Where = s => s.Cccd == shipper.Cccd
         };
         Shipper? isShipperExist = await _shipperRepository.GetAsync(options);
         if (isShipperExist != null)

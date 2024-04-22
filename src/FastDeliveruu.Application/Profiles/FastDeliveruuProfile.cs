@@ -45,7 +45,7 @@ public class FastDeliveruuProfile : Profile
         CreateMap<ShoppingCart, ShoppingCartUpdateDto>().ReverseMap();
 
         CreateMap<Shipper, ShipperDto>();
-        CreateMap<Shipper, ShipperCreateDto>().ReverseMap();
+        CreateMap<Shipper, RegisterationShipperDto>().ReverseMap();
         CreateMap<Shipper, ShipperUpdateDto>().ReverseMap();
 
         CreateMap<Order, OrderDto>()
