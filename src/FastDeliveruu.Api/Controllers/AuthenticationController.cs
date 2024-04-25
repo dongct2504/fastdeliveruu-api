@@ -1,7 +1,14 @@
+using FastDeliveruu.Application.Authentication.Commands.Register;
+using FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
+using FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
+using FastDeliveruu.Application.Authentication.Queries.Login;
+using FastDeliveruu.Application.Authentication.Queries.LoginShipper;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FluentResults;
+using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;
@@ -10,49 +17,43 @@ namespace FastDeliveruu.Api.Controllers;
 [Route("api/v{version:apiVersion}/user-auth")]
 public class AuthenticationController : ApiController
 {
-    private readonly IAuthenticationServices _authenticationServices;
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(IAuthenticationServices authenticationServices,
+    public AuthenticationController(
+        IMediator mediator,
+        IMapper mapper,
         ILogger<AuthenticationController> logger,
         IEmailSender emailSender)
     {
-        _authenticationServices = authenticationServices;
+        _mediator = mediator;
         _logger = logger;
         _emailSender = emailSender;
+        _mapper = mapper;
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Register([FromForm] RegisterationRequestDto registerationRequestDto)
+    public async Task<IActionResult> Register([FromBody] RegisterationRequestDto request)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            RegisterCommand command = _mapper.Map<RegisterCommand>(request);
 
-            Result<AuthenticationResult> authenticationResult = await _authenticationServices.
-                RegisterAsync(registerationRequestDto);
+            Result<AuthenticationResponse> authenticationResult = await _mediator.Send(command);
             if (authenticationResult.IsFailed)
             {
                 return Problem(authenticationResult.Errors);
             }
 
-            await SendEmailAsync(authenticationResult.Value.Token,
-                authenticationResult.Value.LocalUserDto.Email);
+            await SendEmailAsync(authenticationResult.Value.LocalUserDto.Email,
+                authenticationResult.Value.Token);
 
-            AuthenticationResponse registerationResponseDto = new AuthenticationResponse
-            {
-                LocalUserDto = authenticationResult.Value.LocalUserDto,
-                Token = authenticationResult.Value.Token
-            };
-
-            return Ok(registerationResponseDto);
+            return Ok(authenticationResult.Value);
         }
         catch (Exception ex)
         {
@@ -61,35 +62,25 @@ public class AuthenticationController : ApiController
     }
 
     [HttpPost("register-shipper")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> RegisterShipper([FromForm] RegisterationShipperDto request)
+    public async Task<IActionResult> RegisterShipper([FromBody] RegisterationShipperDto request)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            RegisterShipperCommand command = _mapper.Map<RegisterShipperCommand>(request);
 
-            Result<AuthenticationShipperResult> authenticationResult = await _authenticationServices.
-                RegisterShipperAsync(request);
+            Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(command);
             if (authenticationResult.IsFailed)
             {
                 return Problem(authenticationResult.Errors);
             }
 
-            await SendEmailAsync(authenticationResult.Value.Token,
-                authenticationResult.Value.ShipperDto.Email);
+            await SendEmailAsync(authenticationResult.Value.ShipperDto.Email,
+                authenticationResult.Value.Token);
 
-            AuthenticationShipperResponse registerationResponseDto = new AuthenticationShipperResponse
-            {
-                ShipperDto = authenticationResult.Value.ShipperDto,
-                Token = authenticationResult.Value.Token
-            };
-
-            return Ok(registerationResponseDto);
+            return Ok(authenticationResult.Value);
         }
         catch (Exception ex)
         {
@@ -98,32 +89,21 @@ public class AuthenticationController : ApiController
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Login([FromForm] LoginRequestDto request)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            LoginQuery query = _mapper.Map<LoginQuery>(request);
 
-            Result<AuthenticationResult> authenticationResult = await _authenticationServices
-                .LoginAsync(request);
+            Result<AuthenticationResponse> authenticationResult = await _mediator.Send(query);
             if (authenticationResult.IsFailed)
             {
                 return Problem(authenticationResult.Errors);
             }
 
-            AuthenticationResponse loginResponseDto = new AuthenticationResponse
-            {
-                LocalUserDto = authenticationResult.Value.LocalUserDto,
-                Token = authenticationResult.Value.Token
-            };
-
-            return Ok(loginResponseDto);
+            return Ok(authenticationResult.Value);
         }
         catch (Exception ex)
         {
@@ -132,32 +112,21 @@ public class AuthenticationController : ApiController
     }
 
     [HttpPost("login-shipper")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> LoginShipper([FromForm] LoginShipperDto request)
+    public async Task<IActionResult> LoginShipper([FromBody] LoginShipperDto request)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            LoginShipperQuery query = _mapper.Map<LoginShipperQuery>(request);
 
-            Result<AuthenticationShipperResult> authenticationResult = await _authenticationServices
-                .LoginShipperAsync(request);
+            Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(query);
             if (authenticationResult.IsFailed)
             {
                 return Problem(authenticationResult.Errors);
             }
 
-            AuthenticationShipperResponse loginResponseDto = new AuthenticationShipperResponse
-            {
-                ShipperDto = authenticationResult.Value.ShipperDto,
-                Token = authenticationResult.Value.Token
-            };
-
-            return Ok(loginResponseDto);
+            return Ok(authenticationResult.Value);
         }
         catch (Exception ex)
         {
@@ -169,12 +138,13 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ConfirmEmail(string token, string email)
+    public async Task<IActionResult> ConfirmEmail(string email, string token)
     {
         try
         {
-            Result<bool> isConfirmEmailResult = await _authenticationServices.IsEmailConfirm(token, email);
+            EmailConfirmQuery query = new EmailConfirmQuery(email, token);
+
+            Result<bool> isConfirmEmailResult = await _mediator.Send(query);
             if (isConfirmEmailResult.IsFailed)
             {
                 return Problem(isConfirmEmailResult.Errors);
@@ -189,12 +159,12 @@ public class AuthenticationController : ApiController
     }
 
     [NonAction]
-    public async Task SendEmailAsync(string token, string email)
+    public async Task SendEmailAsync(string email, string token)
     {
         string? confirmationLink = Url.Action(
             action: nameof(ConfirmEmail),
             controller: "Authentication",
-            values: new { token, email },
+            values: new { email, token },
             Request.Scheme);
 
         string receiver = email;

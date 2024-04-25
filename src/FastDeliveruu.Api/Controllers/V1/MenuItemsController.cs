@@ -1,4 +1,3 @@
-using AutoMapper;
 using FastDeliveruu.Application.Common.Roles;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
@@ -6,6 +5,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

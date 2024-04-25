@@ -1,11 +1,11 @@
 using System.Security.Claims;
-using AutoMapper;
 using FastDeliveruu.Application.Common.Status;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.VnPayResponses;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

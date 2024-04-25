@@ -1,4 +1,3 @@
-using AutoMapper;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application;
 using FastDeliveruu.Infrastructure;
@@ -8,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Application.Profiles;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -107,12 +105,6 @@ var builder = WebApplication.CreateBuilder(args);
         .CreateLogger();
 
     builder.Host.UseSerilog();
-
-    // register automapper
-    builder.Services.AddAutoMapper(cfg =>
-    {
-        cfg.EnableNullPropagationForQueryMapping = true;
-    }, typeof(FastDeliveruuProfile).Assembly);
 
     builder.Services.AddApiVersioning(options =>
     {

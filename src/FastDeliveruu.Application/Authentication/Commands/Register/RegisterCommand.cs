@@ -1,6 +1,10 @@
-namespace FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FluentResults;
+using MediatR;
 
-public class RegisterationRequestDto
+namespace FastDeliveruu.Application.Authentication.Commands.Register;
+
+public class RegisterCommand : IRequest<Result<AuthenticationResponse>>
 {
     public string UserName { get; set; } = null!;
 

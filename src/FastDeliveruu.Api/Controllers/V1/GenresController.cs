@@ -1,11 +1,11 @@
-﻿using AutoMapper;
-using FastDeliveruu.Application.Dtos.GenreDtos;
+﻿using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Common.Roles;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MapsterMapper;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 

@@ -1,9 +1,9 @@
-using AutoMapper;
 using FastDeliveruu.Application.Common.Roles;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

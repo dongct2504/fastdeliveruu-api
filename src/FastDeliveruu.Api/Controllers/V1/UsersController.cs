@@ -1,4 +1,3 @@
-using AutoMapper;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -8,6 +7,7 @@ using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FluentResults;
+using MapsterMapper;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -16,7 +16,6 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/users")]
 public class UsersController : ApiController
 {
-    private readonly PaginationResponse<LocalUserDto> _paginationResponse;
     private readonly ILocalUserServices _localUserServices;
     private readonly IImageServices _imageServices;
     private readonly ILogger<UsersController> _logger;
@@ -27,7 +26,6 @@ public class UsersController : ApiController
         IMapper mapper,
         IImageServices imageServices)
     {
-        _paginationResponse = new PaginationResponse<LocalUserDto>();
         _localUserServices = localUserServices;
         _logger = logger;
         _mapper = mapper;
@@ -36,21 +34,25 @@ public class UsersController : ApiController
 
     [HttpGet]
     [Authorize(Roles = RoleConstants.RoleAdmin)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(PaginationResponse<LocalUserDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers(int page = 1)
     {
         try
         {
+            
+
             IEnumerable<LocalUser> localUsers = await _localUserServices.GetAllLocalUserAsync(page);
 
-            _paginationResponse.PageNumber = page;
-            _paginationResponse.PageSize = PagingConstants.UserPageSize;
-            _paginationResponse.TotalRecords = await _localUserServices.GetTotalLocalUsersAsync();
+            PaginationResponse<LocalUserDto> paginationResponse = new PaginationResponse<LocalUserDto>
+            {
+                PageNumber = page,
+                PageSize = PagingConstants.UserPageSize,
+                TotalRecords = await _localUserServices.GetTotalLocalUsersAsync(),
 
-            _paginationResponse.Values = _mapper.Map<IEnumerable<LocalUserDto>>(localUsers);
+                Values = _mapper.Map<IEnumerable<LocalUserDto>>(localUsers)
+            };
 
-            return Ok(_paginationResponse);
+            return Ok(paginationResponse);
         }
         catch (Exception ex)
         {
@@ -62,7 +64,6 @@ public class UsersController : ApiController
     [Authorize(Roles = RoleConstants.RoleAdmin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
         try
@@ -86,7 +87,6 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromForm] LocalUserUpdateDto localUserUpdateDto)
     {
         try
@@ -146,7 +146,6 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         try

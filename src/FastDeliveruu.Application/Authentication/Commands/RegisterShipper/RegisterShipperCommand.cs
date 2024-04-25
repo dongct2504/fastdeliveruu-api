@@ -1,6 +1,10 @@
-namespace FastDeliveruu.Application.Dtos.ShipperDtos;
+using FastDeliveruu.Application.Dtos.ShipperDtos;
+using FluentResults;
+using MediatR;
 
-public class RegisterationShipperDto
+namespace FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
+
+public class RegisterShipperCommand : IRequest<Result<AuthenticationShipperResponse>>
 {
     public string FirstName { get; set; } = null!;
 
