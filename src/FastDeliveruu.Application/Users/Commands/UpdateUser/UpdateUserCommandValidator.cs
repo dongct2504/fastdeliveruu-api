@@ -1,15 +1,23 @@
 using FastDeliveruu.Application.Common.ValidationConfigs;
 using FluentValidation;
 
-namespace FastDeliveruu.Application.Authentication.Commands.Register;
+namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {
-    public RegisterCommandValidator()
+    public UpdateUserCommandValidator()
     {
         RuleFor(x => x.UserName)
             .NotEmpty()
             .MaximumLength(128);
+
+        RuleFor(x => x.FirstName)
+            .NotEmpty()
+            .MaximumLength(50);
+
+        RuleFor(x => x.LastName)
+            .NotEmpty()
+            .MaximumLength(50);
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
@@ -19,8 +27,5 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .NotEmpty()
             .EmailAddress()
             .MaximumLength(128);
-
-        RuleFor(x => x.Password)
-            .NotEmpty();
     }
 }

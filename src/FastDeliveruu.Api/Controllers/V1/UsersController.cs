@@ -1,58 +1,43 @@
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Application.Common.Roles;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FluentResults;
-using MapsterMapper;
+using MediatR;
+using FastDeliveruu.Application.Users.Queries.GetAllUsers;
+using FastDeliveruu.Application.Users.Queries.GetUserById;
+using FastDeliveruu.Application.Users.Commands.UpdateUser;
+using FastDeliveruu.Application.Users.Commands.DeleteUser;
+using Microsoft.AspNetCore.Authorization;
+using FastDeliveruu.Application.Common.Constants;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
-[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/users")]
 public class UsersController : ApiController
 {
-    private readonly ILocalUserServices _localUserServices;
-    private readonly IImageServices _imageServices;
-    private readonly ILogger<UsersController> _logger;
-    private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
-    public UsersController(ILocalUserServices localUserServices,
-        ILogger<UsersController> logger,
-        IMapper mapper,
-        IImageServices imageServices)
+    public UsersController(IMediator mediator)
     {
-        _localUserServices = localUserServices;
-        _logger = logger;
-        _mapper = mapper;
-        _imageServices = imageServices;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
+    // [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(PaginationResponse<LocalUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllUsers(int page = 1)
     {
         try
         {
-            
+            GetAllUsersQuery query = new GetAllUsersQuery(page);
 
-            IEnumerable<LocalUser> localUsers = await _localUserServices.GetAllLocalUserAsync(page);
+            PaginationResponse<LocalUserDto> getAllUsers = await _mediator.Send(query);
 
-            PaginationResponse<LocalUserDto> paginationResponse = new PaginationResponse<LocalUserDto>
-            {
-                PageNumber = page,
-                PageSize = PagingConstants.UserPageSize,
-                TotalRecords = await _localUserServices.GetTotalLocalUsersAsync(),
-
-                Values = _mapper.Map<IEnumerable<LocalUserDto>>(localUsers)
-            };
-
-            return Ok(paginationResponse);
+            return Ok(getAllUsers);
         }
         catch (Exception ex)
         {
@@ -60,21 +45,25 @@ public class UsersController : ApiController
         }
     }
 
-    [HttpGet("{id}", Name = "GetUserById")]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpGet("{id:guid}", Name = "GetUserById")]
+    // [Authorize(Roles = RoleConstants.Admin)]
+    [ProducesResponseType(typeof(LocalUserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
         try
         {
-            Result<LocalUser> getUserResult = await _localUserServices.GetLocalUserByIdAsync(id);
+            GetUserByIdQuery query = new GetUserByIdQuery(id);
+
+            Result<LocalUserDto> getUserResult = await _mediator.Send(query);
             if (getUserResult.IsFailed)
             {
                 return Problem(getUserResult.Errors);
             }
 
-            return Ok(_mapper.Map<LocalUserDto>(getUserResult.Value));
+            return Ok(getUserResult.Value);
         }
         catch (Exception ex)
         {
@@ -82,54 +71,26 @@ public class UsersController : ApiController
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
+    // [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdateUser(Guid id, [FromForm] LocalUserUpdateDto localUserUpdateDto)
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromForm] UpdateUserCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (id != command.LocalUserId)
             {
-                return BadRequest(ModelState);
+                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
 
-            Result<LocalUser> oldLocalUserResult = await _localUserServices.GetLocalUserByIdAsync(id);
+            Result<LocalUser> oldLocalUserResult = await _mediator.Send(command);
             if (oldLocalUserResult.IsFailed)
             {
                 return Problem(oldLocalUserResult.Errors);
-            }
-
-            LocalUser localUser = oldLocalUserResult.Value;
-            string? oldImagePath = oldLocalUserResult.Value.ImageUrl;
-
-            _mapper.Map(localUserUpdateDto, localUser);
-
-            if (localUserUpdateDto.ImageFile != null)
-            {
-                string uploadImagePath = @"images\users";
-                string? fileNameWithExtension = await _imageServices.UploadImageAsync(
-                    localUserUpdateDto.ImageFile, uploadImagePath);
-                localUser.ImageUrl = @"\images\users\" + fileNameWithExtension;
-            }
-            localUser.UpdatedAt = DateTime.Now;
-
-            Result updateUserResult = await _localUserServices.UpdateUserAsync(id, localUser);
-            if (updateUserResult.IsFailed)
-            {
-                if (localUserUpdateDto.ImageFile != null)
-                {
-                    await _imageServices.DeleteImageAsync(localUser.ImageUrl);
-                }
-
-                return Problem(updateUserResult.Errors);
-            }
-
-            if (localUserUpdateDto.ImageFile != null)
-            {
-                await _imageServices.DeleteImageAsync(oldImagePath);
             }
 
             return NoContent();
@@ -140,8 +101,8 @@ public class UsersController : ApiController
         }
     }
 
-    [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
+    [HttpDelete("{id:guid}")]
+    // [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -150,15 +111,13 @@ public class UsersController : ApiController
     {
         try
         {
-            Result<LocalUser> getUserResult = await _localUserServices.GetLocalUserByIdAsync(id);
-            if (getUserResult.IsFailed)
+            DeleteUserCommand command = new DeleteUserCommand(id);
+
+            Result<LocalUser> deleteUserResult = await _mediator.Send(command);
+            if (deleteUserResult.IsFailed)
             {
-                return Problem(getUserResult.Errors);
+                return Problem(deleteUserResult.Errors);
             }
-
-            await _localUserServices.DeleteUserAsync(id);
-
-            await _imageServices.DeleteImageAsync(getUserResult.Value.ImageUrl);
 
             return NoContent();
         }

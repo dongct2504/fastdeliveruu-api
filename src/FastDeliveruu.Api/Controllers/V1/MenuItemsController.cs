@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common.Roles;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -19,12 +19,12 @@ public class MenuItemsController : ApiController
     private readonly IMenuItemServices _menuItemServices;
     private readonly ILogger<MenuItemsController> _logger;
     private readonly IMapper _mapper;
-    private readonly IImageServices _imageServices;
+    private readonly IFileStorageServices _imageServices;
 
     public MenuItemsController(IMenuItemServices menuItemServices,
         ILogger<MenuItemsController> logger,
         IMapper mapper,
-        IImageServices imageServices)
+        IFileStorageServices imageServices)
     {
         _paginationResponse = new PaginationResponse<MenuItemDto>();
         _menuItemServices = menuItemServices;
@@ -49,7 +49,7 @@ public class MenuItemsController : ApiController
             _paginationResponse.PageSize = PagingConstants.DefaultPageSize;
             _paginationResponse.TotalRecords = await _menuItemServices.GetTotalMenuItemsAsync();
 
-            _paginationResponse.Values = _mapper.Map<IEnumerable<MenuItemDto>>(menuItems);
+            _paginationResponse.Items = _mapper.Map<IEnumerable<MenuItemDto>>(menuItems);
 
             return Ok(_paginationResponse);
         }
@@ -83,7 +83,7 @@ public class MenuItemsController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -133,7 +133,7 @@ public class MenuItemsController : ApiController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -195,7 +195,7 @@ public class MenuItemsController : ApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

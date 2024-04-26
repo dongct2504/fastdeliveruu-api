@@ -1,6 +1,6 @@
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Application.Common.Roles;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
@@ -16,12 +16,12 @@ public class RestaurantsController : ApiController
     private readonly IRestaurantServices _restaurantServices;
     private readonly ILogger<RestaurantsController> _logger;
     private readonly IMapper _mapper;
-    private readonly IImageServices _imageServices;
+    private readonly IFileStorageServices _imageServices;
 
     public RestaurantsController(IRestaurantServices restaurantServices,
         ILogger<RestaurantsController> logger,
         IMapper mapper,
-        IImageServices imageServices)
+        IFileStorageServices imageServices)
     {
         _restaurantServices = restaurantServices;
         _logger = logger;
@@ -70,7 +70,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +120,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -183,7 +183,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

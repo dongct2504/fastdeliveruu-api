@@ -7,6 +7,7 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Serilog;
 
 namespace FastDeliveruu.Application.Authentication.Queries.Login;
 
@@ -36,27 +37,32 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         LocalUser? localUser = await _localUserRepository.GetAsync(options);
         if (localUser == null)
         {
-            return Result.Fail<AuthenticationResponse>(
-                new NotFoundError("The user name is incorrect."));
+            string message = "The user name is incorrect.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationResponse>(new NotFoundError(message));
         }
 
         bool verified = BCrypt.Net.BCrypt.Verify(request.Password, localUser.PasswordHash);
         if (!verified)
         {
-            return Result.Fail<AuthenticationResponse>(
-                new BadRequestError("The password is incorrect."));
+            string message = "The password is incorrect.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
         }
 
         bool isConfirmEmail = localUser.IsConfirmEmail;
         if (!isConfirmEmail)
         {
-            return Result.Fail<AuthenticationResponse>(
-                new BadRequestError("The email is not yet confirmed."));
+            string message = "The email is not yet confirmed.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
         }
 
         // generate JWT token
         string token = _jwtTokenGenerator.GenerateToken(localUser.LocalUserId, localUser.Email,
             localUser.UserName, localUser.Role);
+
+        Log.Information($"User login at: {DateTime.Now:dd/MM/yyyy hh:mm tt}.");
 
         return _mapper.Map<AuthenticationResponse>((localUser, token));
     }

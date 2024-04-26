@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Application.Common.Roles;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
@@ -65,7 +65,7 @@ public class GenresController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -103,7 +103,7 @@ public class GenresController : ApiController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -146,7 +146,7 @@ public class GenresController : ApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin + "," + RoleConstants.RoleStaff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

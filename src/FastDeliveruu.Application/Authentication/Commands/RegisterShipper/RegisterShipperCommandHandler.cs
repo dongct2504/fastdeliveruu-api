@@ -7,6 +7,7 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Serilog;
 
 namespace FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
 
@@ -42,8 +43,9 @@ public class RegisterShipperCommandHandler : IRequestHandler<RegisterShipperComm
         Shipper? isShipperExist = await _shipperRepository.GetAsync(options);
         if (isShipperExist != null)
         {
-            return Result.Fail<AuthenticationShipperResponse>(
-                new DuplicateError("The request shipper is already exist."));
+            string message = "The request shipper is already exist.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationShipperResponse>(new DuplicateError(message));
         }
 
         Shipper createdShipper = await _shipperRepository.AddAsync(shipper);

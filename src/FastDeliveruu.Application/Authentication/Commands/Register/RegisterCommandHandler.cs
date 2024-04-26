@@ -7,6 +7,7 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Serilog;
 
 namespace FastDeliveruu.Application.Authentication.Commands.Register;
 
@@ -43,8 +44,9 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         LocalUser? isLocalUserExist = await _localUserRepository.GetAsync(options);
         if (isLocalUserExist != null)
         {
-            return Result.Fail<AuthenticationResponse>(
-                new DuplicateError($"The email or username is already exist."));
+            string message = "The email or username is already exist.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationResponse>(new DuplicateError(message));
         }
 
         LocalUser createdUser = await _localUserRepository.AddAsync(localUser);

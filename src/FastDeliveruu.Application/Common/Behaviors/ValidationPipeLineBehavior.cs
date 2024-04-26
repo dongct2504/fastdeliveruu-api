@@ -3,16 +3,17 @@ using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using Serilog;
 
 namespace FastDeliveruu.Application.Common.Behaviors;
 
 public class ValidationPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TResponse : class
+    where TResponse : class // Result<T>
     where TRequest : IRequest<TResponse>
 {
     private readonly IValidator<TRequest>? _validator;
 
-    public ValidationPipelineBehavior(IValidator<TRequest> validator)
+    public ValidationPipelineBehavior(IValidator<TRequest>? validator = null)
     {
         _validator = validator;
     }
@@ -34,7 +35,8 @@ public class ValidationPipelineBehavior<TRequest, TResponse> : IPipelineBehavior
             return await next();
         }
 
-        ValidationError error = new ValidationError("", "Validation Errors.");
+        ValidationError error = new ValidationError("", "Validation failures.");
+        Log.Warning($"Validation failures: {request.GetType().Name} - {string.Join(", ", validationResult.Errors)} - {request}");
 
         foreach (var validationFailure in validationResult.Errors)
         {
@@ -42,6 +44,6 @@ public class ValidationPipelineBehavior<TRequest, TResponse> : IPipelineBehavior
                 validationFailure.ErrorMessage));
         }
 
-        return (dynamic)Result.Fail(error);
+        return (dynamic)Result.Fail(error); // somehow convert to Result<T>
     }
 }

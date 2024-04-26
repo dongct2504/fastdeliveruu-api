@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common.Roles;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -28,7 +28,7 @@ public class ShippersController : ApiController
     }
 
     [HttpGet]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllShippers()
@@ -44,7 +44,7 @@ public class ShippersController : ApiController
     }
 
     [HttpGet("{id}", Name = "GetShipperById")]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -109,7 +109,7 @@ public class ShippersController : ApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.RoleAdmin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

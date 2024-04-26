@@ -7,7 +7,6 @@ using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FluentResults;
-using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,32 +17,22 @@ namespace FastDeliveruu.Api.Controllers;
 public class AuthenticationController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly IMapper _mapper;
     private readonly IEmailSender _emailSender;
-    private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(
-        IMediator mediator,
-        IMapper mapper,
-        ILogger<AuthenticationController> logger,
-        IEmailSender emailSender)
+    public AuthenticationController(IMediator mediator, IEmailSender emailSender)
     {
         _mediator = mediator;
-        _logger = logger;
         _emailSender = emailSender;
-        _mapper = mapper;
     }
 
     [HttpPost("register")]
     [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterationRequestDto request)
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
         try
         {
-            RegisterCommand command = _mapper.Map<RegisterCommand>(request);
-
             Result<AuthenticationResponse> authenticationResult = await _mediator.Send(command);
             if (authenticationResult.IsFailed)
             {
@@ -65,12 +54,10 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RegisterShipper([FromBody] RegisterationShipperDto request)
+    public async Task<IActionResult> RegisterShipper([FromBody] RegisterShipperCommand command)
     {
         try
         {
-            RegisterShipperCommand command = _mapper.Map<RegisterShipperCommand>(request);
-
             Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(command);
             if (authenticationResult.IsFailed)
             {
@@ -91,12 +78,10 @@ public class AuthenticationController : ApiController
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    public async Task<IActionResult> Login([FromBody] LoginQuery query)
     {
         try
         {
-            LoginQuery query = _mapper.Map<LoginQuery>(request);
-
             Result<AuthenticationResponse> authenticationResult = await _mediator.Send(query);
             if (authenticationResult.IsFailed)
             {
@@ -114,12 +99,10 @@ public class AuthenticationController : ApiController
     [HttpPost("login-shipper")]
     [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> LoginShipper([FromBody] LoginShipperDto request)
+    public async Task<IActionResult> LoginShipper([FromBody] LoginShipperQuery query)
     {
         try
         {
-            LoginShipperQuery query = _mapper.Map<LoginShipperQuery>(request);
-
             Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(query);
             if (authenticationResult.IsFailed)
             {
@@ -159,7 +142,7 @@ public class AuthenticationController : ApiController
     }
 
     [NonAction]
-    public async Task SendEmailAsync(string email, string token)
+    private async Task SendEmailAsync(string email, string token)
     {
         string? confirmationLink = Url.Action(
             action: nameof(ConfirmEmail),

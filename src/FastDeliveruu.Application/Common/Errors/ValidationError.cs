@@ -10,5 +10,5 @@ public class ValidationError : Error
         Message = message;
     }
 
-    public string PropertyName { get; set; }
+    public string PropertyName { get; }
 }

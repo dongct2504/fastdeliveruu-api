@@ -13,20 +13,12 @@ public class AuthenticationMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<RegisterationRequestDto, RegisterCommand>();
-
-        config.NewConfig<LoginRequestDto, LoginQuery>();
-
         config.NewConfig<(LocalUser localUser, string token), AuthenticationResponse>()
-            .Map(dest => dest.Token, src => src.token)
-            .Map(dest => dest.LocalUserDto, src => src.localUser);
-
-        config.NewConfig<RegisterationShipperDto, RegisterShipperCommand>();
-
-        config.NewConfig<LoginShipperDto, LoginShipperQuery>();
+            .Map(dest => dest.LocalUserDto, src => src.localUser)
+            .Map(dest => dest.Token, src => src.token);
 
         config.NewConfig<(Shipper shipper, string token), AuthenticationShipperResponse>()
-            .Map(dest => dest.Token, src => src.token)
-            .Map(dest => dest.ShipperDto, src => src.token);
+            .Map(dest => dest.ShipperDto, src => src.shipper)
+            .Map(dest => dest.Token, src => src.token);
     }
 }

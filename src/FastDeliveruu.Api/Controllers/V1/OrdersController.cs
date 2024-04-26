@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using FastDeliveruu.Application.Common.Status;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.VnPayResponses;
 using FastDeliveruu.Application.Interfaces;

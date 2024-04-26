@@ -1,4 +1,3 @@
-using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application;
 using FastDeliveruu.Infrastructure;
 using FastDeliveruu.Infrastructure.Data;
@@ -6,8 +5,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using FastDeliveruu.Application.Interfaces;
 using Serilog;
+using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -94,7 +94,7 @@ var builder = WebApplication.CreateBuilder(args);
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers
-    builder.Services.AddScoped<IImageServices, ImageServices>();
+    builder.Services.AddScoped<IFileStorageServices, FileStorageServices>();
     builder.Services
         .AddApplication()
         .AddInfrastructure(builder.Configuration);
@@ -138,7 +138,7 @@ var app = builder.Build();
 
     app.UseResponseCaching();
 
-    app.UseStaticFiles(); // upload images
+    app.UseStaticFiles();
 
     app.UseAuthentication();
     app.UseAuthorization();

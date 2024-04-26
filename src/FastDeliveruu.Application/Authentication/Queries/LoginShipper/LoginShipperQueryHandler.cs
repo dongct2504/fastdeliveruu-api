@@ -7,6 +7,7 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Serilog;
 
 namespace FastDeliveruu.Application.Authentication.Queries.LoginShipper;
 
@@ -36,27 +37,32 @@ public class LoginShipperQueryHandler : IRequestHandler<LoginShipperQuery, Resul
         Shipper? shipper = await _shipperRepository.GetAsync(options);
         if (shipper == null)
         {
-            return Result.Fail<AuthenticationShipperResponse>(
-                new NotFoundError("The user name is incorrect."));
+            string message = "The user name is incorrect.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationShipperResponse>(new NotFoundError(message));
         }
 
         bool verified = BCrypt.Net.BCrypt.Verify(request.Password, shipper.PasswordHash);
         if (!verified)
         {
-            return Result.Fail<AuthenticationShipperResponse>(
-                new BadRequestError("The password is incorrect."));
+            string message = "The password is incorrect.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationShipperResponse>(new BadRequestError(message));
         }
 
         bool isConfirmEmail = shipper.IsConfirmEmail;
         if (!isConfirmEmail)
         {
-            return Result.Fail<AuthenticationShipperResponse>(
-                new BadRequestError("The email is not yet confirmed."));
+            string message = "The email is not yet confirmed.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<AuthenticationShipperResponse>(new BadRequestError(message));
         }
 
         // generate JWT token
         string token = _jwtTokenGenerator.GenerateToken(shipper.ShipperId, shipper.Email,
             shipper.UserName, "Shipper");
+
+        Log.Information($"Shipper login at: {DateTime.Now:dd/MM/yyyy hh:mm tt}.");
 
         return _mapper.Map<AuthenticationShipperResponse>((shipper, token));
     }

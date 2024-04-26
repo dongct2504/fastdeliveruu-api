@@ -1,4 +1,3 @@
-using Dapper;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
