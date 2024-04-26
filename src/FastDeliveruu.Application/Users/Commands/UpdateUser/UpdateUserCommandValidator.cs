@@ -12,11 +12,9 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .MaximumLength(128);
 
         RuleFor(x => x.FirstName)
-            .NotEmpty()
             .MaximumLength(50);
 
         RuleFor(x => x.LastName)
-            .NotEmpty()
             .MaximumLength(50);
 
         RuleFor(x => x.PhoneNumber)
