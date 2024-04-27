@@ -1,7 +1,3 @@
-using FastDeliveruu.Application.Authentication.Commands.Register;
-using FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
-using FastDeliveruu.Application.Authentication.Queries.Login;
-using FastDeliveruu.Application.Authentication.Queries.LoginShipper;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Domain.Entities;

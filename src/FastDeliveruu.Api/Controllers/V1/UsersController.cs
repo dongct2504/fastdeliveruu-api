@@ -1,6 +1,5 @@
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using FluentResults;
 using MediatR;
@@ -25,7 +24,7 @@ public class UsersController : ApiController
     }
 
     [HttpGet]
-    // [Authorize(Roles = RoleConstants.Admin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(PaginationResponse<LocalUserDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -34,7 +33,6 @@ public class UsersController : ApiController
         try
         {
             GetAllUsersQuery query = new GetAllUsersQuery(page);
-
             PaginationResponse<LocalUserDto> getAllUsers = await _mediator.Send(query);
 
             return Ok(getAllUsers);
@@ -46,7 +44,7 @@ public class UsersController : ApiController
     }
 
     [HttpGet("{id:guid}", Name = "GetUserById")]
-    // [Authorize(Roles = RoleConstants.Admin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(LocalUserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -56,7 +54,6 @@ public class UsersController : ApiController
         try
         {
             GetUserByIdQuery query = new GetUserByIdQuery(id);
-
             Result<LocalUserDto> getUserResult = await _mediator.Send(query);
             if (getUserResult.IsFailed)
             {
@@ -72,7 +69,7 @@ public class UsersController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    // [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
+    [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -87,10 +84,10 @@ public class UsersController : ApiController
                 return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
 
-            Result<LocalUser> oldLocalUserResult = await _mediator.Send(command);
-            if (oldLocalUserResult.IsFailed)
+            Result updateLocalUserResult = await _mediator.Send(command);
+            if (updateLocalUserResult.IsFailed)
             {
-                return Problem(oldLocalUserResult.Errors);
+                return Problem(updateLocalUserResult.Errors);
             }
 
             return NoContent();
@@ -102,7 +99,7 @@ public class UsersController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    // [Authorize(Roles = RoleConstants.Admin)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -112,8 +109,7 @@ public class UsersController : ApiController
         try
         {
             DeleteUserCommand command = new DeleteUserCommand(id);
-
-            Result<LocalUser> deleteUserResult = await _mediator.Send(command);
+            Result deleteUserResult = await _mediator.Send(command);
             if (deleteUserResult.IsFailed)
             {
                 return Problem(deleteUserResult.Errors);
