@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace FastDeliveruu.Application.Common.ValidationConfigs;
+namespace FastDeliveruu.Application.Common.Behaviors;
 
 public static class ValidateForRequest
 {

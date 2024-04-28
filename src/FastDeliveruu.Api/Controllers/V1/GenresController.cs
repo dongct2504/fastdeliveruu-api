@@ -1,11 +1,15 @@
 ﻿using FastDeliveruu.Application.Dtos.GenreDtos;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MapsterMapper;
+using FastDeliveruu.Application.Genres.Queries.GetAllGenres;
+using FastDeliveruu.Application.Dtos;
+using MediatR;
+using FastDeliveruu.Application.Genres.Queries.GenGenreById;
+using FastDeliveruu.Application.Genres.Commands.CreateGenre;
+using FastDeliveruu.Application.Genres.Commands.UpdateGenre;
+using FastDeliveruu.Application.Genres.Commands.DeleteGenre;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -13,28 +17,24 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/genres")]
 public class GenresController : ApiController
 {
-    private readonly IGenreServices _genreServices;
-    private readonly ILogger<GenresController> _logger;
-    private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
-    public GenresController(IGenreServices genreServices,
-        ILogger<GenresController> logger,
-        IMapper mapper)
+    public GenresController(IMediator mediator)
     {
-        _genreServices = genreServices;
-        _logger = logger;
-        _mapper = mapper;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllGenres()
+    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30, VaryByQueryKeys = new[] { "page" })]
+    [ProducesResponseType(typeof(PaginationResponse<GenreDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllGenres(int page = 1)
     {
         try
         {
-            return Ok(_mapper.Map<IEnumerable<GenreDto>>(await _genreServices.GetAllGenresAsync()));
+            GetAllGenresQuery query = new GetAllGenresQuery(page);
+            PaginationResponse<GenreDto> getAllGenres = await _mediator.Send(query);
+
+            return Ok(getAllGenres);
         }
         catch (Exception ex)
         {
@@ -42,21 +42,21 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpGet("{id}", Name = "GetGenreById")]
+    [HttpGet("{id:int}", Name = "GetGenreById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetGenreById(int id)
     {
         try
         {
-            Result<Genre> getGenreResult = await _genreServices.GetGenreWithMenuItemsByIdAsync(id);
+            GetGenreByIdQuery query = new GetGenreByIdQuery(id);
+            Result<GenreDetailDto> getGenreResult = await _mediator.Send(query);
             if (getGenreResult.IsFailed)
             {
                 return Problem(getGenreResult.Errors);
             }
 
-            return Ok(_mapper.Map<GenreDetailDto>(getGenreResult.Value));
+            return Ok(getGenreResult.Value);
         }
         catch (Exception ex)
         {
@@ -65,36 +65,26 @@ public class GenresController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [ProducesResponseType(typeof(GenreDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateGenre([FromBody] GenreCreateDto genreCreateDto)
+    public async Task<IActionResult> CreateGenre([FromBody] CreateGenreCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Genre genre = _mapper.Map<Genre>(genreCreateDto);
-            genre.CreatedAt = DateTime.Now;
-            genre.UpdatedAt = DateTime.Now;
-
-            Result<int> createGenreResult = await _genreServices.CreateGenreAsync(genre);
+            Result<GenreDto> createGenreResult = await _mediator.Send(command);
             if (createGenreResult.IsFailed)
             {
                 return Problem(createGenreResult.Errors);
             }
 
-            genre.GenreId = createGenreResult.Value;
-            GenreDto genreDto = _mapper.Map<GenreDto>(genre);
-
-            return CreatedAtRoute(nameof(GetGenreById), new { Id = genreDto.GenreId }, genreDto);
+            return CreatedAtRoute(
+                nameof(GetGenreById),
+                new { Id = createGenreResult.Value.GenreId },
+                createGenreResult.Value);
         }
         catch (Exception ex)
         {
@@ -102,36 +92,23 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpPut("{id}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpPut("{id:int}")]
+    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateGenre(int id, [FromBody] GenreUpdateDto genreUpdateDto)
+    public async Task<IActionResult> UpdateGenre(int id, [FromBody] UpdateGenreCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (id != command.GenreId)
             {
-                return BadRequest(ModelState);
+                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
 
-            Result<Genre> getGenreResult = await _genreServices.GetGenreByIdAsync(id);
-            if (getGenreResult.IsFailed)
-            {
-                return Problem(getGenreResult.Errors);
-            }
-
-            Genre genre = getGenreResult.Value;
-
-            _mapper.Map(genreUpdateDto, genre);
-
-            genre.UpdatedAt = DateTime.Now;
-
-            Result updateGenreResult = await _genreServices.UpdateGenreAsync(id, genre);
+            Result updateGenreResult = await _mediator.Send(command);
             if (updateGenreResult.IsFailed)
             {
                 return Problem(updateGenreResult.Errors);
@@ -145,18 +122,18 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpDelete("{id:int}")]
+    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteGenre(int id)
     {
         try
         {
-            Result deleteGenreResult = await _genreServices.DeleteGenreAsync(id);
+            DeleteGenreCommand command = new DeleteGenreCommand(id);
+            Result deleteGenreResult = await _mediator.Send(command);
             if (deleteGenreResult.IsFailed)
             {
                 return Problem(deleteGenreResult.Errors);

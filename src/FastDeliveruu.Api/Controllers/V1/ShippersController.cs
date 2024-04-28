@@ -26,6 +26,8 @@ public class ShippersController : ApiController
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllShippers(int page = 1)
     {
         try

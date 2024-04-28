@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common.ValidationConfigs;
+using FastDeliveruu.Application.Common.Behaviors;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Authentication.Commands.RegisterShipper;

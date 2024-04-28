@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
+using FastDeliveruu.Application.Common.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -19,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllers(options =>
     {
         options.CacheProfiles
-            .Add("Default30", new CacheProfile
+            .Add(CacheProfileConstants.Default30, new CacheProfile
             {
                 Duration = 30
             });
