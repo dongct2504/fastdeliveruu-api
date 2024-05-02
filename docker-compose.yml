@@ -3,10 +3,29 @@
 version: '3.4'
 
 services:
-  fastdeliveruuapi:
-    image: fastdeliveruuapi
+  fastdeliveruu.api:
+    image: fastdeliveruu.api
+    container_name: fastdeliveruu.api
     build:
       context: .
       dockerfile: src/FastDeliveruu.Api/Dockerfile
     ports:
       - 5233:5233
+    environment:
+      # should be defined Development-env to allow loading user-secrets located on the local computer.
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      # map the dotnet user-secret folder
+      - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+  fastdeliveruu.db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: fastdeliveruu.db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=super_secret_password_123
+      - MSSQL_PID=Express
+    volumes:
+      - ./.containers/fastdeliveruu-db:/var/opt/mssql/data
+    ports:
+      - 1433:1433
