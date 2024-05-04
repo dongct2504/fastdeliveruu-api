@@ -7,6 +7,9 @@ public class UpdateShipperCommandValidator : AbstractValidator<UpdateShipperComm
 {
     public UpdateShipperCommandValidator()
     {
+        RuleFor(x => x.ShipperId)
+            .NotEmpty();
+
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .MaximumLength(50);

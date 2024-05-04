@@ -1,8 +1,10 @@
-using FastDeliveruu.Application.Dtos.MenuItemDtos;
+﻿using FluentResults;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 
-namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
+namespace FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 
-public class RestaurantDetailDto
+public class UpdateRestaurantCommand : IRequest<Result>
 {
     public int RestaurantId { get; set; }
 
@@ -12,7 +14,7 @@ public class RestaurantDetailDto
 
     public string PhoneNumber { get; set; } = null!;
 
-    public string? ImageUrl { get; set; }
+    public bool IsVerify { get; set; }
 
     public string Address { get; set; } = null!;
 
@@ -22,5 +24,5 @@ public class RestaurantDetailDto
 
     public string City { get; set; } = null!;
 
-    public IEnumerable<MenuItemDto>? MenuItemDtos { get; set; }
+    public IFormFile? ImageFile { get; set; }
 }

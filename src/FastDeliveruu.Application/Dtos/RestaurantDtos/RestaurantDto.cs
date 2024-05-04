@@ -10,8 +10,6 @@ public class RestaurantDto
 
     public string PhoneNumber { get; set; } = null!;
 
-    public bool IsVerify { get; set; }
-
     public string? ImageUrl { get; set; }
 
     public string Address { get; set; } = null!;

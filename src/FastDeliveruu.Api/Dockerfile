@@ -1,26 +1,25 @@
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 5233
+EXPOSE 7012
 
-ENV ASPNETCORE_URLS=http://+:5233
-
-# # Creates a non-root user with an explicit UID and adds permission to access the /app folder
-# # For more info, please refer to https://aka.ms/vscode-docker-dotnet-configure-containers
-# RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
-# USER appuser
-
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-ARG configuration=Release
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/FastDeliveruu.Api/FastDeliveruu.Api.csproj", "src/FastDeliveruu.Api/"]
-RUN dotnet restore "src/FastDeliveruu.Api/FastDeliveruu.Api.csproj"
+COPY ["src/FastDeliveruu.Application/FastDeliveruu.Application.csproj", "src/FastDeliveruu.Application/"]
+COPY ["src/FastDeliveruu.Domain/FastDeliveruu.Domain.csproj", "src/FastDeliveruu.Domain/"]
+COPY ["src/FastDeliveruu.Infrastructure/FastDeliveruu.Infrastructure.csproj", "src/FastDeliveruu.Infrastructure/"]
+RUN dotnet restore "./src/FastDeliveruu.Api/FastDeliveruu.Api.csproj"
 COPY . .
 WORKDIR "/src/src/FastDeliveruu.Api"
-RUN dotnet build "FastDeliveruu.Api.csproj" -c $configuration -o /app/build
+RUN dotnet build "./FastDeliveruu.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG configuration=Release
-RUN dotnet publish "FastDeliveruu.Api.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./FastDeliveruu.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

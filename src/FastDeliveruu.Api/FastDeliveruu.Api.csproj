@@ -4,16 +4,24 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>93e8e15c-267e-4a1e-a0e0-d0e9083d8f1c</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10"/>
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.10"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0"/>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FastDeliveruu.Application\FastDeliveruu.Application.csproj"/>
-    <ProjectReference Include="..\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj"/>
+    <ProjectReference Include="..\FastDeliveruu.Application\FastDeliveruu.Application.csproj" />
+    <ProjectReference Include="..\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\shippers\images\" />
+    <Folder Include="wwwroot\users\images\" />
   </ItemGroup>
 </Project>

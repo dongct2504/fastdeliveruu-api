@@ -1,11 +1,15 @@
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MapsterMapper;
+using FastDeliveruu.Application.Dtos;
+using MediatR;
+using FastDeliveruu.Application.Restaurants.Queries.GetAllRestaurants;
+using FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
+using FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
+using FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
+using FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -13,32 +17,23 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/restaurants")]
 public class RestaurantsController : ApiController
 {
-    private readonly IRestaurantServices _restaurantServices;
-    private readonly ILogger<RestaurantsController> _logger;
-    private readonly IMapper _mapper;
-    private readonly IFileStorageServices _imageServices;
+    private readonly IMediator _mediator;
 
-    public RestaurantsController(IRestaurantServices restaurantServices,
-        ILogger<RestaurantsController> logger,
-        IMapper mapper,
-        IFileStorageServices imageServices)
+    public RestaurantsController(IMediator mediator)
     {
-        _restaurantServices = restaurantServices;
-        _logger = logger;
-        _mapper = mapper;
-        _imageServices = imageServices;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllRestaurants()
+    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30, VaryByQueryKeys = new[] { "page" })]
+    [ProducesResponseType(typeof(PaginationResponse<RestaurantDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllRestaurants(int page = 1)
     {
         try
         {
-            return Ok(_mapper.Map<IEnumerable<RestaurantDto>>(
-                await _restaurantServices.GetAllRestaurantsAsync()));
+            GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(page);
+            PaginationResponse<RestaurantDto> paginationResponse = await _mediator.Send(query);
+            return Ok(paginationResponse);
         }
         catch (Exception ex)
         {
@@ -46,22 +41,21 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpGet("{id}", Name = "GetRestaurantById")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpGet("{id:int}", Name = "GetRestaurantById")]
+    [ProducesResponseType(typeof(RestaurantDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetRestaurantById(int id)
     {
         try
         {
-            Result<Restaurant> getRestaurantResult =
-                await _restaurantServices.GetRestaurantWithMenuItemsByIdAsync(id);
+            GetRestaurantByIdQuery query = new GetRestaurantByIdQuery(id);
+            Result<RestaurantDetailDto> getRestaurantResult = await _mediator.Send(query);
             if (getRestaurantResult.IsFailed)
             {
                 return Problem(getRestaurantResult.Errors);
             }
 
-            return Ok(_mapper.Map<RestaurantDetailDto>(getRestaurantResult.Value));
+            return Ok(getRestaurantResult.Value);
         }
         catch (Exception ex)
         {
@@ -70,48 +64,26 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [ProducesResponseType(typeof(RestaurantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateRestaurant([FromForm] RestaurantCreateDto restaurantCreateDto)
+    public async Task<IActionResult> CreateRestaurant([FromForm] CreateRestaurantCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Restaurant restaurant = _mapper.Map<Restaurant>(restaurantCreateDto);
-            if (restaurantCreateDto.ImageFile != null)
-            {
-                // create and save image
-                string uploadImagePath = @"images\restaurants";
-                string? fileNameWithExtension = await _imageServices.UploadImageAsync(
-                    restaurantCreateDto.ImageFile, uploadImagePath);
-                restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
-            }
-            restaurant.CreatedAt = DateTime.Now;
-            restaurant.UpdatedAt = DateTime.Now;
-
-            Result<int> createRestaurantResult = await _restaurantServices.CreateRestaurantAsync(restaurant);
+            Result<RestaurantDto> createRestaurantResult = await _mediator.Send(command);
             if (createRestaurantResult.IsFailed)
             {
-                await _imageServices.DeleteImageAsync(restaurant.ImageUrl);
-
                 return Problem(createRestaurantResult.Errors);
             }
 
-            restaurant.RestaurantId = createRestaurantResult.Value;
-
-            RestaurantDto restaurantDto = _mapper.Map<RestaurantDto>(restaurant);
-
-            return CreatedAtRoute(nameof(GetRestaurantById),
-                new { Id = restaurant.RestaurantId }, restaurantDto);
+            return CreatedAtRoute(
+                nameof(GetRestaurantById),
+                new { Id = createRestaurantResult.Value.RestaurantId },
+                createRestaurantResult.Value);
         }
         catch (Exception ex)
         {
@@ -119,59 +91,26 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpPut("{id}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpPut("{id:int}")]
+    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateRestaurant(int id,
-        [FromForm] RestaurantUpdateDto restaurantUpdateDto)
+    public async Task<IActionResult> UpdateRestaurant(int id, [FromForm] UpdateRestaurantCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (id != command.RestaurantId)
             {
-                return BadRequest(ModelState);
+                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
 
-            Result<Restaurant> oldRestaurantResult = await _restaurantServices.GetRestaurantByIdAsync(id);
-            if (oldRestaurantResult.IsFailed)
-            {
-                return Problem(oldRestaurantResult.Errors);
-            }
-
-            Restaurant restaurant = oldRestaurantResult.Value;
-            string? oldImagePath = oldRestaurantResult.Value.ImageUrl;
-
-            _mapper.Map(restaurantUpdateDto, restaurant);
-
-            if (restaurantUpdateDto.ImageFile != null)
-            {
-                string uploadImagePath = @"images\restaurants";
-                string? fileNameWithExtension = await _imageServices.UploadImageAsync(
-                    restaurantUpdateDto.ImageFile, uploadImagePath);
-                restaurant.ImageUrl = @"\images\restaurants\" + fileNameWithExtension;
-            }
-            restaurant.UpdatedAt = DateTime.Now;
-
-            Result updateRestaurantResult = await _restaurantServices.UpdateRestaurantAsync(id, restaurant);
+            Result updateRestaurantResult = await _mediator.Send(command);
             if (updateRestaurantResult.IsFailed)
             {
-                if (restaurantUpdateDto.ImageFile != null)
-                {
-                    await _imageServices.DeleteImageAsync(restaurant.ImageUrl);
-                }
-
                 return Problem(updateRestaurantResult.Errors);
-            }
-
-            if (restaurantUpdateDto.ImageFile != null)
-            {
-                // if it has an old one, delete it after successfully updated
-                await _imageServices.DeleteImageAsync(oldImagePath);
             }
 
             return NoContent();
@@ -182,26 +121,22 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpDelete("{id}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpDelete("{id:int}")]
+    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteRestaurant(int id)
     {
         try
         {
-            Result<Restaurant> getRestaurantResult = await _restaurantServices.GetRestaurantByIdAsync(id);
-            if (getRestaurantResult.IsFailed)
+            DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);
+            Result deleteRestaurantResult = await _mediator.Send(command);
+            if (deleteRestaurantResult.IsFailed)
             {
-                return Problem(getRestaurantResult.Errors);
+                return Problem(deleteRestaurantResult.Errors);
             }
-
-            await _restaurantServices.DeleteRestaurantAsync(id);
-
-            await _imageServices.DeleteImageAsync(getRestaurantResult.Value.ImageUrl);
 
             return NoContent();
         }

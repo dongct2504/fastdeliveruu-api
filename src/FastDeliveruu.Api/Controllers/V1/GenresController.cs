@@ -65,7 +65,7 @@ public class GenresController : ApiController
     }
 
     [HttpPost]
-    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(typeof(GenreDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -93,7 +93,7 @@ public class GenresController : ApiController
     }
 
     [HttpPut("{id:int}")]
-    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -123,7 +123,7 @@ public class GenresController : ApiController
     }
 
     [HttpDelete("{id:int}")]
-    // [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

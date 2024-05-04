@@ -22,7 +22,6 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        services.AddScoped<IGenreServices, GenreServices>();
         services.AddScoped<IRestaurantServices, RestaurantServices>();
         services.AddScoped<IMenuItemServices, MenuItemServices>();
         services.AddScoped<ILocalUserServices, localUserServices>();

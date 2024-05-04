@@ -1,22 +1,15 @@
-# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
-
 version: '3.4'
 
 services:
   fastdeliveruu.api:
-    image: fastdeliveruu.api
+    image: ${DOCKER_REGISTRY-}fastdeliveruuapi
     container_name: fastdeliveruu.api
     build:
       context: .
       dockerfile: src/FastDeliveruu.Api/Dockerfile
     ports:
       - 5233:5233
-    environment:
-      # should be defined Development-env to allow loading user-secrets located on the local computer.
-      - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      # map the dotnet user-secret folder
-      - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - 7012:7012
 
   fastdeliveruu.db:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -28,4 +21,4 @@ services:
     volumes:
       - ./.containers/fastdeliveruu-db:/var/opt/mssql/data
     ports:
-      - 1433:1433
+      - 1433:1433    

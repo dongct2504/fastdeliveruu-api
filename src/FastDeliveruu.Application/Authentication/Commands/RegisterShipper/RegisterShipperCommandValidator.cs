@@ -39,5 +39,21 @@ public class RegisterShipperCommandValidator : AbstractValidator<RegisterShipper
 
         RuleFor(x => x.Password)
             .NotEmpty();
+
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .MaximumLength(128);
+
+        RuleFor(x => x.Ward)
+            .NotEmpty()
+            .MaximumLength(50);
+
+        RuleFor(x => x.District)
+            .NotEmpty()
+            .MaximumLength(30);
+
+        RuleFor(x => x.City)
+            .NotEmpty()
+            .MaximumLength(30);
     }
 }

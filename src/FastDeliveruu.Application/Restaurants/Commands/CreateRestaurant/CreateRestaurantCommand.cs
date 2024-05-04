@@ -1,18 +1,17 @@
-using FastDeliveruu.Application.Dtos.MenuItemDtos;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
+using FluentResults;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 
-namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
+namespace FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
 
-public class RestaurantDetailDto
+public class CreateRestaurantCommand : IRequest<Result<RestaurantDto>>
 {
-    public int RestaurantId { get; set; }
-
     public string Name { get; set; } = null!;
 
     public string Description { get; set; } = null!;
 
     public string PhoneNumber { get; set; } = null!;
-
-    public string? ImageUrl { get; set; }
 
     public string Address { get; set; } = null!;
 
@@ -22,5 +21,5 @@ public class RestaurantDetailDto
 
     public string City { get; set; } = null!;
 
-    public IEnumerable<MenuItemDto>? MenuItemDtos { get; set; }
+    public IFormFile? ImageFile { get; set; }
 }
