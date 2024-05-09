@@ -8,13 +8,13 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    protected readonly FastDeliveruuContext _dbContext;
+    protected readonly FastDeliveruuDbContext _dbContext;
 
     private readonly DbSet<T> _dbSet;
 
     private int count;
 
-    public Repository(FastDeliveruuContext context)
+    public Repository(FastDeliveruuDbContext context)
     {
         _dbContext = context;
         _dbSet = _dbContext.Set<T>();

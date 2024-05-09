@@ -2,7 +2,7 @@
 
 public class GenreDto
 {
-    public int GenreId { get; set; }
+    public Guid GenreId { get; set; }
 
     public string Name { get; set; } = null!;
 }

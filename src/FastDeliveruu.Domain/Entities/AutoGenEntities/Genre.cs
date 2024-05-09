@@ -14,7 +14,7 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public int GenreId { get; set; }
+        public Guid GenreId { get; set; }
         [StringLength(126)]
         public string Name { get; set; } = null!;
         [Column(TypeName = "datetime")]

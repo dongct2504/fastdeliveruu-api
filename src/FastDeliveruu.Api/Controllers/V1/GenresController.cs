@@ -42,10 +42,10 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetGenreById")]
+    [HttpGet("{id:guid}", Name = "GetGenreById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetGenreById(int id)
+    public async Task<IActionResult> GetGenreById(Guid id)
     {
         try
         {
@@ -92,14 +92,14 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateGenre(int id, [FromBody] UpdateGenreCommand command)
+    public async Task<IActionResult> UpdateGenre(Guid id, [FromBody] UpdateGenreCommand command)
     {
         try
         {
@@ -122,13 +122,13 @@ public class GenresController : ApiController
         }
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> DeleteGenre(int id)
+    public async Task<IActionResult> DeleteGenre(Guid id)
     {
         try
         {

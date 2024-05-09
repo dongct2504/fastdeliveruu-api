@@ -31,6 +31,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         CancellationToken cancellationToken)
     {
         LocalUser localUser = _mapper.Map<LocalUser>(request);
+        localUser.LocalUserId = Guid.NewGuid();
         localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         localUser.Role = request.Role ?? "Customer";
         localUser.CreatedAt = DateTime.Now;

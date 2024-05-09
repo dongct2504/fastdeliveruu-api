@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Dtos.VnPayResponses;
+using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 
@@ -8,5 +8,5 @@ public interface IVnPayServices
 {
     string CreatePaymentUrl(HttpContext httpContext, Order order);
 
-    VnPayResponse PaymentExecute(IQueryCollection collection);
+    VnpayResponse PaymentExecute(IQueryCollection collection);
 }

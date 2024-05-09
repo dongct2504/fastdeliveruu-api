@@ -34,8 +34,8 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.DefaultPageSize,
-            TotalRecords = await _restaurantRepository.GetCountAsync(),
-            Items = _mapper.Map<IEnumerable<RestaurantDto>>(await _restaurantRepository.ListAllAsync(options))
+            Items = _mapper.Map<IEnumerable<RestaurantDto>>(await _restaurantRepository.ListAllAsync(options)),
+            TotalRecords = await _restaurantRepository.GetCountAsync()
         };
 
         return paginationResponse;

@@ -1,11 +1,8 @@
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Application.Dtos.ShipperDtos;
-
 namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderDto
 {
-    public long OrderId { get; set; }
+    public Guid OrderId { get; set; }
 
     public Guid ShipperId { get; set; }
 
@@ -38,8 +35,4 @@ public class OrderDto
     public string District { get; set; } = null!;
 
     public string City { get; set; } = null!;
-
-    public LocalUserDto? LocalUserDto { get; set; }
-
-    public ShipperDto? ShipperDto { get; set; }
 }

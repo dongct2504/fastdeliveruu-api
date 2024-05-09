@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class ShipperRepository : Repository<Shipper>, IShipperRepository
 {
-    public ShipperRepository(FastDeliveruuContext context) : base(context)
+    public ShipperRepository(Data.FastDeliveruuDbContext context) : base(context)
     {
     }
 

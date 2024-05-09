@@ -9,10 +9,10 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class SP_Call : ISP_Call
 {
-    private readonly FastDeliveruuContext _dbContext;
+    private readonly FastDeliveruuDbContext _dbContext;
     private static string ConnectionString = "";
 
-    public SP_Call(FastDeliveruuContext context)
+    public SP_Call(FastDeliveruuDbContext context)
     {
         _dbContext = context;
         ConnectionString = _dbContext.Database.GetDbConnection().ConnectionString;

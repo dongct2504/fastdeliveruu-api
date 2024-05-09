@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRepository
 {
-    public ShoppingCartRepository(FastDeliveruuContext context) : base(context)
+    public ShoppingCartRepository(Data.FastDeliveruuDbContext context) : base(context)
     {
     }
 

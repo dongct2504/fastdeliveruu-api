@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class RestaurantRepository : Repository<Restaurant>, IRestaurantRepository
 {
-    public RestaurantRepository(FastDeliveruuContext context) : base(context)
+    public RestaurantRepository(Data.FastDeliveruuDbContext context) : base(context)
     {
     }
 

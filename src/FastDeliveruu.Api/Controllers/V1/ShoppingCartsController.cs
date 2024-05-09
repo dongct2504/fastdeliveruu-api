@@ -1,9 +1,12 @@
-using System.Security.Claims;
+using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Application.ShoppingCarts.Commands.CreateShoppingCart;
+using FastDeliveruu.Application.ShoppingCarts.Commands.DeleteShoppingCart;
+using FastDeliveruu.Application.ShoppingCarts.Commands.UpdateShoppingCart;
+using FastDeliveruu.Application.ShoppingCarts.Queries.GetAllShoppingCarts;
+using FastDeliveruu.Application.ShoppingCarts.Queries.GetShoppingCartById;
 using FluentResults;
-using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,38 +17,22 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/shopping-carts")]
 public class ShoppingCartsController : ApiController
 {
-    private readonly IShoppingCartServices _shoppingCartServices;
-    private readonly IMenuItemServices _menuItemServices;
-    private readonly ILogger<ShoppingCartsController> _logger;
-    private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
-    public ShoppingCartsController(IShoppingCartServices shoppingCartServices,
-        IMenuItemServices menuItemServices,
-        ILogger<ShoppingCartsController> logger,
-        IMapper mapper)
+    public ShoppingCartsController(IMediator mediator)
     {
-        _shoppingCartServices = shoppingCartServices;
-        _menuItemServices = menuItemServices;
-        _logger = logger;
-        _mapper = mapper;
+        _mediator = mediator;
     }
 
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllShoppingCartsByUserId()
+    [HttpGet("{userId:guid}")]
+    [ProducesResponseType(typeof(PaginationResponse<ShoppingCartDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllShoppingCartsByUserId(Guid userId, int page = 1)
     {
         try
         {
-            Guid userId = GetAuthenticationUserId();
-            if (userId == Guid.Empty)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(_mapper.Map<IEnumerable<ShoppingCartDto>>(
-                await _shoppingCartServices.GetAllShoppingCartsByUserIdAsync(userId)));
+            GetAllShoppingCartsByUserIdQuery query = new GetAllShoppingCartsByUserIdQuery(userId, page);
+            PaginationResponse<ShoppingCartDto> paginationResponse = await _mediator.Send(query);
+            return Ok(paginationResponse);
         }
         catch (Exception ex)
         {
@@ -53,28 +40,21 @@ public class ShoppingCartsController : ApiController
         }
     }
 
-    [HttpGet("{menuItemId}", Name = "GetShoppingCartById")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpGet("{userId:guid}/{menuItemId:guid}", Name = "GetShoppingCartById")]
+    [ProducesResponseType(typeof(ShoppingCartDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetShoppingCartById(long menuItemId)
+    public async Task<IActionResult> GetShoppingCartById(Guid userId, Guid menuItemId)
     {
         try
         {
-            Guid userId = GetAuthenticationUserId();
-            if (userId == Guid.Empty)
-            {
-                Unauthorized();
-            }
-
-            Result<ShoppingCart> getShoppingCartResult = await _shoppingCartServices.
-                GetShoppingCartByUserIdMenuItemIdAsync(userId, menuItemId);
+            GetShoppingCartByIdQuery query = new GetShoppingCartByIdQuery(userId, menuItemId);
+            Result<ShoppingCartDto> getShoppingCartResult = await _mediator.Send(query);
             if (getShoppingCartResult.IsFailed)
             {
                 return Problem(getShoppingCartResult.Errors);
             }
 
-            return Ok(_mapper.Map<ShoppingCartDto>(getShoppingCartResult.Value));
+            return Ok(getShoppingCartResult.Value);
         }
         catch (Exception ex)
         {
@@ -83,43 +63,21 @@ public class ShoppingCartsController : ApiController
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> AddToCart(
-        [FromBody] ShoppingCartCreateDto shoppingCartCreateDto)
+    public async Task<IActionResult> AddToCart([FromBody] CreateShoppingCartCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Guid userId = GetAuthenticationUserId();
-            if (userId == Guid.Empty)
-            {
-                return Unauthorized();
-            }
-
-            ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartCreateDto);
-            shoppingCart.LocalUserId = userId;
-            shoppingCart.CreatedAt = DateTime.Now;
-            shoppingCart.UpdatedAt = DateTime.Now;
-
-            Result<ShoppingCart> addToCartResult =
-                await _shoppingCartServices.AddToShoppingCartAsync(shoppingCart);
+            Result addToCartResult = await _mediator.Send(command);
             if (addToCartResult.IsFailed)
             {
                 return Problem(addToCartResult.Errors);
             }
 
-            ShoppingCartDto shoppingCartDto = _mapper.Map<ShoppingCartDto>(shoppingCart);
-
-            return CreatedAtRoute(nameof(GetShoppingCartById),
-                new { menuItemId = shoppingCart.MenuItemId }, shoppingCartDto);
+            return Ok();
         }
         catch (Exception ex)
         {
@@ -127,45 +85,24 @@ public class ShoppingCartsController : ApiController
         }
     }
 
-    [HttpPut("{menuItemId}")]
+    [HttpPut("{userId:guid}/{menuItemId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateShoppingCart(long menuItemId,
-        [FromBody] ShoppingCartUpdateDto shoppingCartUpdateDto)
+    public async Task<IActionResult> UpdateShoppingCart(Guid userId, Guid menuItemId,
+        [FromBody] UpdateShoppingCartCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (userId != command.LocalUserId || menuItemId != command.MenuItemId)
             {
-                return BadRequest(ModelState);
+                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
-
-            Guid userId = GetAuthenticationUserId();
-            if (userId == Guid.Empty)
+            Result updateShoppingCartResult = await _mediator.Send(command);
+            if (updateShoppingCartResult.IsFailed)
             {
-                return Unauthorized();
-            }
-
-            Result<ShoppingCart> getShoppingCartResult = await
-                _shoppingCartServices.GetShoppingCartByUserIdMenuItemIdAsync(userId, menuItemId);
-            if (getShoppingCartResult.IsFailed)
-            {
-                return Problem(getShoppingCartResult.Errors);
-            }
-
-            ShoppingCart shoppingCart = getShoppingCartResult.Value;
-
-            _mapper.Map(shoppingCartUpdateDto, shoppingCart);
-            shoppingCart.UpdatedAt = DateTime.Now;
-
-            Result updateShoppingCartresult =
-                await _shoppingCartServices.UpdateShoppingCartAsync(menuItemId, shoppingCart);
-            if (updateShoppingCartresult.IsFailed)
-            {
-                return Problem(updateShoppingCartresult.Errors);
+                return Problem(updateShoppingCartResult.Errors);
             }
 
             return NoContent();
@@ -176,26 +113,19 @@ public class ShoppingCartsController : ApiController
         }
     }
 
-    [HttpDelete("{menuItem}")]
+    [HttpDelete("{userId:guid}/{menuItemId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteShoppingCart(long menuItem)
+    public async Task<IActionResult> DeleteShoppingCart(Guid userId, Guid menuItemId)
     {
         try
         {
-            Guid userId = GetAuthenticationUserId();
-            if (userId == Guid.Empty)
+            DeleteShoppingCartCommand command = new DeleteShoppingCartCommand(userId, menuItemId);
+            Result deleteShoppingCartResult = await _mediator.Send(command);
+            if (deleteShoppingCartResult.IsFailed)
             {
-                return Unauthorized();
-            }
-
-            Result deleteShoppingCartresult =
-                await _shoppingCartServices.DeleteShoppingCartAsync(userId, menuItem);
-            if (deleteShoppingCartresult.IsFailed)
-            {
-                return Problem(deleteShoppingCartresult.Errors);
+                return Problem(deleteShoppingCartResult.Errors);
             }
 
             return NoContent();
@@ -204,18 +134,5 @@ public class ShoppingCartsController : ApiController
         {
             return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
         }
-    }
-
-    [NonAction]
-    private Guid GetAuthenticationUserId()
-    {
-        ClaimsIdentity? claimsIdentity = (ClaimsIdentity?)User.Identity;
-        Claim? claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
-        if (claim == null)
-        {
-            return Guid.Empty;
-        }
-
-        return Guid.Parse(claim.Value);
     }
 }

@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class LocalUserRepository : Repository<LocalUser>, ILocalUserRepository
 {
-    public LocalUserRepository(FastDeliveruuContext context) : base(context)
+    public LocalUserRepository(Data.FastDeliveruuDbContext context) : base(context)
     {
     }
 

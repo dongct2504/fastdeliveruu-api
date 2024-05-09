@@ -32,6 +32,7 @@ public class RegisterShipperCommandHandler : IRequestHandler<RegisterShipperComm
         CancellationToken cancellationToken)
     {
         Shipper shipper = _mapper.Map<Shipper>(request);
+        shipper.ShipperId = Guid.NewGuid();
         shipper.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         shipper.CreatedAt = DateTime.Now;
         shipper.UpdatedAt = DateTime.Now;

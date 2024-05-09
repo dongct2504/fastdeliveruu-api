@@ -1,11 +1,13 @@
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
-using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Application.MenuItems.Commands.CreateMenuItem;
+using FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
+using FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
+using FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
+using FastDeliveruu.Application.MenuItems.Queries.GetMenuItemById;
 using FluentResults;
-using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,43 +17,24 @@ namespace FastDeliveruu.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/menu-items")]
 public class MenuItemsController : ApiController
 {
-    private readonly PaginationResponse<MenuItemDto> _paginationResponse;
-    private readonly IMenuItemServices _menuItemServices;
-    private readonly ILogger<MenuItemsController> _logger;
-    private readonly IMapper _mapper;
-    private readonly IFileStorageServices _imageServices;
+    private readonly IMediator _mediator;
 
-    public MenuItemsController(IMenuItemServices menuItemServices,
-        ILogger<MenuItemsController> logger,
-        IMapper mapper,
-        IFileStorageServices imageServices)
+    public MenuItemsController(IMediator mediator)
     {
-        _paginationResponse = new PaginationResponse<MenuItemDto>();
-        _menuItemServices = menuItemServices;
-        _logger = logger;
-        _mapper = mapper;
-        _imageServices = imageServices;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = "Default30",
+    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30,
         VaryByQueryKeys = new[] { "genreId", "restaurantId", "page" })]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllMenuItems(int? genreId, int? restaurantId, int page = 1)
+    [ProducesResponseType(typeof(PaginationResponse<MenuItemDetailDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllMenuItems(Guid? genreId, Guid? restaurantId, int page = 1)
     {
         try
         {
-            IEnumerable<MenuItem> menuItems = await _menuItemServices.GetAllFilterMenuItemsAsync(
-                genreId, restaurantId, page);
-
-            _paginationResponse.PageNumber = page;
-            _paginationResponse.PageSize = PagingConstants.DefaultPageSize;
-            _paginationResponse.TotalRecords = await _menuItemServices.GetTotalMenuItemsAsync();
-
-            _paginationResponse.Items = _mapper.Map<IEnumerable<MenuItemDto>>(menuItems);
-
-            return Ok(_paginationResponse);
+            GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(genreId, restaurantId, page);
+            PaginationResponse<MenuItemDetailDto> paginationResponse = await _mediator.Send(query);
+            return Ok(paginationResponse);
         }
         catch (Exception ex)
         {
@@ -59,22 +42,21 @@ public class MenuItemsController : ApiController
         }
     }
 
-    [HttpGet("{id}", Name = "GetMenuItemById")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpGet("{id:guid}", Name = "GetMenuItemById")]
+    [ProducesResponseType(typeof(MenuItemDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetMenuItemById(long id)
+    public async Task<IActionResult> GetMenuItemById(Guid id)
     {
         try
         {
-            Result<MenuItem> getMenuItemResult =
-                await _menuItemServices.GetMenuItemWithRestaurantGenreByIdAsync(id);
+            GetMenuItemByIdQuery query = new GetMenuItemByIdQuery(id);
+            Result<MenuItemDetailDto> getMenuItemResult = await _mediator.Send(query);
             if (getMenuItemResult.IsFailed)
             {
                 return Problem(getMenuItemResult.Errors);
             }
 
-            return Ok(_mapper.Map<MenuItemDetailDto>(getMenuItemResult.Value));
+            return Ok(getMenuItemResult.Value);
         }
         catch (Exception ex)
         {
@@ -84,47 +66,25 @@ public class MenuItemsController : ApiController
 
     [HttpPost]
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(MenuItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateMenuItem([FromForm] MenuItemCreateDto menuItemCreateDto)
+    public async Task<IActionResult> CreateMenuItem([FromForm] CreateMenuItemCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            MenuItem menuItem = _mapper.Map<MenuItem>(menuItemCreateDto);
-
-            // create and save image
-            if (menuItemCreateDto.ImageFile != null)
-            {
-                string uploadImagePath = @"images\menu-items";
-                string? fileNameWithExtension =
-                    await _imageServices.UploadImageAsync(menuItemCreateDto.ImageFile, uploadImagePath);
-                menuItem.ImageUrl = @"\images\menu-items\" + fileNameWithExtension;
-            }
-            menuItem.CreatedAt = DateTime.Now;
-            menuItem.UpdatedAt = DateTime.Now;
-
-            Result<long> createMenuItemResult = await _menuItemServices.CreateMenuItemAsync(menuItem);
+            Result<MenuItemDto> createMenuItemResult = await _mediator.Send(command);
             if (createMenuItemResult.IsFailed)
             {
-                await _imageServices.DeleteImageAsync(menuItem.ImageUrl);
-
                 return Problem(createMenuItemResult.Errors);
             }
 
-            menuItem.MenuItemId = createMenuItemResult.Value;
-
-            MenuItemDto menuItemDto = _mapper.Map<MenuItemDto>(menuItem);
-
-            return CreatedAtRoute(nameof(GetMenuItemById), new { Id = menuItemDto.MenuItemId }, menuItemDto);
+            return CreatedAtRoute(
+                nameof(GetMenuItemById),
+                new { Id = createMenuItemResult.Value.MenuItemId },
+                createMenuItemResult.Value);
         }
         catch (Exception ex)
         {
@@ -132,58 +92,26 @@ public class MenuItemsController : ApiController
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateMenuItem(long id, [FromForm] MenuItemUpdateDto menuItemUpdateDto)
+    public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] UpdateMenuItemCommand command)
     {
         try
         {
-            if (!ModelState.IsValid)
+            if (id != command.MenuItemId)
             {
-                return BadRequest(ModelState);
+                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
             }
 
-            Result<MenuItem> oldMenuItemResult = await _menuItemServices.GetMenuItemByIdAsync(id);
-            if (oldMenuItemResult.IsFailed)
-            {
-                return Problem(oldMenuItemResult.Errors);
-            }
-
-            MenuItem menuItem = oldMenuItemResult.Value;
-            string? oldImagePath = oldMenuItemResult.Value.ImageUrl;
-
-            _mapper.Map(menuItemUpdateDto, menuItem);
-
-            if (menuItemUpdateDto.ImageFile != null)
-            {
-                string uploadImagePath = @"images\menu-items";
-                string? fileNameWithExtension =
-                    await _imageServices.UploadImageAsync(menuItemUpdateDto.ImageFile, uploadImagePath);
-                menuItem.ImageUrl = @"\images\menu-items\" + fileNameWithExtension;
-            }
-            menuItem.UpdatedAt = DateTime.Now;
-
-            Result updateMenuItemResult = await _menuItemServices.UpdateMenuItemAsync(id, menuItem);
+            Result updateMenuItemResult = await _mediator.Send(command);
             if (updateMenuItemResult.IsFailed)
             {
-                if (menuItemUpdateDto.ImageFile != null)
-                {
-                    await _imageServices.DeleteImageAsync(menuItem.ImageUrl);
-                }
-
                 return Problem(updateMenuItemResult.Errors);
-            }
-
-            if (menuItemUpdateDto.ImageFile != null)
-            {
-                // if it has an old one, delete it after successfully updated
-                await _imageServices.DeleteImageAsync(oldImagePath);
             }
 
             return NoContent();
@@ -194,26 +122,22 @@ public class MenuItemsController : ApiController
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteMenuItem(long id)
+    public async Task<IActionResult> DeleteMenuItem(Guid id)
     {
         try
         {
-            Result<MenuItem> getMenuItemResult = await _menuItemServices.GetMenuItemByIdAsync(id);
-            if (getMenuItemResult.IsFailed)
+            DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);
+            Result deleteMenuItemResult = await _mediator.Send(command);
+            if (deleteMenuItemResult.IsFailed)
             {
-                return Problem(getMenuItemResult.Errors);
+                return Problem(deleteMenuItemResult.Errors);
             }
-
-            await _menuItemServices.DeleteMenuItemAsync(id);
-
-            await _imageServices.DeleteImageAsync(getMenuItemResult.Value.ImageUrl);
 
             return NoContent();
         }

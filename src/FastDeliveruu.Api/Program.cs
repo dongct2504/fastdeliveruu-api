@@ -9,6 +9,7 @@ using Serilog;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application.Common.Constants;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -91,7 +92,7 @@ var builder = WebApplication.CreateBuilder(args);
         Password = builder.Configuration["Password"]
     };
 
-    builder.Services.AddDbContext<FastDeliveruuContext>(options =>
+    builder.Services.AddDbContext<FastDeliveruuDbContext>(options =>
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers

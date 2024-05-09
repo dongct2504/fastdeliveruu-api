@@ -39,7 +39,7 @@ namespace FastDeliveruu.Domain.Entities
         public string PhoneNumber { get; set; } = null!;
         public bool IsConfirmPhoneNumber { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? LockoutEndDate { get; set; }
         public bool LockoutEnable { get; set; }

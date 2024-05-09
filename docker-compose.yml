@@ -3,10 +3,10 @@ version: '3.4'
 services:
   fastdeliveruu.api:
     image: ${DOCKER_REGISTRY-}fastdeliveruuapi
-    container_name: fastdeliveruu.api
     build:
       context: .
       dockerfile: src/FastDeliveruu.Api/Dockerfile
+    container_name: fastdeliveruu.api
     ports:
       - 5233:5233
       - 7012:7012

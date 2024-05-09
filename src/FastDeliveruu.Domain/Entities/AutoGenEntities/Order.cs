@@ -16,7 +16,7 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public long OrderId { get; set; }
+        public Guid OrderId { get; set; }
         public Guid ShipperId { get; set; }
         public Guid LocalUserId { get; set; }
         [StringLength(128)]

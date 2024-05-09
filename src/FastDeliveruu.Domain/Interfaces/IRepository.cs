@@ -14,7 +14,6 @@ public interface IRepository<T> where T : class
     Task<T?> GetAsync(QueryOptions<T> options);
 
     Task<T> AddAsync(T entity);
-
     Task DeleteAsync(T entity);
     Task DeleteRangeAsync(T entity);
     Task DeleteRangeAsync(List<T> entities);

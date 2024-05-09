@@ -19,7 +19,7 @@ public class UpdateRestaurantCommandValidator : AbstractValidator<UpdateRestaura
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Must(ValidateForRequest.ValidPhoneNumber);
+            .Must(ValidateForRequest.BeValidPhoneNumber);
 
         RuleFor(x => x.Address)
             .NotEmpty()

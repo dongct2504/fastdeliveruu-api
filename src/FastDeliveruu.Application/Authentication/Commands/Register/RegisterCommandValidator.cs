@@ -13,7 +13,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Must(ValidateForRequest.ValidPhoneNumber).WithMessage("Invalid phone number.");
+            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -22,5 +22,8 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.Password)
             .NotEmpty();
+
+        RuleFor(x => x.Role)
+            .Must(ValidateForRequest.BeValidRole).WithMessage("Role must be Customer, Staff or Admin.");
     }
 }

@@ -24,6 +24,7 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
     public async Task<Result<GenreDto>> Handle(CreateGenreCommand request, CancellationToken cancellationToken)
     {
         Genre genre = _mapper.Map<Genre>(request);
+        genre.GenreId = Guid.NewGuid();
         genre.CreatedAt = DateTime.Now;
         genre.UpdatedAt = DateTime.Now;
 

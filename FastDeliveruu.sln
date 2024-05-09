@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastDeliveruu.Infrastructur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastDeliveruu.Domain.Tests", "test\FastDeliveruu.Domain.Tests\FastDeliveruu.Domain.Tests.csproj", "{7320FEC3-C343-459C-AB70-410BBD252C8C}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{642C294B-0E6A-4260-B0D0-43346CAD6457}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{60AA617B-7832-4427-8B94-1286915AE4FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,10 +63,10 @@ Global
 		{7320FEC3-C343-459C-AB70-410BBD252C8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7320FEC3-C343-459C-AB70-410BBD252C8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7320FEC3-C343-459C-AB70-410BBD252C8C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{642C294B-0E6A-4260-B0D0-43346CAD6457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{642C294B-0E6A-4260-B0D0-43346CAD6457}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{642C294B-0E6A-4260-B0D0-43346CAD6457}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{642C294B-0E6A-4260-B0D0-43346CAD6457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60AA617B-7832-4427-8B94-1286915AE4FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60AA617B-7832-4427-8B94-1286915AE4FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60AA617B-7832-4427-8B94-1286915AE4FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60AA617B-7832-4427-8B94-1286915AE4FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class GenreRepository : Repository<Genre>, IGenreRepository
 {
-    public GenreRepository(FastDeliveruuContext context) : base(context)
+    public GenreRepository(Data.FastDeliveruuDbContext context) : base(context)
     {
     }
 

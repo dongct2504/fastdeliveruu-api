@@ -5,10 +5,10 @@ namespace FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
 
 public class DeleteRestaurantCommand : IRequest<Result>
 {
-    public DeleteRestaurantCommand(int id)
+    public DeleteRestaurantCommand(Guid id)
     {
         Id = id;
     }
 
-    public int Id { get; }
+    public Guid Id { get; }
 }

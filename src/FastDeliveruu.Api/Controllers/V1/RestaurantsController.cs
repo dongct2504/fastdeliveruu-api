@@ -41,10 +41,10 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetRestaurantById")]
+    [HttpGet("{id:guid}", Name = "GetRestaurantById")]
     [ProducesResponseType(typeof(RestaurantDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRestaurantById(int id)
+    public async Task<IActionResult> GetRestaurantById(Guid id)
     {
         try
         {
@@ -64,7 +64,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPost]
-    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(typeof(RestaurantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -91,14 +91,14 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpPut("{id:int}")]
-    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateRestaurant(int id, [FromForm] UpdateRestaurantCommand command)
+    public async Task<IActionResult> UpdateRestaurant(Guid id, [FromForm] UpdateRestaurantCommand command)
     {
         try
         {
@@ -121,13 +121,13 @@ public class RestaurantsController : ApiController
         }
     }
 
-    [HttpDelete("{id:int}")]
-    //[Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> DeleteRestaurant(int id)
+    public async Task<IActionResult> DeleteRestaurant(Guid id)
     {
         try
         {

@@ -34,8 +34,8 @@ public class GetAllShipperQueryHandler : IRequestHandler<GetAllShippersQuery, Pa
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.UserPageSize,
-            TotalRecords = await _shipperRepository.GetCountAsync(),
-            Items = _mapper.Map<IEnumerable<ShipperDto>>(await _shipperRepository.ListAllAsync(options))
+            Items = _mapper.Map<IEnumerable<ShipperDto>>(await _shipperRepository.ListAllAsync(options)),
+            TotalRecords = await _shipperRepository.GetCountAsync()
         };
 
         return paginationResponse;

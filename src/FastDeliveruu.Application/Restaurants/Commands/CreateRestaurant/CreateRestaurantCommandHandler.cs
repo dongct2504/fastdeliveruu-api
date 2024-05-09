@@ -43,6 +43,7 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         }
 
         restaurant = _mapper.Map<Restaurant>(request);
+        restaurant.RestaurantId = Guid.NewGuid();
 
         if (request.ImageFile != null)
         {

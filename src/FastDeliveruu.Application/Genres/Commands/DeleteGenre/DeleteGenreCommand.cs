@@ -5,10 +5,10 @@ namespace FastDeliveruu.Application.Genres.Commands.DeleteGenre;
 
 public class DeleteGenreCommand : IRequest<Result>
 {
-    public DeleteGenreCommand(int id)
+    public DeleteGenreCommand(Guid id)
     {
         Id = id;
     }
 
-    public int Id { get; }
+    public Guid Id { get; }
 }

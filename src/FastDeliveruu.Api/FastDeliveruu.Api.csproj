@@ -7,8 +7,14 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+    <EnableSdkContainerDebugging>True</EnableSdkContainerDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10" />
@@ -21,6 +27,8 @@
     <ProjectReference Include="..\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="wwwroot\menu-items\images\" />
+    <Folder Include="wwwroot\restaurants\images\" />
     <Folder Include="wwwroot\shippers\images\" />
     <Folder Include="wwwroot\users\images\" />
   </ItemGroup>

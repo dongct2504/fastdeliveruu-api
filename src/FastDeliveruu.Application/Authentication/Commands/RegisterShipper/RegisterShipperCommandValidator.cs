@@ -30,7 +30,7 @@ public class RegisterShipperCommandValidator : AbstractValidator<RegisterShipper
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Must(ValidateForRequest.ValidPhoneNumber).WithMessage("Invalid phone number.");
+            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
         RuleFor(x => x.Email)
             .NotEmpty()

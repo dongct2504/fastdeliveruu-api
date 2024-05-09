@@ -6,10 +6,10 @@ namespace FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
 
 public class GetRestaurantByIdQuery : IRequest<Result<RestaurantDetailDto>>
 {
-    public GetRestaurantByIdQuery(int id)
+    public GetRestaurantByIdQuery(Guid id)
     {
         Id = id;
     }
 
-    public int Id { get; }
+    public Guid Id { get; }
 }

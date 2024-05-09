@@ -2,11 +2,11 @@ namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 
 public class MenuItemDto
 {
-    public long MenuItemId { get; set; }
+    public Guid MenuItemId { get; set; }
 
-    public int RestaurantId { get; set; }
+    public Guid RestaurantId { get; set; }
 
-    public int GenreId { get; set; }
+    public Guid GenreId { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -17,6 +17,10 @@ public class MenuItemDto
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }
+
+    public decimal DiscountAmount => Price * DiscountPercent;
+
+    public decimal DiscountPrice => Price - DiscountAmount;
 
     public string? ImageUrl { get; set; }
 }

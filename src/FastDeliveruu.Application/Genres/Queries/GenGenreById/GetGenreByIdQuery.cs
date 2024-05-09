@@ -6,10 +6,10 @@ namespace FastDeliveruu.Application.Genres.Queries.GenGenreById;
 
 public class GetGenreByIdQuery : IRequest<Result<GenreDetailDto>>
 {
-    public GetGenreByIdQuery(int id)
+    public GetGenreByIdQuery(Guid id)
     {
         Id = id;
     }
 
-    public int Id { get; }
+    public Guid Id { get; }
 }

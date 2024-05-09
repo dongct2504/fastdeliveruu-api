@@ -34,8 +34,8 @@ public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, Pagin
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.DefaultPageSize,
-            TotalRecords = await _genreRepository.GetCountAsync(),
-            Items = _mapper.Map<IEnumerable<GenreDto>>(await _genreRepository.ListAllAsync(options))
+            Items = _mapper.Map<IEnumerable<GenreDto>>(await _genreRepository.ListAllAsync(options)),
+            TotalRecords = await _genreRepository.GetCountAsync()
         };
 
         return paginationResponse;
