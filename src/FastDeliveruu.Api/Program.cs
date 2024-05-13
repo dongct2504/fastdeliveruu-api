@@ -10,6 +10,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Api.Middleware;
+using Asp.Versioning;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -113,14 +114,14 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddApiVersioning(options =>
     {
-        options.AssumeDefaultVersionWhenUnspecified = true;
         options.DefaultApiVersion = new ApiVersion(1, 0);
         options.ReportApiVersions = true; // report the support version in the response headers
-    });
-    builder.Services.AddVersionedApiExplorer(options =>
+        options.AssumeDefaultVersionWhenUnspecified = true;
+    }).AddApiExplorer(options =>
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true; // automatically change to the version (v1)
+        options.AddApiVersionParametersWhenVersionNeutral = true;
     });
 }
 
