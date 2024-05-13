@@ -9,6 +9,7 @@ using FastDeliveruu.Application.Users.Commands.UpdateUser;
 using FastDeliveruu.Application.Users.Commands.DeleteUser;
 using Microsoft.AspNetCore.Authorization;
 using FastDeliveruu.Application.Common.Constants;
+using Asp.Versioning;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 

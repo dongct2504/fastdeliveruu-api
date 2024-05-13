@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using FastDeliveruu.Application.Authentication.Commands.Register;
 using FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
 using FastDeliveruu.Application.Authentication.Queries.EmailConfirm;

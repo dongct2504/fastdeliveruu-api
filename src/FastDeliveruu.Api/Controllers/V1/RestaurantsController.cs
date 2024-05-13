@@ -10,6 +10,7 @@ using FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
 using FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
 using FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 using FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
+using Asp.Versioning;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 

@@ -10,6 +10,7 @@ using FastDeliveruu.Application.Genres.Queries.GenGenreById;
 using FastDeliveruu.Application.Genres.Commands.CreateGenre;
 using FastDeliveruu.Application.Genres.Commands.UpdateGenre;
 using FastDeliveruu.Application.Genres.Commands.DeleteGenre;
+using Asp.Versioning;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
