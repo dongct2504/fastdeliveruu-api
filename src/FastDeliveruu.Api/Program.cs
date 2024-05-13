@@ -123,6 +123,8 @@ var builder = WebApplication.CreateBuilder(args);
         options.SubstituteApiVersionInUrl = true; // automatically change to the version (v1)
         options.AddApiVersionParametersWhenVersionNeutral = true;
     });
+
+    builder.Services.AddCors();
 }
 
 var app = builder.Build();
@@ -147,6 +149,10 @@ var app = builder.Build();
     app.UseResponseCaching();
 
     app.UseStaticFiles();
+
+    app.UseCors(policy => policy.AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithOrigins("http://localhost:4200"));
 
     app.UseAuthentication();
     app.UseAuthorization();
