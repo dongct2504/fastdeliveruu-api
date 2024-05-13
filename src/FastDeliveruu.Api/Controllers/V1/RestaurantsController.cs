@@ -29,16 +29,9 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(typeof(PaginationResponse<RestaurantDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRestaurants(int page = 1)
     {
-        try
-        {
-            GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(page);
-            PaginationResponse<RestaurantDto> paginationResponse = await _mediator.Send(query);
-            return Ok(paginationResponse);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(page);
+        PaginationResponse<RestaurantDto> paginationResponse = await _mediator.Send(query);
+        return Ok(paginationResponse);
     }
 
     [HttpGet("{id:guid}", Name = "GetRestaurantById")]
@@ -46,21 +39,14 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRestaurantById(Guid id)
     {
-        try
+        GetRestaurantByIdQuery query = new GetRestaurantByIdQuery(id);
+        Result<RestaurantDetailDto> getRestaurantResult = await _mediator.Send(query);
+        if (getRestaurantResult.IsFailed)
         {
-            GetRestaurantByIdQuery query = new GetRestaurantByIdQuery(id);
-            Result<RestaurantDetailDto> getRestaurantResult = await _mediator.Send(query);
-            if (getRestaurantResult.IsFailed)
-            {
-                return Problem(getRestaurantResult.Errors);
-            }
+            return Problem(getRestaurantResult.Errors);
+        }
 
-            return Ok(getRestaurantResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getRestaurantResult.Value);
     }
 
     [HttpPost]
@@ -72,23 +58,16 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateRestaurant([FromForm] CreateRestaurantCommand command)
     {
-        try
+        Result<RestaurantDto> createRestaurantResult = await _mediator.Send(command);
+        if (createRestaurantResult.IsFailed)
         {
-            Result<RestaurantDto> createRestaurantResult = await _mediator.Send(command);
-            if (createRestaurantResult.IsFailed)
-            {
-                return Problem(createRestaurantResult.Errors);
-            }
+            return Problem(createRestaurantResult.Errors);
+        }
 
-            return CreatedAtRoute(
-                nameof(GetRestaurantById),
-                new { Id = createRestaurantResult.Value.RestaurantId },
-                createRestaurantResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return CreatedAtRoute(
+            nameof(GetRestaurantById),
+            new { Id = createRestaurantResult.Value.RestaurantId },
+            createRestaurantResult.Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -100,25 +79,18 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateRestaurant(Guid id, [FromForm] UpdateRestaurantCommand command)
     {
-        try
+        if (id != command.RestaurantId)
         {
-            if (id != command.RestaurantId)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
-            }
-
-            Result updateRestaurantResult = await _mediator.Send(command);
-            if (updateRestaurantResult.IsFailed)
-            {
-                return Problem(updateRestaurantResult.Errors);
-            }
-
-            return NoContent();
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }
-        catch (Exception ex)
+
+        Result updateRestaurantResult = await _mediator.Send(command);
+        if (updateRestaurantResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(updateRestaurantResult.Errors);
         }
+
+        return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
@@ -129,20 +101,13 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteRestaurant(Guid id)
     {
-        try
+        DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);
+        Result deleteRestaurantResult = await _mediator.Send(command);
+        if (deleteRestaurantResult.IsFailed)
         {
-            DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);
-            Result deleteRestaurantResult = await _mediator.Send(command);
-            if (deleteRestaurantResult.IsFailed)
-            {
-                return Problem(deleteRestaurantResult.Errors);
-            }
+            return Problem(deleteRestaurantResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 }

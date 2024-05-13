@@ -73,7 +73,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.CreatedAt = DateTime.Now;
         order.UpdatedAt = DateTime.Now;
 
-        return await _orderRepository.AddAsync(order);
+        await _orderRepository.AddAsync(order);
+
+        return order;
     }
 
     private async Task<Guid> GetNearestShipper(Order order)

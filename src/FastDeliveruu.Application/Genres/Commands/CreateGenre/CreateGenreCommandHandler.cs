@@ -39,8 +39,8 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
             return Result.Fail<GenreDto>(new DuplicateError(message));
         }
 
-        Genre createdGenre = await _genreRepository.AddAsync(genre);
+        await _genreRepository.AddAsync(genre);
 
-        return _mapper.Map<GenreDto>(createdGenre);
+        return _mapper.Map<GenreDto>(genre);
     }
 }

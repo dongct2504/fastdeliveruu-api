@@ -28,16 +28,9 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(typeof(PaginationResponse<ShoppingCartDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllShoppingCartsByUserId(Guid userId, int page = 1)
     {
-        try
-        {
-            GetAllShoppingCartsByUserIdQuery query = new GetAllShoppingCartsByUserIdQuery(userId, page);
-            PaginationResponse<ShoppingCartDto> paginationResponse = await _mediator.Send(query);
-            return Ok(paginationResponse);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        GetAllShoppingCartsByUserIdQuery query = new GetAllShoppingCartsByUserIdQuery(userId, page);
+        PaginationResponse<ShoppingCartDto> paginationResponse = await _mediator.Send(query);
+        return Ok(paginationResponse);
     }
 
     [HttpGet("{userId:guid}/{menuItemId:guid}", Name = "GetShoppingCartById")]
@@ -45,21 +38,14 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetShoppingCartById(Guid userId, Guid menuItemId)
     {
-        try
+        GetShoppingCartByIdQuery query = new GetShoppingCartByIdQuery(userId, menuItemId);
+        Result<ShoppingCartDto> getShoppingCartResult = await _mediator.Send(query);
+        if (getShoppingCartResult.IsFailed)
         {
-            GetShoppingCartByIdQuery query = new GetShoppingCartByIdQuery(userId, menuItemId);
-            Result<ShoppingCartDto> getShoppingCartResult = await _mediator.Send(query);
-            if (getShoppingCartResult.IsFailed)
-            {
-                return Problem(getShoppingCartResult.Errors);
-            }
+            return Problem(getShoppingCartResult.Errors);
+        }
 
-            return Ok(getShoppingCartResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getShoppingCartResult.Value);
     }
 
     [HttpPost]
@@ -69,20 +55,13 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AddToCart([FromBody] CreateShoppingCartCommand command)
     {
-        try
+        Result addToCartResult = await _mediator.Send(command);
+        if (addToCartResult.IsFailed)
         {
-            Result addToCartResult = await _mediator.Send(command);
-            if (addToCartResult.IsFailed)
-            {
-                return Problem(addToCartResult.Errors);
-            }
+            return Problem(addToCartResult.Errors);
+        }
 
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok();
     }
 
     [HttpPut("{userId:guid}/{menuItemId:guid}")]
@@ -90,27 +69,22 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdateShoppingCart(Guid userId, Guid menuItemId,
+    public async Task<IActionResult> UpdateShoppingCart(
+        Guid userId,
+        Guid menuItemId,
         [FromBody] UpdateShoppingCartCommand command)
     {
-        try
+        if (userId != command.LocalUserId || menuItemId != command.MenuItemId)
         {
-            if (userId != command.LocalUserId || menuItemId != command.MenuItemId)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
-            }
-            Result updateShoppingCartResult = await _mediator.Send(command);
-            if (updateShoppingCartResult.IsFailed)
-            {
-                return Problem(updateShoppingCartResult.Errors);
-            }
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
+        }
+        Result updateShoppingCartResult = await _mediator.Send(command);
+        if (updateShoppingCartResult.IsFailed)
+        {
+            return Problem(updateShoppingCartResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 
     [HttpDelete("{userId:guid}/{menuItemId:guid}")]
@@ -119,20 +93,13 @@ public class ShoppingCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteShoppingCart(Guid userId, Guid menuItemId)
     {
-        try
+        DeleteShoppingCartCommand command = new DeleteShoppingCartCommand(userId, menuItemId);
+        Result deleteShoppingCartResult = await _mediator.Send(command);
+        if (deleteShoppingCartResult.IsFailed)
         {
-            DeleteShoppingCartCommand command = new DeleteShoppingCartCommand(userId, menuItemId);
-            Result deleteShoppingCartResult = await _mediator.Send(command);
-            if (deleteShoppingCartResult.IsFailed)
-            {
-                return Problem(deleteShoppingCartResult.Errors);
-            }
+            return Problem(deleteShoppingCartResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 }

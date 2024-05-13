@@ -80,8 +80,8 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         menuItem.CreatedAt = DateTime.Now;
         menuItem.UpdatedAt = DateTime.Now;
 
-        MenuItem createdMenuItem = await _menuItemRepository.AddAsync(menuItem);
+        await _menuItemRepository.AddAsync(menuItem);
 
-        return _mapper.Map<MenuItemDto>(createdMenuItem);
+        return _mapper.Map<MenuItemDto>(menuItem);
     }
 }

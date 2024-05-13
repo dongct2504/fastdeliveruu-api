@@ -29,17 +29,10 @@ public class GenresController : ApiController
     [ProducesResponseType(typeof(PaginationResponse<GenreDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGenres(int page = 1)
     {
-        try
-        {
-            GetAllGenresQuery query = new GetAllGenresQuery(page);
-            PaginationResponse<GenreDto> getAllGenres = await _mediator.Send(query);
+        GetAllGenresQuery query = new GetAllGenresQuery(page);
+        PaginationResponse<GenreDto> getAllGenres = await _mediator.Send(query);
 
-            return Ok(getAllGenres);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getAllGenres);
     }
 
     [HttpGet("{id:guid}", Name = "GetGenreById")]
@@ -47,21 +40,14 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetGenreById(Guid id)
     {
-        try
+        GetGenreByIdQuery query = new GetGenreByIdQuery(id);
+        Result<GenreDetailDto> getGenreResult = await _mediator.Send(query);
+        if (getGenreResult.IsFailed)
         {
-            GetGenreByIdQuery query = new GetGenreByIdQuery(id);
-            Result<GenreDetailDto> getGenreResult = await _mediator.Send(query);
-            if (getGenreResult.IsFailed)
-            {
-                return Problem(getGenreResult.Errors);
-            }
+            return Problem(getGenreResult.Errors);
+        }
 
-            return Ok(getGenreResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getGenreResult.Value);
     }
 
     [HttpPost]
@@ -73,23 +59,16 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateGenre([FromBody] CreateGenreCommand command)
     {
-        try
+        Result<GenreDto> createGenreResult = await _mediator.Send(command);
+        if (createGenreResult.IsFailed)
         {
-            Result<GenreDto> createGenreResult = await _mediator.Send(command);
-            if (createGenreResult.IsFailed)
-            {
-                return Problem(createGenreResult.Errors);
-            }
+            return Problem(createGenreResult.Errors);
+        }
 
-            return CreatedAtRoute(
-                nameof(GetGenreById),
-                new { Id = createGenreResult.Value.GenreId },
-                createGenreResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return CreatedAtRoute(
+            nameof(GetGenreById),
+            new { Id = createGenreResult.Value.GenreId },
+            createGenreResult.Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -101,25 +80,18 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateGenre(Guid id, [FromBody] UpdateGenreCommand command)
     {
-        try
+        if (id != command.GenreId)
         {
-            if (id != command.GenreId)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
-            }
-
-            Result updateGenreResult = await _mediator.Send(command);
-            if (updateGenreResult.IsFailed)
-            {
-                return Problem(updateGenreResult.Errors);
-            }
-
-            return NoContent();
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }
-        catch (Exception ex)
+
+        Result updateGenreResult = await _mediator.Send(command);
+        if (updateGenreResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(updateGenreResult.Errors);
         }
+
+        return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
@@ -130,20 +102,13 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteGenre(Guid id)
     {
-        try
+        DeleteGenreCommand command = new DeleteGenreCommand(id);
+        Result deleteGenreResult = await _mediator.Send(command);
+        if (deleteGenreResult.IsFailed)
         {
-            DeleteGenreCommand command = new DeleteGenreCommand(id);
-            Result deleteGenreResult = await _mediator.Send(command);
-            if (deleteGenreResult.IsFailed)
-            {
-                return Problem(deleteGenreResult.Errors);
-            }
+            return Problem(deleteGenreResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 }

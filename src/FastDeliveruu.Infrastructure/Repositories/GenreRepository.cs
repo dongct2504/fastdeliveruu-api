@@ -1,6 +1,5 @@
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 

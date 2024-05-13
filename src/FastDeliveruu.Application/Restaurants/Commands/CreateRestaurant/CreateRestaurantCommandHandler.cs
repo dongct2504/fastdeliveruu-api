@@ -54,8 +54,8 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         restaurant.CreatedAt = DateTime.Now;
         restaurant.UpdatedAt = DateTime.Now;
 
-        Restaurant createdRestaurant = await _restaurantRepository.AddAsync(restaurant);
+        await _restaurantRepository.AddAsync(restaurant);
 
-        return _mapper.Map<RestaurantDto>(createdRestaurant);
+        return _mapper.Map<RestaurantDto>(restaurant);
     }
 }

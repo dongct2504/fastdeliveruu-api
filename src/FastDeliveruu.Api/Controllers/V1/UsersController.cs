@@ -30,17 +30,10 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllUsers(int page = 1)
     {
-        try
-        {
-            GetAllUsersQuery query = new GetAllUsersQuery(page);
-            PaginationResponse<LocalUserDto> getAllUsers = await _mediator.Send(query);
+        GetAllUsersQuery query = new GetAllUsersQuery(page);
+        PaginationResponse<LocalUserDto> getAllUsers = await _mediator.Send(query);
 
-            return Ok(getAllUsers);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getAllUsers);
     }
 
     [HttpGet("{id:guid}", Name = "GetUserById")]
@@ -51,21 +44,14 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
-        try
+        GetUserByIdQuery query = new GetUserByIdQuery(id);
+        Result<LocalUserDto> getUserResult = await _mediator.Send(query);
+        if (getUserResult.IsFailed)
         {
-            GetUserByIdQuery query = new GetUserByIdQuery(id);
-            Result<LocalUserDto> getUserResult = await _mediator.Send(query);
-            if (getUserResult.IsFailed)
-            {
-                return Problem(getUserResult.Errors);
-            }
+            return Problem(getUserResult.Errors);
+        }
 
-            return Ok(getUserResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getUserResult.Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -77,25 +63,18 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromForm] UpdateUserCommand command)
     {
-        try
+        if (id != command.LocalUserId)
         {
-            if (id != command.LocalUserId)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
-            }
-
-            Result updateLocalUserResult = await _mediator.Send(command);
-            if (updateLocalUserResult.IsFailed)
-            {
-                return Problem(updateLocalUserResult.Errors);
-            }
-
-            return NoContent();
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }
-        catch (Exception ex)
+
+        Result updateLocalUserResult = await _mediator.Send(command);
+        if (updateLocalUserResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(updateLocalUserResult.Errors);
         }
+
+        return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
@@ -106,20 +85,13 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
-        try
+        DeleteUserCommand command = new DeleteUserCommand(id);
+        Result deleteUserResult = await _mediator.Send(command);
+        if (deleteUserResult.IsFailed)
         {
-            DeleteUserCommand command = new DeleteUserCommand(id);
-            Result deleteUserResult = await _mediator.Send(command);
-            if (deleteUserResult.IsFailed)
-            {
-                return Problem(deleteUserResult.Errors);
-            }
+            return Problem(deleteUserResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 }

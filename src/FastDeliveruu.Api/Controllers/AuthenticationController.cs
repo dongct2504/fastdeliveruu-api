@@ -31,23 +31,16 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        try
+        Result<AuthenticationResponse> authenticationResult = await _mediator.Send(command);
+        if (authenticationResult.IsFailed)
         {
-            Result<AuthenticationResponse> authenticationResult = await _mediator.Send(command);
-            if (authenticationResult.IsFailed)
-            {
-                return Problem(authenticationResult.Errors);
-            }
-
-            await SendEmailAsync(authenticationResult.Value.LocalUserDto.Email,
-                authenticationResult.Value.Token);
-
-            return Ok(authenticationResult.Value);
+            return Problem(authenticationResult.Errors);
         }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+
+        await SendEmailAsync(authenticationResult.Value.LocalUserDto.Email,
+            authenticationResult.Value.Token);
+
+        return Ok(authenticationResult.Value);
     }
 
     [HttpPost("register-shipper")]
@@ -56,23 +49,16 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterShipper([FromBody] RegisterShipperCommand command)
     {
-        try
+        Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(command);
+        if (authenticationResult.IsFailed)
         {
-            Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(command);
-            if (authenticationResult.IsFailed)
-            {
-                return Problem(authenticationResult.Errors);
-            }
-
-            await SendEmailAsync(authenticationResult.Value.ShipperDto.Email,
-                authenticationResult.Value.Token);
-
-            return Ok(authenticationResult.Value);
+            return Problem(authenticationResult.Errors);
         }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+
+        await SendEmailAsync(authenticationResult.Value.ShipperDto.Email,
+            authenticationResult.Value.Token);
+
+        return Ok(authenticationResult.Value);
     }
 
     [HttpPost("login")]
@@ -80,20 +66,13 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginQuery query)
     {
-        try
+        Result<AuthenticationResponse> authenticationResult = await _mediator.Send(query);
+        if (authenticationResult.IsFailed)
         {
-            Result<AuthenticationResponse> authenticationResult = await _mediator.Send(query);
-            if (authenticationResult.IsFailed)
-            {
-                return Problem(authenticationResult.Errors);
-            }
+            return Problem(authenticationResult.Errors);
+        }
 
-            return Ok(authenticationResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(authenticationResult.Value);
     }
 
     [HttpPost("login-shipper")]
@@ -101,20 +80,13 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginShipper([FromBody] LoginShipperQuery query)
     {
-        try
+        Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(query);
+        if (authenticationResult.IsFailed)
         {
-            Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(query);
-            if (authenticationResult.IsFailed)
-            {
-                return Problem(authenticationResult.Errors);
-            }
+            return Problem(authenticationResult.Errors);
+        }
 
-            return Ok(authenticationResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(authenticationResult.Value);
     }
 
     [HttpGet("confirm-email")]
@@ -123,22 +95,15 @@ public class AuthenticationController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ConfirmEmail(string email, string token)
     {
-        try
-        {
-            EmailConfirmQuery query = new EmailConfirmQuery(email, token);
+        EmailConfirmQuery query = new EmailConfirmQuery(email, token);
 
-            Result<bool> isConfirmEmailResult = await _mediator.Send(query);
-            if (isConfirmEmailResult.IsFailed)
-            {
-                return Problem(isConfirmEmailResult.Errors);
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
+        Result<bool> isConfirmEmailResult = await _mediator.Send(query);
+        if (isConfirmEmailResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(isConfirmEmailResult.Errors);
         }
+
+        return Ok();
     }
 
     [NonAction]

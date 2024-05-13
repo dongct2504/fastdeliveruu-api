@@ -30,16 +30,9 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(typeof(PaginationResponse<MenuItemDetailDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllMenuItems(Guid? genreId, Guid? restaurantId, int page = 1)
     {
-        try
-        {
-            GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(genreId, restaurantId, page);
-            PaginationResponse<MenuItemDetailDto> paginationResponse = await _mediator.Send(query);
-            return Ok(paginationResponse);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(genreId, restaurantId, page);
+        PaginationResponse<MenuItemDetailDto> paginationResponse = await _mediator.Send(query);
+        return Ok(paginationResponse);
     }
 
     [HttpGet("{id:guid}", Name = "GetMenuItemById")]
@@ -47,21 +40,14 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMenuItemById(Guid id)
     {
-        try
+        GetMenuItemByIdQuery query = new GetMenuItemByIdQuery(id);
+        Result<MenuItemDetailDto> getMenuItemResult = await _mediator.Send(query);
+        if (getMenuItemResult.IsFailed)
         {
-            GetMenuItemByIdQuery query = new GetMenuItemByIdQuery(id);
-            Result<MenuItemDetailDto> getMenuItemResult = await _mediator.Send(query);
-            if (getMenuItemResult.IsFailed)
-            {
-                return Problem(getMenuItemResult.Errors);
-            }
+            return Problem(getMenuItemResult.Errors);
+        }
 
-            return Ok(getMenuItemResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getMenuItemResult.Value);
     }
 
     [HttpPost]
@@ -73,23 +59,16 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateMenuItem([FromForm] CreateMenuItemCommand command)
     {
-        try
+        Result<MenuItemDto> createMenuItemResult = await _mediator.Send(command);
+        if (createMenuItemResult.IsFailed)
         {
-            Result<MenuItemDto> createMenuItemResult = await _mediator.Send(command);
-            if (createMenuItemResult.IsFailed)
-            {
-                return Problem(createMenuItemResult.Errors);
-            }
+            return Problem(createMenuItemResult.Errors);
+        }
 
-            return CreatedAtRoute(
-                nameof(GetMenuItemById),
-                new { Id = createMenuItemResult.Value.MenuItemId },
-                createMenuItemResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return CreatedAtRoute(
+            nameof(GetMenuItemById),
+            new { Id = createMenuItemResult.Value.MenuItemId },
+            createMenuItemResult.Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -101,25 +80,18 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] UpdateMenuItemCommand command)
     {
-        try
+        if (id != command.MenuItemId)
         {
-            if (id != command.MenuItemId)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
-            }
-
-            Result updateMenuItemResult = await _mediator.Send(command);
-            if (updateMenuItemResult.IsFailed)
-            {
-                return Problem(updateMenuItemResult.Errors);
-            }
-
-            return NoContent();
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }
-        catch (Exception ex)
+
+        Result updateMenuItemResult = await _mediator.Send(command);
+        if (updateMenuItemResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(updateMenuItemResult.Errors);
         }
+
+        return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
@@ -130,20 +102,13 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteMenuItem(Guid id)
     {
-        try
+        DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);
+        Result deleteMenuItemResult = await _mediator.Send(command);
+        if (deleteMenuItemResult.IsFailed)
         {
-            DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);
-            Result deleteMenuItemResult = await _mediator.Send(command);
-            if (deleteMenuItemResult.IsFailed)
-            {
-                return Problem(deleteMenuItemResult.Errors);
-            }
+            return Problem(deleteMenuItemResult.Errors);
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return NoContent();
     }
 }

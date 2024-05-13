@@ -9,7 +9,7 @@ using Serilog;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Application.Common.Constants;
-using Microsoft.Extensions.FileProviders;
+using FastDeliveruu.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -43,6 +43,7 @@ var builder = WebApplication.CreateBuilder(args);
             In = ParameterLocation.Header,
             Scheme = "Bearer"
         });
+
         options.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
             {
@@ -60,6 +61,7 @@ var builder = WebApplication.CreateBuilder(args);
                 new List<string>()
             }
         });
+
         options.SwaggerDoc("v1", new OpenApiInfo // 'v1' name must match the swagger endpoint bellow
         {
             Version = "1.0",
@@ -71,6 +73,7 @@ var builder = WebApplication.CreateBuilder(args);
                 Url = new Uri("https://example.com/license")
             }
         });
+
         options.SwaggerDoc("v2", new OpenApiInfo
         {
             Version = "2.0",
@@ -96,7 +99,7 @@ var builder = WebApplication.CreateBuilder(args);
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers
-    builder.Services.AddScoped<IFileStorageServices, FileStorageServices>();
+    builder.Services.AddSingleton<IFileStorageServices, FileStorageServices>();
     builder.Services
         .AddApplication()
         .AddInfrastructure(builder.Configuration);
@@ -134,7 +137,9 @@ var app = builder.Build();
         });
     }
 
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
+
+    app.UseMiddleware<ExceptionHandlerMiddleware>();
 
     app.UseSerilogRequestLogging();
 

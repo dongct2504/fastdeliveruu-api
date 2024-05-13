@@ -28,18 +28,13 @@ public class RegisterShipperCommandHandler : IRequestHandler<RegisterShipperComm
         _mapper = mapper;
     }
 
-    public async Task<Result<AuthenticationShipperResponse>> Handle(RegisterShipperCommand request,
+    public async Task<Result<AuthenticationShipperResponse>> Handle(
+        RegisterShipperCommand request,
         CancellationToken cancellationToken)
     {
-        Shipper shipper = _mapper.Map<Shipper>(request);
-        shipper.ShipperId = Guid.NewGuid();
-        shipper.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        shipper.CreatedAt = DateTime.Now;
-        shipper.UpdatedAt = DateTime.Now;
-
         QueryOptions<Shipper> options = new QueryOptions<Shipper>
         {
-            Where = s => s.Cccd == shipper.Cccd
+            Where = s => s.Cccd == request.Cccd
         };
         Shipper? isShipperExist = await _shipperRepository.GetAsync(options);
         if (isShipperExist != null)
@@ -49,9 +44,13 @@ public class RegisterShipperCommandHandler : IRequestHandler<RegisterShipperComm
             return Result.Fail<AuthenticationShipperResponse>(new DuplicateError(message));
         }
 
-        Shipper createdShipper = await _shipperRepository.AddAsync(shipper);
+        Shipper shipper = _mapper.Map<Shipper>(request);
+        shipper.ShipperId = Guid.NewGuid();
+        shipper.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        shipper.CreatedAt = DateTime.Now;
+        shipper.UpdatedAt = DateTime.Now;
 
-        shipper.ShipperId = createdShipper.ShipperId;
+        await _shipperRepository.AddAsync(shipper);
 
         string token = _jwtTokenGenerator.GenerateEmailConfirmationToken(shipper.ShipperId, shipper.Email);
 

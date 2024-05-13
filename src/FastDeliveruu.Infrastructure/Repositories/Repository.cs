@@ -87,12 +87,10 @@ public class Repository<T> : IRepository<T> where T : class
         return query;
     }
 
-    public async Task<T> AddAsync(T entity)
+    public async Task AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
         await _dbContext.SaveChangesAsync();
-
-        return entity;
     }
 
     public async Task DeleteAsync(T entity)

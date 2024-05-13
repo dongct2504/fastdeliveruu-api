@@ -27,21 +27,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         _localUserRepository = localUserRepository;
     }
 
-    public async Task<Result<AuthenticationResponse>> Handle(RegisterCommand request,
+    public async Task<Result<AuthenticationResponse>> Handle(
+        RegisterCommand request,
         CancellationToken cancellationToken)
     {
-        LocalUser localUser = _mapper.Map<LocalUser>(request);
-        localUser.LocalUserId = Guid.NewGuid();
-        localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        localUser.Role = request.Role ?? "Customer";
-        localUser.CreatedAt = DateTime.Now;
-        localUser.UpdatedAt = DateTime.Now;
-
         QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
         {
-            Where = u => u.UserName == localUser.UserName || u.Email == localUser.Email
+            Where = u => u.UserName == request.UserName || u.Email == request.Email
         };
-
         LocalUser? isLocalUserExist = await _localUserRepository.GetAsync(options);
         if (isLocalUserExist != null)
         {
@@ -50,9 +43,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
             return Result.Fail<AuthenticationResponse>(new DuplicateError(message));
         }
 
-        LocalUser createdUser = await _localUserRepository.AddAsync(localUser);
+        LocalUser localUser = _mapper.Map<LocalUser>(request);
+        localUser.LocalUserId = Guid.NewGuid();
+        localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        localUser.Role = request.Role ?? "Customer";
+        localUser.CreatedAt = DateTime.Now;
+        localUser.UpdatedAt = DateTime.Now;
 
-        localUser.LocalUserId = createdUser.LocalUserId;
+        await _localUserRepository.AddAsync(localUser);
 
         string token = _jwtTokenGenerator.GenerateEmailConfirmationToken(localUser.LocalUserId, localUser.Email);
 

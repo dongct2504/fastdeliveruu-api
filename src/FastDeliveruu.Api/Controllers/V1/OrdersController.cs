@@ -35,16 +35,9 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAllOrdersByUserId(Guid userId, int page = 1)
     {
-        try
-        {
-            GetAllOrdersByUserIdQuery query = new GetAllOrdersByUserIdQuery(userId, page);
-            PaginationResponse<OrderDto> paginationResponse = await _mediator.Send(query);
-            return Ok(paginationResponse);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        GetAllOrdersByUserIdQuery query = new GetAllOrdersByUserIdQuery(userId, page);
+        PaginationResponse<OrderDto> paginationResponse = await _mediator.Send(query);
+        return Ok(paginationResponse);
     }
 
     [HttpGet("{userId:guid}/{id:guid}", Name = "GetOrderbyId")]
@@ -53,21 +46,14 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetOrderbyId(Guid userId, Guid id)
     {
-        try
+        GetOrderByIdQuery query = new GetOrderByIdQuery(userId, id);
+        Result<OrderHeaderDetailDto> getOrderResult = await _mediator.Send(query);
+        if (getOrderResult.IsFailed)
         {
-            GetOrderByIdQuery query = new GetOrderByIdQuery(userId, id);
-            Result<OrderHeaderDetailDto> getOrderResult = await _mediator.Send(query);
-            if (getOrderResult.IsFailed)
-            {
-                return Problem(getOrderResult.Errors);
-            }
+            return Problem(getOrderResult.Errors);
+        }
 
-            return Ok(getOrderResult.Value);
-        }
-        catch (Exception ex)
-        {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
-        }
+        return Ok(getOrderResult.Value);
     }
 
     [HttpPost]
@@ -77,40 +63,33 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Checkout([FromBody] CreateOrderCommand command)
     {
-        try
+        Result<Order> createOrderResult = await _mediator.Send(command);
+        if (createOrderResult.IsFailed)
         {
-            Result<Order> createOrderResult = await _mediator.Send(command);
-            if (createOrderResult.IsFailed)
-            {
-                return Problem(createOrderResult.Errors);
-            }
-
-            string paymentUrl = string.Empty;
-
-            switch (command.PaymentMethod)
-            {
-                case PaymentMethods.Cash:
-                    PaymentResponse paymentResponse = new PaymentResponse()
-                    {
-                        IsSuccess = true,
-                        OrderId = createOrderResult.Value.OrderId,
-                        OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
-                        PaymentMethod = createOrderResult.Value.PaymentMethod ?? PaymentMethods.Cash,
-                        TotalAmount = createOrderResult.Value.TotalAmount,
-                        TransactionId = createOrderResult.Value.TransactionId ?? "0"
-                    };
-                    return Ok(paymentResponse);
-                case PaymentMethods.Vnpay:
-                    paymentUrl = _vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value);
-                    break;
-            }
-
-            return Ok(paymentUrl);
+            return Problem(createOrderResult.Errors);
         }
-        catch (Exception ex)
+
+        string paymentUrl = string.Empty;
+
+        switch (command.PaymentMethod)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            case PaymentMethods.Cash:
+                PaymentResponse paymentResponse = new PaymentResponse()
+                {
+                    IsSuccess = true,
+                    OrderId = createOrderResult.Value.OrderId,
+                    OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
+                    PaymentMethod = createOrderResult.Value.PaymentMethod ?? PaymentMethods.Cash,
+                    TotalAmount = createOrderResult.Value.TotalAmount,
+                    TransactionId = createOrderResult.Value.TransactionId ?? "0"
+                };
+                return Ok(paymentResponse);
+            case PaymentMethods.Vnpay:
+                paymentUrl = _vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value);
+                break;
         }
+
+        return Ok(paymentUrl);
     }
 
     [AllowAnonymous]
@@ -120,27 +99,20 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VnpayReturn()
     {
-        try
+        VnpayResponse? vnpayResponse = _vnPayServices.PaymentExecute(Request.Query);
+        if (vnpayResponse == null)
         {
-            VnpayResponse? vnpayResponse = _vnPayServices.PaymentExecute(Request.Query);
-            if (vnpayResponse == null)
-            {
-                return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "can't create the response.");
-            }
-
-            UpdateVnpayCommand command = new UpdateVnpayCommand(vnpayResponse);
-            Result<VnpayResponse> updateVnpayResult = await _mediator.Send(command);
-            if (updateVnpayResult.IsFailed)
-            {
-                return Problem(updateVnpayResult.Errors);
-            }
-
-            return Ok(updateVnpayResult.Value);
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "can't create the response.");
         }
-        catch (Exception ex)
+
+        UpdateVnpayCommand command = new UpdateVnpayCommand(vnpayResponse);
+        Result<VnpayResponse> updateVnpayResult = await _mediator.Send(command);
+        if (updateVnpayResult.IsFailed)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, detail: ex.ToString());
+            return Problem(updateVnpayResult.Errors);
         }
+
+        return Ok(updateVnpayResult.Value);
     }
 
     [HttpDelete("{id:guid}")]

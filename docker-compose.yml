@@ -8,8 +8,8 @@ services:
       dockerfile: src/FastDeliveruu.Api/Dockerfile
     container_name: fastdeliveruu.api
     ports:
-      - 5233:5233
-      - 7012:7012
+      - 5000:5000
+      - 5001:5001
 
   fastdeliveruu.db:
     image: mcr.microsoft.com/mssql/server:2019-latest
