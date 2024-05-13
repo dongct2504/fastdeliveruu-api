@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -25,11 +25,5 @@
   <ItemGroup>
     <ProjectReference Include="..\FastDeliveruu.Application\FastDeliveruu.Application.csproj" />
     <ProjectReference Include="..\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\menu-items\images\" />
-    <Folder Include="wwwroot\restaurants\images\" />
-    <Folder Include="wwwroot\shippers\images\" />
-    <Folder Include="wwwroot\users\images\" />
   </ItemGroup>
 </Project>

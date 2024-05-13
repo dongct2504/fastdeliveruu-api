@@ -7,8 +7,8 @@ public static class ValidateForRequest
 {
     public static bool BeValidPhoneNumber(string phoneNumber)
     {
-        string pattern = @"^\+(?:[0-9] ?){6,14}[0-9]$";
-        return Regex.IsMatch(phoneNumber, pattern);
+        Regex regex = new Regex(@"^\d{6,15}$");
+        return regex.IsMatch(phoneNumber);
     }
 
     public static bool BeValidRole(string? role)

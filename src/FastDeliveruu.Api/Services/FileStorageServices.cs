@@ -20,7 +20,7 @@ public class FileStorageServices : IFileStorageServices
 
         string webRootPath = _hostEnvironment.WebRootPath;
 
-        string uploadPath = $"{webRootPath}{TrimWwwroot(uploadImagePath)}";
+        string uploadPath = $"{webRootPath}{uploadImagePath}";
         string fileName = Guid.NewGuid().ToString();
         string extension = Path.GetExtension(imageFile.FileName);
 
@@ -41,15 +41,10 @@ public class FileStorageServices : IFileStorageServices
 
         string webRootPath = _hostEnvironment.WebRootPath;
 
-        string oldImagePath = Path.Combine(webRootPath, TrimWwwroot(imageUrl).TrimStart('/'));
+        string oldImagePath = Path.Combine(webRootPath, imageUrl.TrimStart('/'));
         if (File.Exists(oldImagePath))
         {
             await Task.Run(() => File.Delete(oldImagePath));
         }
-    }
-
-    private static string TrimWwwroot(string path)
-    {
-        return path.Substring("/wwwroot".Length);
     }
 }

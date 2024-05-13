@@ -80,7 +80,15 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         menuItem.CreatedAt = DateTime.Now;
         menuItem.UpdatedAt = DateTime.Now;
 
-        await _menuItemRepository.AddAsync(menuItem);
+        try
+        {
+            await _menuItemRepository.AddAsync(menuItem);
+        }
+        catch
+        {
+            await _fileStorageServices.DeleteImageAsync(menuItem.ImageUrl);
+            throw;
+        }
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }

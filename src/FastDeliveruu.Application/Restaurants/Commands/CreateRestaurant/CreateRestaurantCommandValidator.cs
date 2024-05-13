@@ -16,7 +16,7 @@ public class CreateRestaurantCommandValidator : AbstractValidator<CreateRestaura
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Must(ValidateForRequest.BeValidPhoneNumber);
+            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");;
 
         RuleFor(x => x.Address)
             .NotEmpty()

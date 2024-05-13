@@ -37,7 +37,7 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
         }
 
         _mapper.Map(request, restaurant);
-        
+
         if (request.ImageFile != null)
         {
             await _fileStorageServices.DeleteImageAsync(restaurant.ImageUrl);
