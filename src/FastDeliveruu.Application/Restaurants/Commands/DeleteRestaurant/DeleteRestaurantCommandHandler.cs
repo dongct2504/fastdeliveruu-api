@@ -1,6 +1,8 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
@@ -10,15 +12,18 @@ namespace FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
 
 public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCommand, Result>
 {
+    private readonly ICacheService _cacheService;
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteRestaurantCommandHandler(
         IRestaurantRepository restaurantRepository,
-        IFileStorageServices fileStorageServices)
+        IFileStorageServices fileStorageServices,
+        ICacheService cacheService)
     {
         _restaurantRepository = restaurantRepository;
         _fileStorageServices = fileStorageServices;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteRestaurantCommand request, CancellationToken cancellationToken)
@@ -34,6 +39,8 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
         await _restaurantRepository.DeleteAsync(restaurant);
 
         await _fileStorageServices.DeleteImageAsync(restaurant.ImageUrl);
+
+        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

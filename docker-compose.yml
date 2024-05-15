@@ -22,3 +22,10 @@ services:
       - ./.containers/fastdeliveruu-db:/var/opt/mssql/data
     ports:
       - 1433:1433    
+
+  fastdeliveruu.cache:
+    image: redis:latest
+    container_name: fastdeliveruu.cache
+    restart: always
+    ports:
+      - 6379:6379

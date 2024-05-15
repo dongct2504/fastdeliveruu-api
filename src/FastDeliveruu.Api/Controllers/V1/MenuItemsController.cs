@@ -26,8 +26,6 @@ public class MenuItemsController : ApiController
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30,
-        VaryByQueryKeys = new[] { "genreId", "restaurantId", "page" })]
     [ProducesResponseType(typeof(PaginationResponse<MenuItemDetailDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllMenuItems(Guid? genreId, Guid? restaurantId, int page = 1)
     {

@@ -34,7 +34,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         {
             Where = u => u.UserName == request.UserName
         };
-        LocalUser? localUser = await _localUserRepository.GetAsync(options);
+        LocalUser? localUser = await _localUserRepository.GetAsync(options, asNoTracking: true);
         if (localUser == null)
         {
             string message = "The user name is incorrect.";

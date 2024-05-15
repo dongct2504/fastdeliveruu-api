@@ -37,7 +37,8 @@ public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllSho
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.DefaultPageSize,
-            Items = _mapper.Map<IEnumerable<ShoppingCartDto>>(await _shoppingCartRepository.ListAllAsync(options)),
+            Items = _mapper.Map<IEnumerable<ShoppingCartDto>>(
+                await _shoppingCartRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _shoppingCartRepository.GetCountAsync()
         };
 

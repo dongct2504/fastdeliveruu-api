@@ -34,7 +34,7 @@ public class LoginShipperQueryHandler : IRequestHandler<LoginShipperQuery, Resul
         {
             Where = u => u.UserName == request.UserName
         };
-        Shipper? shipper = await _shipperRepository.GetAsync(options);
+        Shipper? shipper = await _shipperRepository.GetAsync(options, asNoTracking: true);
         if (shipper == null)
         {
             string message = "The user name is incorrect.";

@@ -11,6 +11,9 @@ public class ShipperMappingConfig : IRegister
     {
         config.NewConfig<Shipper, ShipperDto>();
 
+        config.NewConfig<Shipper, ShipperDetailDto>()
+            .Map(dest => dest.OrderDtos, src => src.Orders);
+
         config.NewConfig<UpdateShipperCommand, Shipper>();
     }
 }

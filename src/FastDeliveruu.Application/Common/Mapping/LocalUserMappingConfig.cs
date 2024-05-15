@@ -11,6 +11,9 @@ public class LocalUserMappingConfig : IRegister
     {
         config.NewConfig<LocalUser, LocalUserDto>();
 
+        config.NewConfig<LocalUser, LocalUserDetailDto>()
+            .Map(dest => dest.OrderDtos, src => src.Orders);
+
         config.NewConfig<UpdateUserCommand, LocalUser>();
     }
 }

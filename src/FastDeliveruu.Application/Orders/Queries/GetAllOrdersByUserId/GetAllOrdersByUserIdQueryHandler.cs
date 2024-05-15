@@ -36,7 +36,8 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.DefaultPageSize,
-            Items = _mapper.Map<IEnumerable<OrderDto>>(await _orderRepository.ListAllAsync(options)),
+            Items = _mapper.Map<IEnumerable<OrderDto>>(
+                await _orderRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _orderRepository.GetCountAsync()
         };
 

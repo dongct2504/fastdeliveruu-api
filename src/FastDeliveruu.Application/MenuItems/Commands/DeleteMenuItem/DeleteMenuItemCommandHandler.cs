@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -10,13 +11,18 @@ namespace FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
 
 public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemCommand, Result>
 {
+    private readonly ICacheService _cacheService;
     private readonly IMenuItemRepository _menuItemRepository;
     private readonly IFileStorageServices _fileStorageServices;
 
-    public DeleteMenuItemCommandHandler(IMenuItemRepository menuItemRepository, IFileStorageServices fileStorageServices)
+    public DeleteMenuItemCommandHandler(
+        IMenuItemRepository menuItemRepository,
+        IFileStorageServices fileStorageServices,
+        ICacheService cacheService)
     {
         _menuItemRepository = menuItemRepository;
         _fileStorageServices = fileStorageServices;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteMenuItemCommand request, CancellationToken cancellationToken)
@@ -32,6 +38,8 @@ public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemComman
         await _menuItemRepository.DeleteAsync(menuItem);
 
         await _fileStorageServices.DeleteImageAsync(menuItem.ImageUrl);
+
+        await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

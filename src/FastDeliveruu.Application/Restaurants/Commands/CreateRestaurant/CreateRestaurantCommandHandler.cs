@@ -14,6 +14,7 @@ namespace FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
 
 public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCommand, Result<RestaurantDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
@@ -21,11 +22,13 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
     public CreateRestaurantCommandHandler(
         IRestaurantRepository restaurantRepository,
         IMapper mapper,
-        IFileStorageServices fileStorageServices)
+        IFileStorageServices fileStorageServices,
+        ICacheService cacheService)
     {
         _restaurantRepository = restaurantRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<RestaurantDto>> Handle(CreateRestaurantCommand request, CancellationToken cancellationToken)
@@ -63,6 +66,8 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
             await _fileStorageServices.DeleteImageAsync(restaurant.ImageUrl);
             throw;
         }
+
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Restaurants, cancellationToken);
 
         return _mapper.Map<RestaurantDto>(restaurant);
     }

@@ -26,7 +26,6 @@ public class GenresController : ApiController
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30, VaryByQueryKeys = new[] { "page" })]
     [ProducesResponseType(typeof(PaginationResponse<GenreDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGenres(int page = 1)
     {

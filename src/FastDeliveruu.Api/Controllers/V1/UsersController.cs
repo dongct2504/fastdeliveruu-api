@@ -39,14 +39,14 @@ public class UsersController : ApiController
 
     [HttpGet("{id:guid}", Name = "GetUserById")]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(typeof(LocalUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LocalUserDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
         GetUserByIdQuery query = new GetUserByIdQuery(id);
-        Result<LocalUserDto> getUserResult = await _mediator.Send(query);
+        Result<LocalUserDetailDto> getUserResult = await _mediator.Send(query);
         if (getUserResult.IsFailed)
         {
             return Problem(getUserResult.Errors);

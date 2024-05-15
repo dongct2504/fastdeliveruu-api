@@ -2,6 +2,7 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
@@ -12,6 +13,7 @@ namespace FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 
 public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCommand, Result>
 {
+    private readonly ICacheService _cacheService;
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
@@ -19,11 +21,13 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
     public UpdateRestaurantCommandHandler(
         IRestaurantRepository restaurantRepository,
         IMapper mapper,
-        IFileStorageServices fileStorageServices)
+        IFileStorageServices fileStorageServices,
+        ICacheService cacheService)
     {
         _restaurantRepository = restaurantRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
@@ -49,6 +53,8 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
         restaurant.UpdatedAt = DateTime.Now;
 
         await _restaurantRepository.UpdateAsync(restaurant);
+
+        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.RestaurantId}", cancellationToken);
 
         return Result.Ok();
     }

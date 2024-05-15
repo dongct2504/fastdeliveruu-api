@@ -37,7 +37,8 @@ public class GetAllUsersQueryHandler :
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.UserPageSize,
-            Items = _mapper.Map<IEnumerable<LocalUserDto>>(await _localUserRepository.ListAllAsync(options)),
+            Items = _mapper.Map<IEnumerable<LocalUserDto>>(
+                await _localUserRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _localUserRepository.GetCountAsync()
         };
 

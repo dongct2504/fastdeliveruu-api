@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Users.Queries.GetUserById;
 
-public class GetUserByIdQuery : IRequest<Result<LocalUserDto>>
+public class GetUserByIdQuery : IRequest<Result<LocalUserDetailDto>>
 {
     public GetUserByIdQuery(Guid id)
     {

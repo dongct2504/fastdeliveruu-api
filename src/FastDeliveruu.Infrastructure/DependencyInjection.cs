@@ -21,13 +21,17 @@ public static class DependencyInjection
         services.AddAuth(configuration);
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
+        services.AddStackExchangeRedisCache(options =>
+            options.Configuration = configuration.GetConnectionString("Cache"));
+
+        services.AddSingleton<ICacheService, CacheService>();
+
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
         services.Configure<VnPaySettings>(configuration.GetSection(VnPaySettings.SectionName));
         services.AddSingleton<IVnPayServices, VnPayServices>();
 
-        services.AddScoped<ISP_Call, SP_Call>();
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<IMenuItemRepository, MenuItemRepository>();

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Shippers.Queries.GetShipperById;
 
-public class GetShipperByIdQuery : IRequest<Result<ShipperDto>>
+public class GetShipperByIdQuery : IRequest<Result<ShipperDetailDto>>
 {
     public GetShipperByIdQuery(Guid id)
     {

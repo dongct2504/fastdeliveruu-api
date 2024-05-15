@@ -26,7 +26,7 @@ public class ShippersController : ApiController
 
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginationResponse<ShipperDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAllShippers(int page = 1)
@@ -38,14 +38,14 @@ public class ShippersController : ApiController
 
     [HttpGet("{id:guid}", Name = "GetShipperById")]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ShipperDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetShipperById(Guid id)
     {
         GetShipperByIdQuery query = new GetShipperByIdQuery(id);
-        Result<ShipperDto> getShipperResult = await _mediator.Send(query);
+        Result<ShipperDetailDto> getShipperResult = await _mediator.Send(query);
         if (getShipperResult.IsFailed)
         {
             return Problem(getShipperResult.Errors);

@@ -30,7 +30,7 @@ public class GetShoppingCartByIdQueryHandler : IRequestHandler<GetShoppingCartBy
             SetIncludes = "MenuItem",
             Where = sc => sc.LocalUserId == request.LocalUserId && sc.MenuItemId == request.MenuItemId
         };
-        ShoppingCart? shoppingCart = await _shoppingCartRepository.GetAsync(options);
+        ShoppingCart? shoppingCart = await _shoppingCartRepository.GetAsync(options, asNoTracking: true);
         if (shoppingCart == null)
         {
             string message = "Shopping Cart not found.";

@@ -12,6 +12,7 @@ namespace FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 
 public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemCommand, Result>
 {
+    private readonly ICacheService _cacheService;
     private readonly IMenuItemRepository _menuItemRepository;
     private readonly IGenreRepository _genreRepository;
     private readonly IRestaurantRepository _restaurantRepository;
@@ -23,13 +24,15 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         IGenreRepository genreRepository,
         IRestaurantRepository restaurantRepository,
         IMapper mapper,
-        IFileStorageServices fileStorageServices)
+        IFileStorageServices fileStorageServices,
+        ICacheService cacheService)
     {
         _menuItemRepository = menuItemRepository;
         _genreRepository = genreRepository;
         _restaurantRepository = restaurantRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateMenuItemCommand request, CancellationToken cancellationToken)
@@ -71,6 +74,8 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         menuItem.UpdatedAt = DateTime.Now;
 
         await _menuItemRepository.UpdateAsync(menuItem);
+
+        await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.MenuItemId}", cancellationToken);
 
         return Result.Ok();
     }

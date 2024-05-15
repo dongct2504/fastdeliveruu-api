@@ -46,7 +46,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
                 request.ImageFile, UploadPath.UserImageUploadPath);
             localUser.ImageUrl = UploadPath.UserImageUploadPath + fileNameWithExtension;
         }
-        localUser.Role = request.Role ?? "Customer";
+        localUser.Role ??= RoleConstants.Customer;
         localUser.UpdatedAt = DateTime.Now;
 
         await _localUserRepository.UpdateAsync(localUser);

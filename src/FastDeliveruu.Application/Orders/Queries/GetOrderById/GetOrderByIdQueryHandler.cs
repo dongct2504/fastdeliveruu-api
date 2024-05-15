@@ -28,7 +28,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
             SetIncludes = "LocalUser, Shipper, OrderDetails.MenuItem",
             Where = o => o.LocalUserId == request.UserId && o.OrderId == request.Id
         };
-        Order? order = await _orderRepository.GetAsync(options);
+        Order? order = await _orderRepository.GetAsync(options, asNoTracking: true);
         if (order == null)
         {
             string message = "Order not found.";

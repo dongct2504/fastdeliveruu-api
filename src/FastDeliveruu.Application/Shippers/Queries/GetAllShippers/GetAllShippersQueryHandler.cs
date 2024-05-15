@@ -9,12 +9,14 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Shippers.Queries.GetAllShippers;
 
-public class GetAllShipperQueryHandler : IRequestHandler<GetAllShippersQuery, PaginationResponse<ShipperDto>>
+public class GetAllShippersQueryHandler : IRequestHandler<GetAllShippersQuery, PaginationResponse<ShipperDto>>
 {
     private readonly IShipperRepository _shipperRepository;
     private readonly IMapper _mapper;
 
-    public GetAllShipperQueryHandler(IShipperRepository shipperRepository, IMapper mapper)
+    public GetAllShippersQueryHandler(
+        IShipperRepository shipperRepository,
+        IMapper mapper)
     {
         _shipperRepository = shipperRepository;
         _mapper = mapper;
@@ -34,7 +36,8 @@ public class GetAllShipperQueryHandler : IRequestHandler<GetAllShippersQuery, Pa
         {
             PageNumber = request.PageNumber,
             PageSize = PagingConstants.UserPageSize,
-            Items = _mapper.Map<IEnumerable<ShipperDto>>(await _shipperRepository.ListAllAsync(options)),
+            Items = _mapper.Map<IEnumerable<ShipperDto>>(
+                await _shipperRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _shipperRepository.GetCountAsync()
         };
 

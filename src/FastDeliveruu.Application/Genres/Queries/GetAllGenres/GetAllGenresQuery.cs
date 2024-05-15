@@ -1,6 +1,5 @@
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.GenreDtos;
-using FluentResults;
 using MediatR;
 
 namespace FastDeliveruu.Application.Genres.Queries.GetAllGenres;

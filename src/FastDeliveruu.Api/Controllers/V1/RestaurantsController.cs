@@ -26,7 +26,6 @@ public class RestaurantsController : ApiController
     }
 
     [HttpGet]
-    [ResponseCache(CacheProfileName = CacheProfileConstants.Default30, VaryByQueryKeys = new[] { "page" })]
     [ProducesResponseType(typeof(PaginationResponse<RestaurantDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRestaurants(int page = 1)
     {

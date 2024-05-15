@@ -4,11 +4,9 @@ using FastDeliveruu.Infrastructure.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Api.Middleware;
 using Asp.Versioning;
 
@@ -16,22 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 {
     // Add services to the container.
 
-    // allows for the correct parsing of Patch document using NewtonsoftJson
-    builder.Services.AddResponseCaching();
+    builder.Services.AddControllers();
 
-    builder.Services.AddControllers(options =>
-    {
-        options.CacheProfiles
-            .Add(CacheProfileConstants.Default30, new CacheProfile
-            {
-                Duration = 30
-            });
-    })
-        .AddNewtonsoftJson()
-        .AddXmlDataContractSerializerFormatters();
-
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
+
     builder.Services.AddSwaggerGen(options =>
     {
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
