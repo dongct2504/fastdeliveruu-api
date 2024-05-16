@@ -14,7 +14,6 @@ namespace FastDeliveruu.Application.MenuItems.Commands.CreateMenuItem;
 
 public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemCommand, Result<MenuItemDto>>
 {
-    private readonly ICacheService _cacheService;
     private readonly IMenuItemRepository _menuItemRepository;
     private readonly IGenreRepository _genreRepository;
     private readonly IRestaurantRepository _restaurantRepository;
@@ -26,15 +25,13 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         IGenreRepository genreRepository,
         IRestaurantRepository restaurantRepository,
         IFileStorageServices fileStorageServices,
-        IMapper mapper,
-        ICacheService cacheService)
+        IMapper mapper)
     {
         _menuItemRepository = menuItemRepository;
         _genreRepository = genreRepository;
         _restaurantRepository = restaurantRepository;
         _fileStorageServices = fileStorageServices;
         _mapper = mapper;
-        _cacheService = cacheService;
     }
 
     public async Task<Result<MenuItemDto>> Handle(
@@ -92,8 +89,6 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             await _fileStorageServices.DeleteImageAsync(menuItem.ImageUrl);
             throw;
         }
-
-        await _cacheService.RemoveByPrefixAsync(CacheConstants.MenuItems, cancellationToken);
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }

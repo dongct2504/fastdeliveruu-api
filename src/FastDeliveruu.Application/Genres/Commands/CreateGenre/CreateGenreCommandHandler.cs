@@ -1,7 +1,5 @@
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.GenreDtos;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
@@ -14,15 +12,13 @@ namespace FastDeliveruu.Application.Genres.Commands.CreateGenre;
 
 public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Result<GenreDto>>
 {
-    private readonly ICacheService _cacheService;
     private readonly IGenreRepository _genreRepository;
     private readonly IMapper _mapper;
 
-    public CreateGenreCommandHandler(IGenreRepository genreRepository, IMapper mapper, ICacheService cacheService)
+    public CreateGenreCommandHandler(IGenreRepository genreRepository, IMapper mapper)
     {
         _genreRepository = genreRepository;
         _mapper = mapper;
-        _cacheService = cacheService;
     }
 
     public async Task<Result<GenreDto>> Handle(CreateGenreCommand request, CancellationToken cancellationToken)
@@ -44,8 +40,6 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
         }
 
         await _genreRepository.AddAsync(genre);
-
-        await _cacheService.RemoveByPrefixAsync(CacheConstants.Genres, cancellationToken);
 
         return _mapper.Map<GenreDto>(genre);
     }
