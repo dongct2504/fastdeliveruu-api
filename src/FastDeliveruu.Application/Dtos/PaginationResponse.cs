@@ -14,5 +14,5 @@ public class PaginationResponse<T>
 
     public bool HasPreviousPage => PageNumber > 1;
 
-    public IEnumerable<T>? Items { get; set; }
+    public IEnumerable<T> Items { get; set; } = new List<T>();
 }
