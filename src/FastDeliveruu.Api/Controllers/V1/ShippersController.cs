@@ -26,13 +26,11 @@ public class ShippersController : ApiController
 
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(typeof(PaginationResponse<ShipperDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(PagedList<ShipperDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllShippers(int page = 1)
     {
         GetAllShippersQuery query = new GetAllShippersQuery(page);
-        PaginationResponse<ShipperDto> getAllShippers = await _mediator.Send(query);
+        PagedList<ShipperDto> getAllShippers = await _mediator.Send(query);
         return Ok(getAllShippers);
     }
 
@@ -40,8 +38,6 @@ public class ShippersController : ApiController
     [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(ShipperDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetShipperById(Guid id)
     {
         GetShipperByIdQuery query = new GetShipperByIdQuery(id);
@@ -59,8 +55,6 @@ public class ShippersController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateShipper(Guid id, [FromForm] UpdateShipperCommand command)
     {
         if (id != command.ShipperId)
@@ -81,8 +75,6 @@ public class ShippersController : ApiController
     [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteShipper(Guid id)
     {
         DeleteShipperCommand command = new DeleteShipperCommand(id);

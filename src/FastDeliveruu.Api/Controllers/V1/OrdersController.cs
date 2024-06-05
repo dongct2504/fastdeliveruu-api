@@ -10,6 +10,7 @@ using FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 using FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
 using FastDeliveruu.Application.Orders.Queries.GetOrderById;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -31,23 +32,25 @@ public class OrdersController : ApiController
         _vnPayServices = vnPayServices;
     }
 
-    [HttpGet("{userId:guid}")]
-    [ProducesResponseType(typeof(PaginationResponse<OrderDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetAllOrdersByUserId(Guid userId, int page = 1)
+    [HttpGet]
+    [ProducesResponseType(typeof(PagedList<OrderDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllOrders(int page = 1)
     {
+        Guid userId = User.GetCurrentUserId();
+
         GetAllOrdersByUserIdQuery query = new GetAllOrdersByUserIdQuery(userId, page);
-        PaginationResponse<OrderDto> paginationResponse = await _mediator.Send(query);
+        PagedList<OrderDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }
 
-    [HttpGet("{userId:guid}/{id:guid}", Name = "GetOrderbyId")]
+    [HttpGet("{orderId:guid}", Name = "GetOrderbyId")]
     [ProducesResponseType(typeof(OrderHeaderDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetOrderbyId(Guid userId, Guid id)
+    public async Task<IActionResult> GetOrderbyId(Guid orderId)
     {
-        GetOrderByIdQuery query = new GetOrderByIdQuery(userId, id);
+        Guid userId = User.GetCurrentUserId();
+
+        GetOrderByIdQuery query = new GetOrderByIdQuery(userId, orderId);
         Result<OrderHeaderDetailDto> getOrderResult = await _mediator.Send(query);
         if (getOrderResult.IsFailed)
         {
@@ -61,9 +64,10 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Checkout([FromBody] CreateOrderCommand command)
     {
+        command.LocalUserId = User.GetCurrentUserId();
+
         Result<Order> createOrderResult = await _mediator.Send(command);
         if (createOrderResult.IsFailed)
         {
@@ -119,7 +123,6 @@ public class OrdersController : ApiController
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteOrder(Guid id)
     {
         DeleteOrderCommand command = new DeleteOrderCommand(id);

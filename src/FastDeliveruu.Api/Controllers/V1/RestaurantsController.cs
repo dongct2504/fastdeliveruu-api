@@ -26,11 +26,11 @@ public class RestaurantsController : ApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(PaginationResponse<RestaurantDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<RestaurantDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRestaurants(int page = 1)
     {
         GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(page);
-        PaginationResponse<RestaurantDto> paginationResponse = await _mediator.Send(query);
+        PagedList<RestaurantDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }
 
@@ -54,8 +54,6 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(typeof(RestaurantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateRestaurant([FromForm] CreateRestaurantCommand command)
     {
         Result<RestaurantDto> createRestaurantResult = await _mediator.Send(command);
@@ -75,8 +73,6 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateRestaurant(Guid id, [FromForm] UpdateRestaurantCommand command)
     {
         if (id != command.RestaurantId)
@@ -97,8 +93,6 @@ public class RestaurantsController : ApiController
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteRestaurant(Guid id)
     {
         DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);

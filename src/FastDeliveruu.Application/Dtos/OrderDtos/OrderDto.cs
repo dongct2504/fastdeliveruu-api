@@ -4,27 +4,17 @@ public class OrderDto
 {
     public Guid OrderId { get; set; }
 
-    public Guid ShipperId { get; set; }
-
-    public Guid LocalUserId { get; set; }
-
     public string ReceiverName { get; set; } = null!;
 
-    public DateTime OrderDate { get; set; }
-
-    public string OrderDescription { get; set; } = null!;
+    public DateTime? OrderDate { get; set; }
 
     public string PhoneNumber { get; set; } = null!;
 
     public decimal TotalAmount { get; set; }
 
-    public string? TrackingNumber { get; set; }
-
     public string? OrderStatus { get; set; }
 
     public string? PaymentStatus { get; set; }
-
-    public string? PaymentMethod { get; set; }
 
     public string? TransactionId { get; set; }
 

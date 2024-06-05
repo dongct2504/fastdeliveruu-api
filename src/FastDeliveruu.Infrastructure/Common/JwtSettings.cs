@@ -6,7 +6,7 @@ public class JwtSettings
 
     public string Secret { get; set; } = null!;
 
-    public int ExpiryMinutes { get; set; }
+    public int ExpiryDays { get; set; }
 
     public int EmailConfirmationExpiryMinutes { get; set; }
 

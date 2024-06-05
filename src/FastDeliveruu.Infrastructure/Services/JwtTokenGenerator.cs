@@ -2,12 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Infrastructure.Common;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace FastDeliveruu.Infrastructure.Authentication;
+namespace FastDeliveruu.Infrastructure.Services;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
@@ -38,7 +37,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         JwtSecurityToken securityToken = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
-            expires: _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: _dateTimeProvider.UtcNow.AddDays(_jwtSettings.ExpiryDays),
             claims: claims,
             signingCredentials: signingCredentials
         );

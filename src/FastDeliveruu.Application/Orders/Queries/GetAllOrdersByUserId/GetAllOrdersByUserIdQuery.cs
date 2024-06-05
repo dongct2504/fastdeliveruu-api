@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
 
-public class GetAllOrdersByUserIdQuery : IRequest<PaginationResponse<OrderDto>>
+public class GetAllOrdersByUserIdQuery : IRequest<PagedList<OrderDto>>
 {
     public GetAllOrdersByUserIdQuery(Guid userId, int pageNumber)
     {

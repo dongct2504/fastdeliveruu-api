@@ -5,10 +5,13 @@ namespace FastDeliveruu.Application.MenuItems.Queries.SearchMenuItems;
 
 public class SearchMenuItemsQuery : IRequest<IEnumerable<MenuItemDto>>
 {
-    public SearchMenuItemsQuery(string name)
+    public SearchMenuItemsQuery(decimal amount, decimal discountPercent)
     {
-        Name = name;
+        Amount = amount;
+        DiscountPercent = discountPercent;
     }
 
-    public string Name { get; }
+    public decimal Amount { get; }
+
+    public decimal DiscountPercent { get; }
 }

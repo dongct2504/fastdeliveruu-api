@@ -44,7 +44,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             SetIncludes = "MenuItem",
             Where = sc => sc.LocalUserId == request.LocalUserId
         };
-        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository.ListAllAsync(shoppingCartOptions);
+        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository
+            .ListAllAsync(shoppingCartOptions, asNoTracking: true);
         if (!shoppingCarts.Any())
         {
             string message = "Cart is empty.";

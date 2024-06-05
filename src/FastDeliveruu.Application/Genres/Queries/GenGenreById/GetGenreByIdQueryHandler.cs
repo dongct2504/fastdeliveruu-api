@@ -3,12 +3,11 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.Genres.Queries.GenGenreById;
@@ -16,17 +15,17 @@ namespace FastDeliveruu.Application.Genres.Queries.GenGenreById;
 public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Result<GenreDetailDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetGenreByIdQueryHandler(IGenreRepository genreRepository, IMapper mapper, ICacheService cacheService)
+    public GetGenreByIdQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
     {
-        _genreRepository = genreRepository;
-        _mapper = mapper;
         _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
-    public async Task<Result<GenreDetailDto>> Handle(GetGenreByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GenreDetailDto>> Handle(
+        GetGenreByIdQuery request,
+        CancellationToken cancellationToken)
     {
         string key = $"{CacheConstants.Genre}-{request.Id}";
 
@@ -36,23 +35,20 @@ public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Resul
             return genreCache;
         }
 
-        QueryOptions<Genre> options = new QueryOptions<Genre>
-        {
-            SetIncludes = "MenuItems",
-            Where = g => g.GenreId == request.Id
-        };
-        Genre? genre = await _genreRepository.GetAsync(options, asNoTracking: true);
-        if (genre == null)
+        GenreDetailDto? genreDetailDto = await _dbContext.Genres
+            .Where(g => g.GenreId == request.Id)
+            .AsNoTracking()
+            .ProjectToType<GenreDetailDto>()
+            .FirstOrDefaultAsync(cancellationToken);
+        if (genreDetailDto == null)
         {
             string message = "Genre not found.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<GenreDetailDto>(new NotFoundError(message));
+            return Result.Fail(new NotFoundError(message));
         }
 
-        genreCache = _mapper.Map<GenreDetailDto>(genre);
+        await _cacheService.SetAsync(key, genreDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
 
-        await _cacheService.SetAsync(key, genreCache, CacheOptions.DefaultExpiration, cancellationToken);
-
-        return genreCache;
+        return genreDetailDto;
     }
 }

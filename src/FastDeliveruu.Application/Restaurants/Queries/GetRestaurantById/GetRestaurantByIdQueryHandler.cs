@@ -3,12 +3,11 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
@@ -16,17 +15,14 @@ namespace FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
 public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQuery, Result<RestaurantDetailDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IRestaurantRepository _restaurantRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
     public GetRestaurantByIdQueryHandler(
-        IRestaurantRepository restaurantRepository,
-        IMapper mapper,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext)
     {
-        _restaurantRepository = restaurantRepository;
-        _mapper = mapper;
         _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<RestaurantDetailDto>> Handle(
@@ -42,23 +38,24 @@ public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQu
             return restaurantCache;
         }
 
-        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
-        {
-            SetIncludes = "MenuItems",
-            Where = r => r.RestaurantId == request.Id
-        };
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(options, asNoTracking: true);
-        if (restaurant == null)
+        RestaurantDetailDto? restaurantDetailDto = await _dbContext.Restaurants
+            .Where(r => r.RestaurantId == request.Id)
+            .AsNoTracking()
+            .ProjectToType<RestaurantDetailDto>()
+            .FirstOrDefaultAsync(cancellationToken);
+        if (restaurantDetailDto == null)
         {
             string message = "Restaurant not found.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<RestaurantDetailDto>(new NotFoundError(message));
         }
 
-        restaurantCache = _mapper.Map<RestaurantDetailDto>(restaurant);
+        await _cacheService.SetAsync(
+            key,
+            restaurantDetailDto,
+            CacheOptions.DefaultExpiration,
+            cancellationToken);
 
-        await _cacheService.SetAsync(key, restaurantCache, CacheOptions.DefaultExpiration, cancellationToken);
-
-        return restaurantCache;
+        return restaurantDetailDto;
     }
 }

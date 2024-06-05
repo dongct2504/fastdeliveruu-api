@@ -7,10 +7,6 @@ public class OrderHeaderDetailDto
 {
     public Guid OrderId { get; set; }
 
-    public Guid ShipperId { get; set; }
-
-    public Guid LocalUserId { get; set; }
-
     public string ReceiverName { get; set; } = null!;
 
     public DateTime OrderDate { get; set; }

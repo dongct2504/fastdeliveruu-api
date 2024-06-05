@@ -4,7 +4,7 @@ using FastDeliveruu.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace FastDeliveruu.Infrastructure.Data
+namespace FastDeliveruu.Domain.Data
 {
     public partial class FastDeliveruuDbContext : DbContext
     {

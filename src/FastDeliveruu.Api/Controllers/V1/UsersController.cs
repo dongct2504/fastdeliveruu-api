@@ -13,6 +13,7 @@ using Asp.Versioning;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/users")]
 public class UsersController : ApiController
@@ -26,23 +27,18 @@ public class UsersController : ApiController
 
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(typeof(PaginationResponse<LocalUserDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(PagedList<LocalUserDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers(int page = 1)
     {
         GetAllUsersQuery query = new GetAllUsersQuery(page);
-        PaginationResponse<LocalUserDto> getAllUsers = await _mediator.Send(query);
+        PagedList<LocalUserDto> getAllUsers = await _mediator.Send(query);
 
         return Ok(getAllUsers);
     }
 
     [HttpGet("{id:guid}", Name = "GetUserById")]
-    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(LocalUserDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
         GetUserByIdQuery query = new GetUserByIdQuery(id);
@@ -60,8 +56,6 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromForm] UpdateUserCommand command)
     {
         if (id != command.LocalUserId)
@@ -79,11 +73,9 @@ public class UsersController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Admin)]
+    [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         DeleteUserCommand command = new DeleteUserCommand(id);

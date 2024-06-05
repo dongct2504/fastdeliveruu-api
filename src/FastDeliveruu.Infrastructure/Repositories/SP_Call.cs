@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,8 +50,7 @@ public class SP_Call : ISP_Call
         {
             await connection.OpenAsync();
 
-            var result = await SqlMapper.QueryMultipleAsync(connection,
-                procedureName, CommandType.StoredProcedure);
+            var result = await connection.QueryMultipleAsync(procedureName, CommandType.StoredProcedure);
 
             var item1 = await result.ReadAsync<T1>();
             List<T1> item1List = item1.ToList();

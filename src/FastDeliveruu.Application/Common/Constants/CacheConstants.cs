@@ -10,4 +10,10 @@ public static class CacheConstants
 
     public const string MenuItems = "menuitems";
     public const string MenuItem = "menuitem";
+
+    public const string LocalUsers = "localUsers";
+    public const string LocalUser = "localUser";
+
+    public const string Shippers = "shippers";
+    public const string Shipper = "shipper";
 }

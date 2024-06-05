@@ -8,8 +8,6 @@ public class RestaurantDto
 
     public string Description { get; set; } = null!;
 
-    public string PhoneNumber { get; set; } = null!;
-
     public string? ImageUrl { get; set; }
 
     public string Address { get; set; } = null!;

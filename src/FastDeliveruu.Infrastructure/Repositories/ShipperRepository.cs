@@ -1,12 +1,12 @@
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class ShipperRepository : Repository<Shipper>, IShipperRepository
 {
-    public ShipperRepository(Data.FastDeliveruuDbContext context) : base(context)
+    public ShipperRepository(FastDeliveruuDbContext context) : base(context)
     {
     }
 

@@ -3,12 +3,11 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetMenuItemById;
@@ -16,17 +15,14 @@ namespace FastDeliveruu.Application.MenuItems.Queries.GetMenuItemById;
 public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery, Result<MenuItemDetailDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IMenuItemRepository _menuItemRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
     public GetMenuItemByIdQueryHandler(
-        IMenuItemRepository menuItemRepository,
-        IMapper mapper,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext)
     {
-        _menuItemRepository = menuItemRepository;
-        _mapper = mapper;
         _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<MenuItemDetailDto>> Handle(
@@ -41,23 +37,21 @@ public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery,
             return menuItemCache;
         }
 
-        QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
-        {
-            SetIncludes = "Genre, Restaurant",
-            Where = mi => mi.MenuItemId == request.Id
-        };
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(options, asNoTracking: true);
-        if (menuItem == null)
+        MenuItemDetailDto? menuItemDetailDto = await _dbContext.MenuItems
+            .Where(mi => mi.MenuItemId == request.Id)
+            .AsNoTracking()
+            .ProjectToType<MenuItemDetailDto>()
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (menuItemDetailDto == null)
         {
             string message = "MenuItem not found.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<MenuItemDetailDto>(new NotFoundError(message));
         }
 
-        menuItemCache = _mapper.Map<MenuItemDetailDto>(menuItem);
+        await _cacheService.SetAsync(key, menuItemDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
 
-        await _cacheService.SetAsync(key, menuItemCache, CacheOptions.DefaultExpiration, cancellationToken);
-
-        return menuItemCache;
+        return menuItemDetailDto;
     }
 }

@@ -6,9 +6,6 @@ public class UpdateShoppingCartCommandValidator : AbstractValidator<UpdateShoppi
 {
     public UpdateShoppingCartCommandValidator()
     {
-        RuleFor(x => x.LocalUserId)
-            .NotEmpty();
-
         RuleFor(x => x.MenuItemId)
             .NotEmpty();
 

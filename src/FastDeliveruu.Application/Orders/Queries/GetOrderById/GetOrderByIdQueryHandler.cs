@@ -26,7 +26,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
         QueryOptions<Order> options = new QueryOptions<Order>
         {
             SetIncludes = "LocalUser, Shipper, OrderDetails.MenuItem",
-            Where = o => o.LocalUserId == request.UserId && o.OrderId == request.Id
+            Where = o => o.LocalUserId == request.UserId && o.OrderId == request.OrderId
         };
         Order? order = await _orderRepository.GetAsync(options, asNoTracking: true);
         if (order == null)

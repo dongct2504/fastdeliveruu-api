@@ -6,13 +6,13 @@ namespace FastDeliveruu.Application.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQuery : IRequest<Result<OrderHeaderDetailDto>>
 {
-    public GetOrderByIdQuery(Guid userId, Guid id)
+    public GetOrderByIdQuery(Guid userId, Guid orderId)
     {
         UserId = userId;
-        Id = id;
+        OrderId = orderId;
     }
 
     public Guid UserId { get; }
 
-    public Guid Id { get; }
+    public Guid OrderId { get; }
 }

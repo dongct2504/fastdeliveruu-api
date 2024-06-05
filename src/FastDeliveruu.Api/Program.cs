@@ -1,6 +1,5 @@
 using FastDeliveruu.Application;
-using FastDeliveruu.Infrastructure;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -9,6 +8,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Api.Services;
 using FastDeliveruu.Api.Middleware;
 using Asp.Versioning;
+using FastDeliveruu.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 {

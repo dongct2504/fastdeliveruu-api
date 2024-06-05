@@ -26,17 +26,17 @@ public class GenresController : ApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(PaginationResponse<GenreDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<GenreDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGenres(int page = 1)
     {
         GetAllGenresQuery query = new GetAllGenresQuery(page);
-        PaginationResponse<GenreDto> getAllGenres = await _mediator.Send(query);
+        PagedList<GenreDto> getAllGenres = await _mediator.Send(query);
 
         return Ok(getAllGenres);
     }
 
     [HttpGet("{id:guid}", Name = "GetGenreById")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenreDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetGenreById(Guid id)
     {
@@ -55,8 +55,6 @@ public class GenresController : ApiController
     [ProducesResponseType(typeof(GenreDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateGenre([FromBody] CreateGenreCommand command)
     {
         Result<GenreDto> createGenreResult = await _mediator.Send(command);
@@ -76,8 +74,6 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateGenre(Guid id, [FromBody] UpdateGenreCommand command)
     {
         if (id != command.GenreId)
@@ -98,8 +94,6 @@ public class GenresController : ApiController
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteGenre(Guid id)
     {
         DeleteGenreCommand command = new DeleteGenreCommand(id);

@@ -4,10 +4,6 @@ public class MenuItemDto
 {
     public Guid MenuItemId { get; set; }
 
-    public Guid RestaurantId { get; set; }
-
-    public Guid GenreId { get; set; }
-
     public string Name { get; set; } = null!;
 
     public string Description { get; set; } = null!;

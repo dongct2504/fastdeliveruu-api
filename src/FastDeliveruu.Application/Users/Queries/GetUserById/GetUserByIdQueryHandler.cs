@@ -1,52 +1,57 @@
+using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.Users.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<LocalUserDetailDto>>
 {
-    private readonly ILocalUserRepository _localUserRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
+    private readonly ICacheService _cacheService;
 
     public GetUserByIdQueryHandler(
-        ILocalUserRepository localUserRepository,
-        IMapper mapper)
+        FastDeliveruuDbContext dbContext,
+        ICacheService cacheService)
     {
-        _localUserRepository = localUserRepository;
-        _mapper = mapper;
+        _dbContext = dbContext;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<LocalUserDetailDto>> Handle(
         GetUserByIdQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.Id == Guid.Empty)
+        string key = $"{CacheConstants.LocalUser}-{request.Id}";
+
+        LocalUserDetailDto? localUserDetailDtoCache = await _cacheService
+            .GetAsync<LocalUserDetailDto>(key, cancellationToken);
+        if (localUserDetailDtoCache != null)
         {
-            string message = "Id is empty";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            return localUserDetailDtoCache;
         }
 
-        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
-        {
-            SetIncludes = "Orders",
-            Where = lc => lc.LocalUserId == request.Id
-        };
-        LocalUser? localUser = await _localUserRepository.GetAsync(options, asNoTracking: true);
-        if (localUser == null)
+        LocalUserDetailDto? localUserDetailDto = await _dbContext.LocalUsers
+            .Where(lc => lc.LocalUserId == request.Id)
+            .AsNoTracking()
+            .ProjectToType<LocalUserDetailDto>()
+            .FirstOrDefaultAsync(cancellationToken);
+        if (localUserDetailDto == null)
         {
             string message = "User not found";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        return _mapper.Map<LocalUserDetailDto>(localUser);
+        await _cacheService.SetAsync(key, localUserDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
+
+        return localUserDetailDto;
     }
 }

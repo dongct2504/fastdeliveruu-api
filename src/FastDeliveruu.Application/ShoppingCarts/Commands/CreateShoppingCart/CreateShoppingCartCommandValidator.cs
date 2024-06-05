@@ -6,9 +6,6 @@ public class CreateShoppingCartCommandValidator : AbstractValidator<CreateShoppi
 {
     public CreateShoppingCartCommandValidator()
     {
-        RuleFor(x => x.LocalUserId)
-            .NotEmpty();
-
         RuleFor(x => x.MenuItemId)
             .NotEmpty();
 

@@ -1,15 +1,14 @@
 ﻿using System.Text;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Authentication;
-using FastDeliveruu.Infrastructure.Common;
-using FastDeliveruu.Infrastructure.Repositories;
-using FastDeliveruu.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using FastDeliveruu.Infrastructure.Services;
+using FastDeliveruu.Infrastructure.Repositories;
+using FastDeliveruu.Infrastructure.Common;
 
 namespace FastDeliveruu.Infrastructure;
 

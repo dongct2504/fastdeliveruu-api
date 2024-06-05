@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Genres.Queries.GetAllGenres;
 
-public class GetAllGenresQuery : IRequest<PaginationResponse<GenreDto>>
+public class GetAllGenresQuery : IRequest<PagedList<GenreDto>>
 {
     public GetAllGenresQuery(int pageNumber)
     {

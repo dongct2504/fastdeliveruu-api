@@ -1,46 +1,55 @@
+using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using FastDeliveruu.Domain.Data;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
 
 public class GetAllUsersQueryHandler :
-    IRequestHandler<GetAllUsersQuery, PaginationResponse<LocalUserDto>>
+    IRequestHandler<GetAllUsersQuery, PagedList<LocalUserDto>>
 {
-    private readonly ILocalUserRepository _localUserRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
+    private readonly ICacheService _cacheService;
 
-    public GetAllUsersQueryHandler(
-        ILocalUserRepository localUserRepository,
-        IMapper mapper)
+    public GetAllUsersQueryHandler(FastDeliveruuDbContext dbContext, ICacheService cacheService)
     {
-        _localUserRepository = localUserRepository;
-        _mapper = mapper;
+        _dbContext = dbContext;
+        _cacheService = cacheService;
     }
 
-    public async Task<PaginationResponse<LocalUserDto>> Handle(
+    public async Task<PagedList<LocalUserDto>> Handle(
         GetAllUsersQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
+        string key = $"{CacheConstants.LocalUsers}-{request.PageNumber}";
+
+        PagedList<LocalUserDto>? pagingResponseCache = await _cacheService
+            .GetAsync<PagedList<LocalUserDto>>(key, cancellationToken);
+        if (pagingResponseCache != null)
+        {
+            return pagingResponseCache;
+        }
+
+        PagedList<LocalUserDto> paginationResponse = new PagedList<LocalUserDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.UserPageSize
+            PageSize = PageConstants.User18,
+            TotalRecords = await _dbContext.LocalUsers.CountAsync(cancellationToken),
+            Items = await _dbContext.LocalUsers
+                .AsNoTracking()
+                .ProjectToType<LocalUserDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.User18)
+                .Take(PageConstants.User18)
+                .ToListAsync(cancellationToken)
         };
 
-        PaginationResponse<LocalUserDto> paginationResponse = new PaginationResponse<LocalUserDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PagingConstants.UserPageSize,
-            Items = _mapper.Map<IEnumerable<LocalUserDto>>(
-                await _localUserRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _localUserRepository.GetCountAsync()
-        };
+        await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);
 
         return paginationResponse;
     }

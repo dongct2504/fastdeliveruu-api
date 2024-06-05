@@ -1,12 +1,12 @@
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class RestaurantRepository : Repository<Restaurant>, IRestaurantRepository
 {
-    public RestaurantRepository(Data.FastDeliveruuDbContext context) : base(context)
+    public RestaurantRepository(FastDeliveruuDbContext context) : base(context)
     {
     }
 

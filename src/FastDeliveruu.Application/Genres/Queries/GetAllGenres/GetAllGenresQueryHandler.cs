@@ -4,53 +4,48 @@ using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using FastDeliveruu.Domain.Data;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Genres.Queries.GetAllGenres;
 
-public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, PaginationResponse<GenreDto>>
+public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, PagedList<GenreDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetAllGenresQueryHandler(IGenreRepository genreRepository, IMapper mapper, ICacheService cacheService)
+    public GetAllGenresQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
     {
-        _genreRepository = genreRepository;
-        _mapper = mapper;
         _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
-    public async Task<PaginationResponse<GenreDto>> Handle(
+    public async Task<PagedList<GenreDto>> Handle(
         GetAllGenresQuery request,
         CancellationToken cancellationToken)
     {
         string key = $"{CacheConstants.Genres}-{request.PageNumber}";
 
-        PaginationResponse<GenreDto>? paginationResponseCache = await _cacheService
-            .GetAsync<PaginationResponse<GenreDto>>(key, cancellationToken);
+        PagedList<GenreDto>? paginationResponseCache = await _cacheService
+            .GetAsync<PagedList<GenreDto>>(key, cancellationToken);
         if (paginationResponseCache != null)
         {
             return paginationResponseCache;
         }
 
-        QueryOptions<Genre> options = new QueryOptions<Genre>
+        PagedList<GenreDto> paginationResponse = new PagedList<GenreDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize
-        };
-
-        PaginationResponse<GenreDto> paginationResponse = new PaginationResponse<GenreDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
-            Items = _mapper.Map<IEnumerable<GenreDto>>(
-                await _genreRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _genreRepository.GetCountAsync()
+            PageSize = PageConstants.Default24,
+            TotalRecords = await _dbContext.Genres.CountAsync(cancellationToken),
+            Items = await _dbContext.Genres
+                .AsNoTracking()
+                .ProjectToType<GenreDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.Default24)
+                .Take(PageConstants.Default24)
+                .ToListAsync(cancellationToken)
         };
 
         await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);

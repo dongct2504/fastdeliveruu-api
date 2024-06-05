@@ -10,7 +10,7 @@ using MediatR;
 namespace FastDeliveruu.Application.ShoppingCarts.Queries.GetAllShoppingCarts;
 
 public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllShoppingCartsByUserIdQuery, 
-    PaginationResponse<ShoppingCartDto>>
+    PagedList<ShoppingCartDto>>
 {
     private readonly IShoppingCartRepository _shoppingCartRepository;
     private readonly IMapper _mapper;
@@ -21,22 +21,22 @@ public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllSho
         _mapper = mapper;
     }
 
-    public async Task<PaginationResponse<ShoppingCartDto>> Handle(
+    public async Task<PagedList<ShoppingCartDto>> Handle(
         GetAllShoppingCartsByUserIdQuery request,
         CancellationToken cancellationToken)
     {
         QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
+            PageSize = PageConstants.Default24,
             SetIncludes = "MenuItem",
             Where = sc => sc.LocalUserId == request.UserId
         };
 
-        PaginationResponse<ShoppingCartDto> paginationResponse = new PaginationResponse<ShoppingCartDto>
+        PagedList<ShoppingCartDto> paginationResponse = new PagedList<ShoppingCartDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
+            PageSize = PageConstants.Default24,
             Items = _mapper.Map<IEnumerable<ShoppingCartDto>>(
                 await _shoppingCartRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _shoppingCartRepository.GetCountAsync()

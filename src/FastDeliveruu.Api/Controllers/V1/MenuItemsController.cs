@@ -27,19 +27,19 @@ public class MenuItemsController : ApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(PaginationResponse<MenuItemDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<MenuItemDetailDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllMenuItems(Guid? genreId, Guid? restaurantId, int page = 1)
     {
         GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(genreId, restaurantId, page);
-        PaginationResponse<MenuItemDetailDto> paginationResponse = await _mediator.Send(query);
+        PagedList<MenuItemDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }
 
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<MenuItemDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> SearchMenuItems(string name)
+    public async Task<IActionResult> SearchMenuItems(decimal amount, decimal discountPercent)
     {
-        SearchMenuItemsQuery query = new SearchMenuItemsQuery(name);
+        SearchMenuItemsQuery query = new SearchMenuItemsQuery(amount, discountPercent);
         IEnumerable<MenuItemDto> menuItemDtos = await _mediator.Send(query);
         return Ok(menuItemDtos);
     }
@@ -64,8 +64,6 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(typeof(MenuItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateMenuItem([FromForm] CreateMenuItemCommand command)
     {
         Result<MenuItemDto> createMenuItemResult = await _mediator.Send(command);
@@ -85,8 +83,6 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] UpdateMenuItemCommand command)
     {
         if (id != command.MenuItemId)
@@ -107,8 +103,6 @@ public class MenuItemsController : ApiController
     [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteMenuItem(Guid id)
     {
         DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);

@@ -1,45 +1,56 @@
+using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using FastDeliveruu.Domain.Data;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Shippers.Queries.GetAllShippers;
 
-public class GetAllShippersQueryHandler : IRequestHandler<GetAllShippersQuery, PaginationResponse<ShipperDto>>
+public class GetAllShippersQueryHandler : IRequestHandler<GetAllShippersQuery, PagedList<ShipperDto>>
 {
-    private readonly IShipperRepository _shipperRepository;
-    private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
+    private readonly FastDeliveruuDbContext _dbContext;
 
     public GetAllShippersQueryHandler(
-        IShipperRepository shipperRepository,
-        IMapper mapper)
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext)
     {
-        _shipperRepository = shipperRepository;
-        _mapper = mapper;
+        _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
-    public async Task<PaginationResponse<ShipperDto>> Handle(
+    public async Task<PagedList<ShipperDto>> Handle(
         GetAllShippersQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<Shipper> options = new QueryOptions<Shipper>
+        string key = $"{CacheConstants.Shippers}-{request.PageNumber}";
+
+        PagedList<ShipperDto>? paginationResponseCache = await _cacheService
+            .GetAsync<PagedList<ShipperDto>>(key, cancellationToken);
+        if (paginationResponseCache != null)
+        {
+            return paginationResponseCache;
+        }
+
+        PagedList<ShipperDto> paginationResponse = new PagedList<ShipperDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.UserPageSize
+            PageSize = PageConstants.User18,
+            TotalRecords = await _dbContext.Shippers.CountAsync(cancellationToken),
+            Items = await _dbContext.Shippers
+                .AsNoTracking()
+                .ProjectToType<ShipperDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.User18)
+                .Take(PageConstants.User18)
+                .ToListAsync(cancellationToken)
         };
 
-        PaginationResponse<ShipperDto> paginationResponse = new PaginationResponse<ShipperDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PagingConstants.UserPageSize,
-            Items = _mapper.Map<IEnumerable<ShipperDto>>(
-                await _shipperRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _shipperRepository.GetCountAsync()
-        };
+        await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);
 
         return paginationResponse;
     }

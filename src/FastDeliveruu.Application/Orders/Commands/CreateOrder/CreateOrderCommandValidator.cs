@@ -7,9 +7,6 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 {
     public CreateOrderCommandValidator()
     {
-        RuleFor(x => x.LocalUserId)
-            .NotEmpty();
-
         RuleFor(x => x.ReceiverName)
             .NotEmpty()
             .MaximumLength(128);

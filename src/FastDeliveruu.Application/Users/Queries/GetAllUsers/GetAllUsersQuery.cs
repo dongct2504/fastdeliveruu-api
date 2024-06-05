@@ -5,7 +5,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
 
-public class GetAllUsersQuery : IRequest<PaginationResponse<LocalUserDto>>
+public class GetAllUsersQuery : IRequest<PagedList<LocalUserDto>>
 {
     public GetAllUsersQuery(int pageNumber)
     {

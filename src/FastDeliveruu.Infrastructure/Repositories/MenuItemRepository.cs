@@ -1,12 +1,12 @@
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class MenuItemRepository : Repository<MenuItem>, IMenuItemRepository
 {
-    public MenuItemRepository(Data.FastDeliveruuDbContext context) : base(context)
+    public MenuItemRepository(FastDeliveruuDbContext context) : base(context)
     {
     }
 

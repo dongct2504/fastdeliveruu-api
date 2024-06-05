@@ -12,12 +12,6 @@ public class LocalUserDto
 
     public string Email { get; set; } = null!;
 
-    public string PhoneNumber { get; set; } = null!;
-
-    public DateTime? DateOfBirth { get; set; }
-
-    public string Role { get; set; } = null!;
-
     public string? ImageUrl { get; set; }
 
     public string? Address { get; set; }

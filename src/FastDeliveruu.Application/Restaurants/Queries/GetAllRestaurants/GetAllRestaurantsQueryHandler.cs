@@ -4,56 +4,50 @@ using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using FastDeliveruu.Domain.Data;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Restaurants.Queries.GetAllRestaurants;
 
-public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQuery, PaginationResponse<RestaurantDto>>
+public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQuery, PagedList<RestaurantDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IRestaurantRepository _restaurantRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
     public GetAllRestaurantsQueryHandler(
-        IRestaurantRepository restaurantRepository,
-        IMapper mapper,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext)
     {
-        _restaurantRepository = restaurantRepository;
-        _mapper = mapper;
         _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
-    public async Task<PaginationResponse<RestaurantDto>> Handle(
+    public async Task<PagedList<RestaurantDto>> Handle(
         GetAllRestaurantsQuery request,
         CancellationToken cancellationToken)
     {
         string key = $"{CacheConstants.Restaurants}-{request.PageNumber}";
 
-        PaginationResponse<RestaurantDto>? paginationResponseCache = await _cacheService
-            .GetAsync<PaginationResponse<RestaurantDto>>(key, cancellationToken);
+        PagedList<RestaurantDto>? paginationResponseCache = await _cacheService
+            .GetAsync<PagedList<RestaurantDto>>(key, cancellationToken);
         if (paginationResponseCache != null)
         {
             return paginationResponseCache;
         }
 
-        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
+        PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize
-        };
-
-        PaginationResponse<RestaurantDto> paginationResponse = new PaginationResponse<RestaurantDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
-            Items = _mapper.Map<IEnumerable<RestaurantDto>>(
-                await _restaurantRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _restaurantRepository.GetCountAsync()
+            PageSize = PageConstants.Default24,
+            TotalRecords = await _dbContext.Restaurants.CountAsync(cancellationToken),
+            Items = await _dbContext.Restaurants
+                .AsNoTracking()
+                .ProjectToType<RestaurantDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.Default24)
+                .Take(PageConstants.Default24)
+                .ToListAsync(cancellationToken)
         };
 
         await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);

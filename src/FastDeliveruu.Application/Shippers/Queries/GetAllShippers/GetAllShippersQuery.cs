@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Shippers.Queries.GetAllShippers;
 
-public class GetAllShippersQuery : IRequest<PaginationResponse<ShipperDto>>
+public class GetAllShippersQuery : IRequest<PagedList<ShipperDto>>
 {
     public GetAllShippersQuery(int pageNumber)
     {

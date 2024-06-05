@@ -10,7 +10,7 @@ using MediatR;
 namespace FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
 
 public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUserIdQuery,
-    PaginationResponse<OrderDto>>
+    PagedList<OrderDto>>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IMapper _mapper;
@@ -21,21 +21,21 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         _mapper = mapper;
     }
 
-    public async Task<PaginationResponse<OrderDto>> Handle(
+    public async Task<PagedList<OrderDto>> Handle(
         GetAllOrdersByUserIdQuery request,
         CancellationToken cancellationToken)
     {
         QueryOptions<Order> options = new QueryOptions<Order>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
+            PageSize = PageConstants.Default24,
             Where = o => o.LocalUserId == request.UserId
         };
 
-        PaginationResponse<OrderDto> paginationResponse = new PaginationResponse<OrderDto>
+        PagedList<OrderDto> paginationResponse = new PagedList<OrderDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PagingConstants.DefaultPageSize,
+            PageSize = PageConstants.Default24,
             Items = _mapper.Map<IEnumerable<OrderDto>>(
                 await _orderRepository.ListAllAsync(options, asNoTracking: true)),
             TotalRecords = await _orderRepository.GetCountAsync()

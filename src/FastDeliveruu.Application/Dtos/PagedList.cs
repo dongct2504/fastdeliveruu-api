@@ -1,6 +1,6 @@
 namespace FastDeliveruu.Application.Dtos;
 
-public class PaginationResponse<T>
+public class PagedList<T>
 {
     public int PageNumber { get; set; }
 

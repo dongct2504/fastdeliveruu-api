@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Queries.GetAllShoppingCarts;
 
-public class GetAllShoppingCartsByUserIdQuery : IRequest<PaginationResponse<ShoppingCartDto>>
+public class GetAllShoppingCartsByUserIdQuery : IRequest<PagedList<ShoppingCartDto>>
 {
     public GetAllShoppingCartsByUserIdQuery(Guid userId, int pageNumber)
     {

@@ -28,7 +28,6 @@ public class CreateMenuItemCommandValidator : AbstractValidator<CreateMenuItemCo
             .GreaterThanOrEqualTo(1000);
 
         RuleFor(x => x.DiscountPercent)
-            .NotEmpty()
             .InclusiveBetween(0, 1);
     }
 }

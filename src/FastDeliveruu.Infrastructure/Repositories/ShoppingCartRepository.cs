@@ -1,12 +1,12 @@
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 
 public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRepository
 {
-    public ShoppingCartRepository(Data.FastDeliveruuDbContext context) : base(context)
+    public ShoppingCartRepository(FastDeliveruuDbContext context) : base(context)
     {
     }
 

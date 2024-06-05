@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 
-public class GetAllMenuItemsQuery : IRequest<PaginationResponse<MenuItemDetailDto>>
+public class GetAllMenuItemsQuery : IRequest<PagedList<MenuItemDto>>
 {
     public GetAllMenuItemsQuery(Guid? genreId, Guid? restaurantId, int pageNumber)
     {

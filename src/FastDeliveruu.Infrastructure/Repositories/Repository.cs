@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Data;
+using FastDeliveruu.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
@@ -82,7 +82,7 @@ public class Repository<T> : IRepository<T> where T : class
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteRangeAsync(List<T> entities)
+    public async Task DeleteRangeAsync(IEnumerable<T> entities)
     {
         _dbSet.RemoveRange(entities);
         await _dbContext.SaveChangesAsync();

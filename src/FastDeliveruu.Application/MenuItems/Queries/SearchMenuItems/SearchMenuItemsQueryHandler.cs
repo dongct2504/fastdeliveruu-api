@@ -30,7 +30,7 @@ public class SearchMenuItemsQueryHandler : IRequestHandler<SearchMenuItemsQuery,
         SearchMenuItemsQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.MenuItems}-{request.Name}";
+        string key = $"{CacheConstants.MenuItems}-{request.Amount}-{request.DiscountPercent}";
 
         IEnumerable<MenuItemDto>? menuItemDtosCache = await _cacheService
             .GetAsync<IEnumerable<MenuItemDto>>(key, cancellationToken);
@@ -41,9 +41,9 @@ public class SearchMenuItemsQueryHandler : IRequestHandler<SearchMenuItemsQuery,
 
         QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
         {
-            Where = mi => mi.Name.Contains(request.Name),
+            Where = mi => mi.Price == request.Amount && mi.DiscountPercent == request.DiscountPercent,
             PageNumber = 1,
-            PageSize = 20
+            PageSize = 50
         };
 
         IEnumerable<MenuItemDto> menuItemDtos = _mapper.Map<IEnumerable<MenuItemDto>>(
