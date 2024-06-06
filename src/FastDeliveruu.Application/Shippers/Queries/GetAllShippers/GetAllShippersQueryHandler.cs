@@ -40,13 +40,13 @@ public class GetAllShippersQueryHandler : IRequestHandler<GetAllShippersQuery, P
         PagedList<ShipperDto> paginationResponse = new PagedList<ShipperDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.User18,
+            PageSize = PageConstants.Other18,
             TotalRecords = await _dbContext.Shippers.CountAsync(cancellationToken),
             Items = await _dbContext.Shippers
                 .AsNoTracking()
                 .ProjectToType<ShipperDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.User18)
-                .Take(PageConstants.User18)
+                .Skip((request.PageNumber - 1) * PageConstants.Other18)
+                .Take(PageConstants.Other18)
                 .ToListAsync(cancellationToken)
         };
 

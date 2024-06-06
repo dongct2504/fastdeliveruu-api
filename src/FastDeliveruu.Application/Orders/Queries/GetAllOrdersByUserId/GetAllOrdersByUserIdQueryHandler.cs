@@ -1,46 +1,62 @@
-﻿using FastDeliveruu.Application.Dtos;
+﻿using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.OrderDtos;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
+using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
 
 public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUserIdQuery,
     PagedList<OrderDto>>
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetAllOrdersByUserIdQueryHandler(IOrderRepository orderRepository, IMapper mapper)
+    public GetAllOrdersByUserIdQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
     {
-        _orderRepository = orderRepository;
-        _mapper = mapper;
+        _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
     public async Task<PagedList<OrderDto>> Handle(
         GetAllOrdersByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<Order> options = new QueryOptions<Order>
+        string key = $"{CacheConstants.Orders}-{request.UserId}-{request.PageNumber}";
+
+        PagedList<OrderDto>? pagedListCache = await _cacheService
+            .GetAsync<PagedList<OrderDto>>(key, cancellationToken);
+        if (pagedListCache != null)
+        {
+            return pagedListCache;
+        }
+
+        IQueryable<Order> ordersQuery = _dbContext.Orders.AsQueryable();
+
+        ordersQuery = ordersQuery
+            .Where(o => o.LocalUserId == request.UserId);
+
+        PagedList<OrderDto> pagedList = new PagedList<OrderDto>
         {
             PageNumber = request.PageNumber,
             PageSize = PageConstants.Default24,
-            Where = o => o.LocalUserId == request.UserId
+            TotalRecords = await ordersQuery.CountAsync(cancellationToken),
+            Items = await ordersQuery
+                .AsNoTracking()
+                .ProjectToType<OrderDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.Other18)
+                .Take(PageConstants.Other18)
+                .ToListAsync(cancellationToken)
         };
 
-        PagedList<OrderDto> paginationResponse = new PagedList<OrderDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default24,
-            Items = _mapper.Map<IEnumerable<OrderDto>>(
-                await _orderRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _orderRepository.GetCountAsync()
-        };
+        await _cacheService.SetAsync(key, pagedList, CacheOptions.DefaultExpiration, cancellationToken);
 
-        return paginationResponse;
+        return pagedList;
     }
 }

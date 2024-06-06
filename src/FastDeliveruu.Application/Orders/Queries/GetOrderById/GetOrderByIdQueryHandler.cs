@@ -1,41 +1,59 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.OrderDtos;
+using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Result<OrderHeaderDetailDto>>
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetOrderByIdQueryHandler(IOrderRepository orderRepository, IMapper mapper)
+    public GetOrderByIdQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
     {
-        _orderRepository = orderRepository;
-        _mapper = mapper;
+        _cacheService = cacheService;
+        _dbContext = dbContext;
     }
 
-    public async Task<Result<OrderHeaderDetailDto>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<OrderHeaderDetailDto>> Handle(
+        GetOrderByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        QueryOptions<Order> options = new QueryOptions<Order>
+        string key = $"{CacheConstants.Order}-{request.UserId}-{request.OrderId}";
+
+        OrderHeaderDetailDto? orderHeaderDetailDtoCache = await _cacheService
+            .GetAsync<OrderHeaderDetailDto>(key, cancellationToken);
+        if (orderHeaderDetailDtoCache != null)
         {
-            SetIncludes = "LocalUser, Shipper, OrderDetails.MenuItem",
-            Where = o => o.LocalUserId == request.UserId && o.OrderId == request.OrderId
-        };
-        Order? order = await _orderRepository.GetAsync(options, asNoTracking: true);
-        if (order == null)
+            return orderHeaderDetailDtoCache;
+        }
+
+        OrderHeaderDetailDto? orderHeaderDetailDto = await _dbContext.Orders
+            .Where(o => o.LocalUserId == request.UserId && o.OrderId == request.OrderId)
+            .AsNoTracking()
+            .ProjectToType<OrderHeaderDetailDto>()
+            .FirstOrDefaultAsync(cancellationToken);
+        if (orderHeaderDetailDto == null)
         {
             string message = "Order not found.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<OrderHeaderDetailDto>(new NotFoundError(message));
         }
 
-        return _mapper.Map<OrderHeaderDetailDto>(order);
+        await _cacheService.SetAsync(key, orderHeaderDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
+
+        return orderHeaderDetailDto;
     }
 }

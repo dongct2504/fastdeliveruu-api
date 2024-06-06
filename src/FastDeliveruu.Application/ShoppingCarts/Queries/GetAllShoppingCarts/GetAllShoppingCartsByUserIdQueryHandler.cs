@@ -1,47 +1,62 @@
-﻿using FastDeliveruu.Application.Dtos;
+﻿using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Constants;
+using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Queries.GetAllShoppingCarts;
 
 public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllShoppingCartsByUserIdQuery, 
     PagedList<ShoppingCartDto>>
 {
-    private readonly IShoppingCartRepository _shoppingCartRepository;
-    private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetAllShoppingCartsByUserIdQueryHandler(IShoppingCartRepository shoppingCartRepository, IMapper mapper)
+    public GetAllShoppingCartsByUserIdQueryHandler(FastDeliveruuDbContext dbContext, ICacheService cacheService)
     {
-        _shoppingCartRepository = shoppingCartRepository;
-        _mapper = mapper;
+        _dbContext = dbContext;
+        _cacheService = cacheService;
     }
 
     public async Task<PagedList<ShoppingCartDto>> Handle(
         GetAllShoppingCartsByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
+        string key = $"{CacheConstants.ShoppingCarts}-{request.UserId}-{request.PageNumber}";
+
+        PagedList<ShoppingCartDto>? pagedListCache = await _cacheService
+            .GetAsync<PagedList<ShoppingCartDto>>(key, cancellationToken);
+        if (pagedListCache != null)
+        {
+            return pagedListCache;
+        }
+
+        IQueryable<ShoppingCart> shoppingCartsQuery = _dbContext.ShoppingCarts.AsQueryable();
+
+        shoppingCartsQuery = shoppingCartsQuery
+            .Where(sc => sc.LocalUserId == request.UserId);
+
+        PagedList<ShoppingCartDto> pagedList = new PagedList<ShoppingCartDto>
         {
             PageNumber = request.PageNumber,
             PageSize = PageConstants.Default24,
-            SetIncludes = "MenuItem",
-            Where = sc => sc.LocalUserId == request.UserId
+            TotalRecords = await shoppingCartsQuery.CountAsync(cancellationToken),
+            Items = await shoppingCartsQuery
+                .AsNoTracking()
+                .ProjectToType<ShoppingCartDto>()
+                .Skip((request.PageNumber - 1) * PageConstants.Other18)
+                .Take(PageConstants.Other18)
+                .ToListAsync(cancellationToken)
         };
 
-        PagedList<ShoppingCartDto> paginationResponse = new PagedList<ShoppingCartDto>
-        {
-            PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default24,
-            Items = _mapper.Map<IEnumerable<ShoppingCartDto>>(
-                await _shoppingCartRepository.ListAllAsync(options, asNoTracking: true)),
-            TotalRecords = await _shoppingCartRepository.GetCountAsync()
-        };
+        await _cacheService.SetAsync(key, pagedList, CacheOptions.DefaultExpiration, cancellationToken);
 
-        return paginationResponse;
+        return pagedList;
     }
 }
