@@ -2,28 +2,24 @@
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Constants;
+using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
-using MapsterMapper;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.SearchMenuItems;
 
 public class SearchMenuItemsQueryHandler : IRequestHandler<SearchMenuItemsQuery, IEnumerable<MenuItemDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IMenuItemRepository _menuItemRepository;
-    private readonly IMapper _mapper;
+    private readonly FastDeliveruuDbContext _dbContext;
 
-    public SearchMenuItemsQueryHandler(
-        IMenuItemRepository menuItemRepository,
-        IMapper mapper,
-        ICacheService cacheService)
+    public SearchMenuItemsQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
     {
         _cacheService = cacheService;
-        _menuItemRepository = menuItemRepository;
-        _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<IEnumerable<MenuItemDto>> Handle(
@@ -39,15 +35,16 @@ public class SearchMenuItemsQueryHandler : IRequestHandler<SearchMenuItemsQuery,
             return menuItemDtosCache;
         }
 
-        QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
-        {
-            Where = mi => mi.Price == request.Amount && mi.DiscountPercent == request.DiscountPercent,
-            PageNumber = 1,
-            PageSize = 50
-        };
+        IQueryable<MenuItem> menuItemsQuery = _dbContext.MenuItems.AsQueryable();
 
-        IEnumerable<MenuItemDto> menuItemDtos = _mapper.Map<IEnumerable<MenuItemDto>>(
-            await _menuItemRepository.ListAllAsync(options, asNoTracking: true));
+        menuItemsQuery = menuItemsQuery
+            .Where(mi => mi.Price == request.Amount && mi.DiscountPercent == request.DiscountPercent);
+
+        IEnumerable<MenuItemDto> menuItemDtos = await menuItemsQuery
+            .AsNoTracking()
+            .ProjectToType<MenuItemDto>()
+            .Take(PageConstants.Other18)
+            .ToListAsync(cancellationToken);
 
         await _cacheService.SetAsync(key, menuItemDtos, CacheOptions.DefaultExpiration, cancellationToken);
 

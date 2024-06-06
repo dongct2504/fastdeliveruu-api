@@ -1,8 +1,7 @@
-using System.Linq.Expressions;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Data;
 using Microsoft.EntityFrameworkCore;
+using FastDeliveruu.Domain.Specifications;
 
 namespace FastDeliveruu.Infrastructure.Repositories;
 
@@ -20,13 +19,8 @@ public class Repository<T> : IRepository<T> where T : class
         _dbSet = _dbContext.Set<T>();
     }
 
-    public async Task<IEnumerable<T>> ListAllAsync(QueryOptions<T>? options = null, bool asNoTracking = false)
+    public async Task<IEnumerable<T>> ListAllAsync(bool asNoTracking = false)
     {
-        if (options != null)
-        {
-            return await BuildQuery(options, asNoTracking).ToListAsync();
-        }
-
         if (asNoTracking)
         {
             return await _dbSet.AsNoTracking().ToListAsync();
@@ -49,9 +43,6 @@ public class Repository<T> : IRepository<T> where T : class
     {
         return await _dbSet.FindAsync(id);
     }
-
-    public virtual async Task<T?> GetAsync(QueryOptions<T> options, bool asNoTracking = false) =>
-        await BuildQuery(options, asNoTracking).FirstOrDefaultAsync();
 
     public async Task AddAsync(T entity)
     {
@@ -88,48 +79,28 @@ public class Repository<T> : IRepository<T> where T : class
         await _dbContext.SaveChangesAsync();
     }
 
-    private IQueryable<T> BuildQuery(QueryOptions<T> options, bool asNoTracking)
+    public async Task<IEnumerable<T>> ListAllWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false)
     {
-        IQueryable<T> query = _dbSet; // ex: _context.Books;
-
-        if (!options.Tracked)
-        {
-            query = query.AsNoTracking();
-        }
-
-        if (options.HasInclude)
-        {
-            foreach (string include in options.GetIncludes)
-            {
-                query = query.Include(include);
-            }
-        }
-
-        if (options.HasWhereClause)
-        {
-            foreach (Expression<Func<T, bool>> expression in options.WhereClauses)
-            {
-                query = query.Where(expression);
-            }
-            count = query.Count(); // get filter count
-        }
-
         if (asNoTracking)
         {
-            query = query.AsNoTracking();
+            return await ApplySpecification(spec).AsNoTracking().ToListAsync();
         }
 
-        if (options.HasPaging)
+        return await ApplySpecification(spec).ToListAsync();
+    }
+
+    public async Task<T?> GetWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false)
+    {
+        if (asNoTracking)
         {
-            query = query.Skip(options.PageSize * (options.PageNumber - 1))
-                .Take(options.PageSize);
+            return await ApplySpecification(spec).AsNoTracking().FirstOrDefaultAsync();
         }
 
-        if (options.HasOrderBy)
-        {
-            query = query.OrderBy(options.OrderBy);
-        }
+        return await ApplySpecification(spec).FirstOrDefaultAsync();
+    }
 
-        return query;
+    private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+    {
+        return SpecificationEvaluator<T>.GetQuery(_dbSet.AsQueryable(), spec);
     }
 }

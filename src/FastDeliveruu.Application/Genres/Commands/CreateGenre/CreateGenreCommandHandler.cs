@@ -1,8 +1,8 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Genres;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -23,21 +23,19 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
 
     public async Task<Result<GenreDto>> Handle(CreateGenreCommand request, CancellationToken cancellationToken)
     {
-        Genre genre = _mapper.Map<Genre>(request);
-        genre.GenreId = Guid.NewGuid();
-        genre.CreatedAt = DateTime.Now;
-        genre.UpdatedAt = DateTime.Now;
-
-        QueryOptions<Genre> options = new QueryOptions<Genre>
-        {
-            Where = g => g.Name == genre.Name
-        };
-        if (await _genreRepository.GetAsync(options) != null)
+        var spec = new GenreByNameSpecification(request.Name);
+        Genre? genre = await _genreRepository.GetWithSpecAsync(spec, asNoTracking: true);
+        if (genre != null)
         {
             string message = "genre is already exist.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<GenreDto>(new DuplicateError(message));
         }
+
+        genre = _mapper.Map<Genre>(request);
+        genre.GenreId = Guid.NewGuid();
+        genre.CreatedAt = DateTime.Now;
+        genre.UpdatedAt = DateTime.Now;
 
         await _genreRepository.AddAsync(genre);
 

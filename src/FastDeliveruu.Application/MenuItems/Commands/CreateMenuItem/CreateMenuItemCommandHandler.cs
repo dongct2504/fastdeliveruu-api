@@ -3,8 +3,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -54,12 +54,10 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             return Result.Fail<MenuItemDto>(new NotFoundError(message));
         }
 
-        QueryOptions<MenuItem> options = new QueryOptions<MenuItem>
-        {
-            Where = mi => (mi.Name == request.Name && mi.RestaurantId == request.RestaurantId) ||
-                (mi.Name == request.Name && mi.GenreId == request.GenreId)
-        };
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(options);
+        var spec = new MenuItemExistInGenreOrRestaurantSpecification(request.GenreId,
+            request.RestaurantId, request.Name);
+
+        MenuItem? menuItem = await _menuItemRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (menuItem != null)
         {
             string message = "MenuItem is already exist.";
@@ -80,15 +78,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         menuItem.CreatedAt = DateTime.Now;
         menuItem.UpdatedAt = DateTime.Now;
 
-        try
-        {
-            await _menuItemRepository.AddAsync(menuItem);
-        }
-        catch
-        {
-            await _fileStorageServices.DeleteImageAsync(menuItem.ImageUrl);
-            throw;
-        }
+        await _menuItemRepository.AddAsync(menuItem);
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }

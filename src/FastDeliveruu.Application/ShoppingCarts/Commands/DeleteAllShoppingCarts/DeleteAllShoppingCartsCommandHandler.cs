@@ -1,7 +1,7 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.ShoppingCarts;
 using FluentResults;
 using MediatR;
 using Serilog;
@@ -19,11 +19,9 @@ public class DeleteAllShoppingCartsCommandHandler : IRequestHandler<DeleteAllSho
 
     public async Task<Result> Handle(DeleteAllShoppingCartsCommand request, CancellationToken cancellationToken)
     {
-        QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
-        {
-            Where = sc => sc.LocalUserId == request.LocalUserId
-        };
-        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository.ListAllAsync(options);
+        var spec = new CartByUserIdSpecification(request.LocalUserId);
+        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository
+            .ListAllWithSpecAsync(spec, asNoTracking: true);
         if (!shoppingCarts.Any())
         {
             string message = "The user does not have any cart.";

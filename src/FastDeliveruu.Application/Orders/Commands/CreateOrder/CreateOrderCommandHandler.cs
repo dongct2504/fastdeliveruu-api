@@ -1,8 +1,8 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.ShoppingCarts;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -39,13 +39,10 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.OrderStatus = OrderStatus.Pending;
         order.PaymentStatus = PaymentStatus.Pending;
 
-        QueryOptions<ShoppingCart> shoppingCartOptions = new QueryOptions<ShoppingCart>
-        {
-            SetIncludes = "MenuItem",
-            Where = sc => sc.LocalUserId == request.LocalUserId
-        };
+        var spec = new CartWithMenuItemByUserIdSpecification(request.LocalUserId);
+
         IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository
-            .ListAllAsync(shoppingCartOptions, asNoTracking: true);
+            .ListAllWithSpecAsync(spec, asNoTracking: true);
         if (!shoppingCarts.Any())
         {
             string message = "Cart is empty.";
@@ -70,6 +67,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<Order>(new NotFoundError(message));
         }
+
         order.ShipperId = shipperId;
         order.CreatedAt = DateTime.Now;
         order.UpdatedAt = DateTime.Now;

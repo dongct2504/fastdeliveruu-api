@@ -2,8 +2,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.LocalUsers;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -31,19 +31,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         RegisterCommand request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
-        {
-            Where = u => u.UserName == request.UserName || u.Email == request.Email
-        };
-        LocalUser? isLocalUserExist = await _localUserRepository.GetAsync(options);
-        if (isLocalUserExist != null)
+        var spec = new UserByUsernameOrEmailSpecification(request.UserName, request.Email);
+        LocalUser? localUser = await _localUserRepository.GetWithSpecAsync(spec, asNoTracking: true);
+        if (localUser != null)
         {
             string message = "The email or username is already exist.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<AuthenticationResponse>(new DuplicateError(message));
         }
 
-        LocalUser localUser = _mapper.Map<LocalUser>(request);
+        localUser = _mapper.Map<LocalUser>(request);
         localUser.LocalUserId = Guid.NewGuid();
         localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         localUser.Role = request.Role ?? "Customer";

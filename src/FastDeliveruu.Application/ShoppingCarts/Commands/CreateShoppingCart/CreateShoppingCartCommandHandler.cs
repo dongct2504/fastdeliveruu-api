@@ -1,7 +1,7 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.ShoppingCarts;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -48,11 +48,8 @@ public class CreateShoppingCartCommandHandler : IRequestHandler<CreateShoppingCa
             return Result.Fail(new NotFoundError(message));
         }
 
-        QueryOptions<ShoppingCart> options = new QueryOptions<ShoppingCart>
-        {
-            Where = sc => sc.LocalUserId == request.LocalUserId && sc.MenuItemId == request.MenuItemId
-        };
-        ShoppingCart? shoppingCart = await _shoppingCartRepository.GetAsync(options);
+        var spec = new CartByUserIdAndMenuItemIdSpecification(request.LocalUserId, request.MenuItemId);
+        ShoppingCart? shoppingCart = await _shoppingCartRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (shoppingCart != null)
         {
             shoppingCart.Quantity += request.Quantity;

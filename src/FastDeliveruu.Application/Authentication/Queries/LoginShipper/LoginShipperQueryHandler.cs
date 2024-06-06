@@ -2,8 +2,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Shippers;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -30,11 +30,8 @@ public class LoginShipperQueryHandler : IRequestHandler<LoginShipperQuery, Resul
     public async Task<Result<AuthenticationShipperResponse>> Handle(LoginShipperQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<Shipper> options = new QueryOptions<Shipper>
-        {
-            Where = u => u.UserName == request.UserName
-        };
-        Shipper? shipper = await _shipperRepository.GetAsync(options, asNoTracking: true);
+        var spec = new ShipperByUsernameSpecification(request.UserName);
+        Shipper? shipper = await _shipperRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (shipper == null)
         {
             string message = "The user name is incorrect.";

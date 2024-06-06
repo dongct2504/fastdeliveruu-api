@@ -3,8 +3,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Restaurants;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -30,11 +30,8 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
 
     public async Task<Result<RestaurantDto>> Handle(CreateRestaurantCommand request, CancellationToken cancellationToken)
     {
-        QueryOptions<Restaurant> options = new QueryOptions<Restaurant>
-        {
-            Where = r => r.Name == request.Name && r.PhoneNumber == request.PhoneNumber
-        };
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(options);
+        var spec = new RestaurantByNameAndPhoneSpecification(request.Name, request.PhoneNumber);
+        Restaurant? restaurant = await _restaurantRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (restaurant != null)
         {
             string message = "Restaurant is already exist.";
@@ -54,15 +51,7 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         restaurant.CreatedAt = DateTime.Now;
         restaurant.UpdatedAt = DateTime.Now;
 
-        try
-        {
-            await _restaurantRepository.AddAsync(restaurant);
-        }
-        catch
-        {
-            await _fileStorageServices.DeleteImageAsync(restaurant.ImageUrl);
-            throw;
-        }
+        await _restaurantRepository.AddAsync(restaurant);
 
         return _mapper.Map<RestaurantDto>(restaurant);
     }

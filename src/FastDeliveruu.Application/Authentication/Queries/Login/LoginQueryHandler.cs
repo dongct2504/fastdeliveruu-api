@@ -2,8 +2,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.LocalUsers;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -30,11 +30,8 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
     public async Task<Result<AuthenticationResponse>> Handle(LoginQuery request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<LocalUser> options = new QueryOptions<LocalUser>
-        {
-            Where = u => u.UserName == request.UserName
-        };
-        LocalUser? localUser = await _localUserRepository.GetAsync(options, asNoTracking: true);
+        var spec = new UserByUsernameSpecification(request.UserName);
+        LocalUser? localUser = await _localUserRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (localUser == null)
         {
             string message = "The user name is incorrect.";

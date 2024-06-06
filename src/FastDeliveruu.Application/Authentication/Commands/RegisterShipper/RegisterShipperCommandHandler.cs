@@ -2,8 +2,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Shippers;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -32,19 +32,16 @@ public class RegisterShipperCommandHandler : IRequestHandler<RegisterShipperComm
         RegisterShipperCommand request,
         CancellationToken cancellationToken)
     {
-        QueryOptions<Shipper> options = new QueryOptions<Shipper>
-        {
-            Where = s => s.Cccd == request.Cccd
-        };
-        Shipper? isShipperExist = await _shipperRepository.GetAsync(options);
-        if (isShipperExist != null)
+        var spec = new ShipperByUsernameOrEmailSpecification(request.UserName, request.Email);
+        Shipper? shipper = await _shipperRepository.GetWithSpecAsync(spec, asNoTracking: true);
+        if (shipper != null)
         {
             string message = "The request shipper is already exist.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<AuthenticationShipperResponse>(new DuplicateError(message));
         }
 
-        Shipper shipper = _mapper.Map<Shipper>(request);
+        shipper = _mapper.Map<Shipper>(request);
         shipper.ShipperId = Guid.NewGuid();
         shipper.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         shipper.CreatedAt = DateTime.Now;

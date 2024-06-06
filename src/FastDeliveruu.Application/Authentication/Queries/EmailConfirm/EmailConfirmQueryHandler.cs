@@ -2,8 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.LocalUsers;
+using FastDeliveruu.Domain.Specifications.Shippers;
 using FluentResults;
 using MediatR;
 
@@ -28,26 +29,19 @@ public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Resul
         JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(request.Token);
 
         // Retrieve the user ID and email from the token
-        Claim? userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId");
         Claim? emailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email);
 
-        if (userIdClaim == null || emailClaim == null)
+        if (emailClaim == null)
         {
             return Result.Fail<bool>(new BadRequestError("Invalid token format."));
         }
 
         // Retrieve the user based on email
-        QueryOptions<LocalUser> LocalUserOptions = new QueryOptions<LocalUser>
-        {
-            Where = u => u.Email == request.Email
-        };
-        LocalUser? localUser = await _localUserRepository.GetAsync(LocalUserOptions);
+        var userSpec = new UserByEmailSpecification(request.Email);
+        LocalUser? localUser = await _localUserRepository.GetWithSpecAsync(userSpec, asNoTracking: true);
 
-        QueryOptions<Shipper> ShipperOptions = new QueryOptions<Shipper>
-        {
-            Where = s => s.Email == request.Email
-        };
-        Shipper? shipper = await _shipperRepository.GetAsync(ShipperOptions);
+        var shipperSpec = new ShipperByEmailSpecification(request.Email);
+        Shipper? shipper = await _shipperRepository.GetWithSpecAsync(shipperSpec, asNoTracking: true);
 
         if (localUser == null && shipper == null)
         {

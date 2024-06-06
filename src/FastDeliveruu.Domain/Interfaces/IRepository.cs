@@ -1,15 +1,14 @@
-using FastDeliveruu.Domain.Extensions;
+using FastDeliveruu.Domain.Specifications;
 
 namespace FastDeliveruu.Domain.Interfaces;
 
 public interface IRepository<T> where T : class
 {
-    Task<IEnumerable<T>> ListAllAsync(QueryOptions<T>? options = null, bool asNoTracking = false);
+    Task<IEnumerable<T>> ListAllAsync(bool asNoTracking = false);
 
     Task<T?> GetAsync(int id);
     Task<T?> GetAsync(long id);
     Task<T?> GetAsync(Guid id);
-    Task<T?> GetAsync(QueryOptions<T> options, bool asNoTracking = false);
 
     Task<int> GetCountAsync();
 
@@ -17,4 +16,8 @@ public interface IRepository<T> where T : class
     Task DeleteAsync(T entity);
     Task DeleteRangeAsync(T entity);
     Task DeleteRangeAsync(IEnumerable<T> entities);
+
+    Task<IEnumerable<T>> ListAllWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false);
+
+    Task<T?> GetWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false);
 }
