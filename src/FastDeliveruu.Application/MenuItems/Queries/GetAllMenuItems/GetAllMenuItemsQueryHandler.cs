@@ -30,7 +30,7 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
         GetAllMenuItemsQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.MenuItems}-{request.GenreId}-{request.RestaurantId}-{request.PageNumber}";
+        string key = $"{CacheConstants.MenuItems}-{request.MenuItemParams}";
 
         PagedList<MenuItemDto>? paginationResponseCache = await _cacheService
             .GetAsync<PagedList<MenuItemDto>>(key, cancellationToken);
@@ -41,25 +41,44 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
 
         IQueryable<MenuItem> menuItemsQuery = _dbContext.MenuItems.AsQueryable();
 
-        if (request.GenreId != null)
+        if (request.MenuItemParams.GenreId != null)
         {
-            menuItemsQuery = menuItemsQuery.Where(mi => mi.GenreId == request.GenreId);
+            menuItemsQuery = menuItemsQuery.Where(mi => mi.GenreId == request.MenuItemParams.GenreId);
         }
 
-        if (request.RestaurantId != null)
+        if (request.MenuItemParams.RestaurantId != null)
         {
-            menuItemsQuery = menuItemsQuery.Where(mi => mi.RestaurantId == request.RestaurantId);
+            menuItemsQuery = menuItemsQuery.Where(mi => mi.RestaurantId == request.MenuItemParams.RestaurantId);
+        }
+
+        if (!string.IsNullOrEmpty(request.MenuItemParams.Sort))
+        {
+            switch (request.MenuItemParams.Sort)
+            {
+                case MenuItemSortConstants.LatestUpdateDesc:
+                    menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.UpdatedAt);
+                    break;
+                case MenuItemSortConstants.PriceAsc:
+                    menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Price);
+                    break;
+                case MenuItemSortConstants.PriceDesc:
+                    menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.Price);
+                    break;
+                case MenuItemSortConstants.Name:
+                    menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Name);
+                    break;
+            }
         }
 
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>
         {
-            PageNumber = request.PageNumber,
+            PageNumber = request.MenuItemParams.Page,
             PageSize = PageConstants.Default24,
             TotalRecords = await menuItemsQuery.CountAsync(cancellationToken),
             Items = await menuItemsQuery
                 .AsNoTracking()
                 .ProjectToType<MenuItemDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Default24)
+                .Skip((request.MenuItemParams.Page - 1) * PageConstants.Default24)
                 .Take(PageConstants.Default24)
                 .ToListAsync(cancellationToken)
         };

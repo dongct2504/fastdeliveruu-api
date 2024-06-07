@@ -6,16 +6,10 @@ namespace FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 
 public class GetAllMenuItemsQuery : IRequest<PagedList<MenuItemDto>>
 {
-    public GetAllMenuItemsQuery(Guid? genreId, Guid? restaurantId, int pageNumber)
+    public GetAllMenuItemsQuery(MenuItemParams menuItemParams)
     {
-        GenreId = genreId;
-        RestaurantId = restaurantId;
-        PageNumber = pageNumber;
+        MenuItemParams = menuItemParams;
     }
 
-    public Guid? GenreId { get; }
-
-    public Guid? RestaurantId { get; }
-
-    public int PageNumber { get; }
+    public MenuItemParams MenuItemParams { get; }
 }

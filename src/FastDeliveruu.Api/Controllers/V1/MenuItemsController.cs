@@ -28,9 +28,9 @@ public class MenuItemsController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedList<MenuItemDetailDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllMenuItems(Guid? genreId, Guid? restaurantId, int page = 1)
+    public async Task<IActionResult> GetAllMenuItems([FromQuery] MenuItemParams menuItemParams)
     {
-        GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(genreId, restaurantId, page);
+        GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(menuItemParams);
         PagedList<MenuItemDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }
