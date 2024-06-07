@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace FastDeliveruu.Application.Interfaces;
 
-public interface IVnPayServices
+public interface IVnpayServices
 {
     string CreatePaymentUrl(HttpContext httpContext, Order order);
 

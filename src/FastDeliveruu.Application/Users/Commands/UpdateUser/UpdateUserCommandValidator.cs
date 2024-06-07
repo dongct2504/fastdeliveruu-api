@@ -10,10 +10,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         RuleFor(x => x.LocalUserId)
             .NotEmpty();
 
-        RuleFor(x => x.UserName)
-            .NotEmpty()
-            .MaximumLength(128);
-
         RuleFor(x => x.FirstName)
             .MaximumLength(50);
 
@@ -24,9 +20,16 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
-        RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress()
+        RuleFor(x => x.Address)
             .MaximumLength(128);
+
+        RuleFor(x => x.Ward)
+            .MaximumLength(50);
+
+        RuleFor(x => x.District)
+            .MaximumLength(30);
+
+        RuleFor(x => x.City)
+            .MaximumLength(30);
     }
 }

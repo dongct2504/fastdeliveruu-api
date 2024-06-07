@@ -12,8 +12,6 @@ public class UpdateShipperCommand : IRequest<Result>
 
     public string LastName { get; set; } = null!;
 
-    public string UserName { get; set; } = null!;
-
     public string PhoneNumber { get; set; } = null!;
 
     public string Address { get; set; } = null!;

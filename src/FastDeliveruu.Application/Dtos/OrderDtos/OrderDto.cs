@@ -16,6 +16,8 @@ public class OrderDto
 
     public string? PaymentStatus { get; set; }
 
+    public string? PaymentMethod { get; set; }
+
     public string? TransactionId { get; set; }
 
     public string Address { get; set; } = null!;

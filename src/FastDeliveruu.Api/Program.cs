@@ -88,7 +88,7 @@ var builder = WebApplication.CreateBuilder(args);
     // register services in other layers
     builder.Services.AddSingleton<IFileStorageServices, FileStorageServices>();
     builder.Services
-        .AddApplication()
+        .AddApplication(builder.Configuration)
         .AddInfrastructure(builder.Configuration);
 
     Log.Logger = new LoggerConfiguration()

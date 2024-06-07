@@ -1,8 +1,8 @@
 namespace FastDeliveruu.Infrastructure.Common;
 
-public class VnPaySettings
+public class VnpaySettings
 {
-    public const string SectionName = "Payment:VnPay";
+    public const string SectionName = "Payment:Vnpay";
 
     public string Url { get; set; } = null!;
 

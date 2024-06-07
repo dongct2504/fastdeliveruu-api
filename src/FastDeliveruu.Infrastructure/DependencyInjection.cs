@@ -28,8 +28,8 @@ public static class DependencyInjection
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
-        services.Configure<VnPaySettings>(configuration.GetSection(VnPaySettings.SectionName));
-        services.AddSingleton<IVnPayServices, VnPayServices>();
+        services.Configure<VnpaySettings>(configuration.GetSection(VnpaySettings.SectionName));
+        services.AddSingleton<IVnpayServices, VnpayServices>();
 
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();

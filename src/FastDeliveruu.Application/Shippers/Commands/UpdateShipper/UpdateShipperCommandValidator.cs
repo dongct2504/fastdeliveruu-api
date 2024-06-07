@@ -18,10 +18,6 @@ public class UpdateShipperCommandValidator : AbstractValidator<UpdateShipperComm
             .NotEmpty()
             .MaximumLength(50);
 
-        RuleFor(x => x.UserName)
-            .NotEmpty()
-            .MaximumLength(128);
-
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
@@ -41,5 +37,8 @@ public class UpdateShipperCommandValidator : AbstractValidator<UpdateShipperComm
         RuleFor(x => x.City)
             .NotEmpty()
             .MaximumLength(30);
+
+        RuleFor(x => x.VehicleType)
+            .MaximumLength(126);
     }
 }

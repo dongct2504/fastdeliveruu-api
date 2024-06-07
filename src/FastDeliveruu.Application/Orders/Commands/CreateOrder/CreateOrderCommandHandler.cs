@@ -40,7 +40,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.PaymentStatus = PaymentStatus.Pending;
 
         var spec = new CartWithMenuItemByUserIdSpecification(request.LocalUserId);
-
         IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository
             .ListAllWithSpecAsync(spec, asNoTracking: true);
         if (!shoppingCarts.Any())

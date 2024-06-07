@@ -24,9 +24,9 @@ namespace FastDeliveruu.Api.Controllers.V1;
 public class OrdersController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly IVnPayServices _vnPayServices;
+    private readonly IVnpayServices _vnPayServices;
 
-    public OrdersController(IMediator mediator, IVnPayServices vnPayServices)
+    public OrdersController(IMediator mediator, IVnpayServices vnPayServices)
     {
         _mediator = mediator;
         _vnPayServices = vnPayServices;

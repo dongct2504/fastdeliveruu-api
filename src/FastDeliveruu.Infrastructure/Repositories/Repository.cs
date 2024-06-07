@@ -11,8 +11,6 @@ public class Repository<T> : IRepository<T> where T : class
 
     private readonly DbSet<T> _dbSet;
 
-    private int count;
-
     public Repository(FastDeliveruuDbContext context)
     {
         _dbContext = context;
@@ -50,14 +48,8 @@ public class Repository<T> : IRepository<T> where T : class
         await _dbContext.SaveChangesAsync();
     }
 
-    // if count = 0 (Where is not use) then use _dbSet.CountAsync()
     public async Task<int> GetCountAsync()
     {
-        if (count > 0)
-        {
-            return count;
-        }
-
         return await _dbSet.CountAsync();
     }
 
