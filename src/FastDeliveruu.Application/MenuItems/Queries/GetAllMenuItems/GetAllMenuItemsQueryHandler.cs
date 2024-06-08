@@ -70,16 +70,23 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
             }
         }
 
+        if (!string.IsNullOrEmpty(request.MenuItemParams.Search))
+        {
+            string lowerCaseSearch = request.MenuItemParams.Search.ToLower();
+            menuItemsQuery = menuItemsQuery
+                .Where(mi => EF.Functions.Like(mi.Name.ToLower(), $"%{lowerCaseSearch}%"));
+        }
+
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>
         {
             PageNumber = request.MenuItemParams.Page,
-            PageSize = PageConstants.Default24,
+            PageSize = PageConstants.Default9,
             TotalRecords = await menuItemsQuery.CountAsync(cancellationToken),
             Items = await menuItemsQuery
                 .AsNoTracking()
                 .ProjectToType<MenuItemDto>()
-                .Skip((request.MenuItemParams.Page - 1) * PageConstants.Default24)
-                .Take(PageConstants.Default24)
+                .Skip((request.MenuItemParams.Page - 1) * PageConstants.Default9)
+                .Take(PageConstants.Default9)
                 .ToListAsync(cancellationToken)
         };
 

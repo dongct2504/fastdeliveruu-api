@@ -45,7 +45,7 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         PagedList<OrderDto> pagedList = new PagedList<OrderDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default24,
+            PageSize = PageConstants.Default9,
             TotalRecords = await ordersQuery.CountAsync(cancellationToken),
             Items = await ordersQuery
                 .AsNoTracking()

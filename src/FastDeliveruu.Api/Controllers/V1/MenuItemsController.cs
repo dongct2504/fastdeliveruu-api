@@ -7,7 +7,6 @@ using FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
 using FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 using FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 using FastDeliveruu.Application.MenuItems.Queries.GetMenuItemById;
-using FastDeliveruu.Application.MenuItems.Queries.SearchMenuItems;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -33,15 +32,6 @@ public class MenuItemsController : ApiController
         GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(menuItemParams);
         PagedList<MenuItemDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
-    }
-
-    [HttpGet("search")]
-    [ProducesResponseType(typeof(IEnumerable<MenuItemDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> SearchMenuItems(decimal amount, decimal discountPercent)
-    {
-        SearchMenuItemsQuery query = new SearchMenuItemsQuery(amount, discountPercent);
-        IEnumerable<MenuItemDto> menuItemDtos = await _mediator.Send(query);
-        return Ok(menuItemDtos);
     }
 
     [HttpGet("{id:guid}", Name = "GetMenuItemById")]

@@ -40,13 +40,13 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default24,
+            PageSize = PageConstants.Default9,
             TotalRecords = await _dbContext.Restaurants.CountAsync(cancellationToken),
             Items = await _dbContext.Restaurants
                 .AsNoTracking()
                 .ProjectToType<RestaurantDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Default24)
-                .Take(PageConstants.Default24)
+                .Skip((request.PageNumber - 1) * PageConstants.Default9)
+                .Take(PageConstants.Default9)
                 .ToListAsync(cancellationToken)
         };
 

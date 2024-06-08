@@ -54,8 +54,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             return Result.Fail<MenuItemDto>(new NotFoundError(message));
         }
 
-        var spec = new MenuItemExistInGenreOrRestaurantSpecification(request.GenreId,
-            request.RestaurantId, request.Name);
+        var spec = new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name);
 
         MenuItem? menuItem = await _menuItemRepository.GetWithSpecAsync(spec, asNoTracking: true);
         if (menuItem != null)

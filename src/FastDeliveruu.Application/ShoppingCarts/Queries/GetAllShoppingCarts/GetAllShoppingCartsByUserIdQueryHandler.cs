@@ -45,7 +45,7 @@ public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllSho
         PagedList<ShoppingCartDto> pagedList = new PagedList<ShoppingCartDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default24,
+            PageSize = PageConstants.Default9,
             TotalRecords = await shoppingCartsQuery.CountAsync(cancellationToken),
             Items = await shoppingCartsQuery
                 .AsNoTracking()

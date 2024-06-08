@@ -1,10 +1,9 @@
-using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using MediatR;
 
 namespace FastDeliveruu.Application.Genres.Queries.GetAllGenres;
 
-public class GetAllGenresQuery : IRequest<PagedList<GenreDto>>
+public class GetAllGenresQuery : IRequest<List<GenreDto>>
 {
     public GetAllGenresQuery(int pageNumber)
     {

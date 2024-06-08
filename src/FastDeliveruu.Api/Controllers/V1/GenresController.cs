@@ -4,7 +4,6 @@ using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FastDeliveruu.Application.Genres.Queries.GetAllGenres;
-using FastDeliveruu.Application.Dtos;
 using MediatR;
 using FastDeliveruu.Application.Genres.Queries.GenGenreById;
 using FastDeliveruu.Application.Genres.Commands.CreateGenre;
@@ -26,12 +25,11 @@ public class GenresController : ApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(PagedList<GenreDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<GenreDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGenres(int page = 1)
     {
         GetAllGenresQuery query = new GetAllGenresQuery(page);
-        PagedList<GenreDto> getAllGenres = await _mediator.Send(query);
-
+        List<GenreDto> getAllGenres = await _mediator.Send(query);
         return Ok(getAllGenres);
     }
 
