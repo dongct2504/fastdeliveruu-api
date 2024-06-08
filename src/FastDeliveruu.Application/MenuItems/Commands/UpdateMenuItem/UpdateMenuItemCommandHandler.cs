@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -65,11 +66,25 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
 
         if (request.ImageFile != null)
         {
-            await _fileStorageServices.DeleteImageAsync(menuItem.ImageUrl);
+            DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(menuItem.PublicId);
+            if (deletionResult.Error != null)
+            {
+                string message = deletionResult.Error.Message;
+                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new BadRequestError(message));
+            }
 
-            string? fileNameWithExtension = await _fileStorageServices.UploadImageAsync(request.ImageFile,
-                UploadPath.MenuItemImageUploadPath);
-            menuItem.ImageUrl = UploadPath.MenuItemImageUploadPath + fileNameWithExtension;
+            UploadResult uploadResult = await _fileStorageServices
+                .UploadImageAsync(request.ImageFile, UploadPath.MenuItemImageUploadPath);
+            if (uploadResult.Error != null)
+            {
+                string message = uploadResult.Error.Message;
+                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new BadRequestError(message));
+            }
+
+            menuItem.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+            menuItem.PublicId = uploadResult.PublicId;
         }
         menuItem.UpdatedAt = DateTime.Now;
 

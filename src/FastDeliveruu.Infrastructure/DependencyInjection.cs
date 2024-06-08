@@ -28,6 +28,9 @@ public static class DependencyInjection
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+        services.AddSingleton<IFileStorageServices, FileStorageServices>();
+
         services.Configure<VnpaySettings>(configuration.GetSection(VnpaySettings.SectionName));
         services.AddSingleton<IVnpayServices, VnpayServices>();
 

@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -42,12 +43,18 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         restaurant = _mapper.Map<Restaurant>(request);
         restaurant.RestaurantId = Guid.NewGuid();
 
-        if (request.ImageFile != null)
+        UploadResult uploadResult = await _fileStorageServices.UploadImageAsync(request.ImageFile,
+            UploadPath.RestaurantImageUploadPath);
+        if (uploadResult.Error != null)
         {
-            string? fileNameWithExtension = await _fileStorageServices.UploadImageAsync(request.ImageFile,
-                UploadPath.RestaurantImageUploadPath);
-            restaurant.ImageUrl = UploadPath.RestaurantImageUploadPath + fileNameWithExtension;
+            string message = uploadResult.Error.Message;
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
+
+        restaurant.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+        restaurant.PublicId = uploadResult.PublicId;
+
         restaurant.CreatedAt = DateTime.Now;
         restaurant.UpdatedAt = DateTime.Now;
 

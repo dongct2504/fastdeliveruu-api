@@ -46,6 +46,9 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(1024)]
         [Unicode(false)]
         public string? ImageUrl { get; set; }
+        [StringLength(256)]
+        [Unicode(false)]
+        public string? PublicId { get; set; }
         [StringLength(126)]
         [Unicode(false)]
         public string? VehicleType { get; set; }

@@ -3,6 +3,7 @@
     <ProjectReference Include="..\FastDeliveruu.Domain\FastDeliveruu.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.26.2" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="FluentResults" Version="3.15.0" />

@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -67,12 +68,17 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         menuItem = _mapper.Map<MenuItem>(request);
         menuItem.MenuItemId = Guid.NewGuid();
 
-        if (request.ImageFile != null)
+        UploadResult uploadResult = await _fileStorageServices
+            .UploadImageAsync(request.ImageFile, UploadPath.MenuItemImageUploadPath);
+        if (uploadResult.Error != null)
         {
-            string? fileNameWithExtension = await _fileStorageServices.UploadImageAsync(request.ImageFile,
-                UploadPath.MenuItemImageUploadPath);
-            menuItem.ImageUrl = UploadPath.MenuItemImageUploadPath + fileNameWithExtension;
+            string message = uploadResult.Error.Message;
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
+
+        menuItem.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+        menuItem.PublicId = uploadResult.PublicId;
 
         menuItem.CreatedAt = DateTime.Now;
         menuItem.UpdatedAt = DateTime.Now;

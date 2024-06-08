@@ -21,5 +21,5 @@ public class CreateMenuItemCommand : IRequest<Result<MenuItemDto>>
 
     public decimal DiscountPercent { get; set; }
 
-    public IFormFile? ImageFile { get; set; }
+    public IFormFile ImageFile { get; set; } = null!;
 }

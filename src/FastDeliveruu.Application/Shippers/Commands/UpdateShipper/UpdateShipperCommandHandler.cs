@@ -1,3 +1,4 @@
+using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
@@ -40,11 +41,22 @@ public class UpdateShipperCommandHandler : IRequestHandler<UpdateShipperCommand,
 
         if (request.ImageFile != null)
         {
-            await _fileStorageServices.DeleteImageAsync(shipper.ImageUrl);
+            if (!string.IsNullOrEmpty(shipper.PublicId))
+            {
+                DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(shipper.PublicId);
+                if (deletionResult.Error != null)
+                {
+                    string message = deletionResult.Error.Message;
+                    Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+            }
 
-            string? fileNameWithExtension = await _fileStorageServices.UploadImageAsync(
+            UploadResult uploadResult = await _fileStorageServices.UploadImageAsync(
                 request.ImageFile, UploadPath.ShipperImageUploadPath);
-            shipper.ImageUrl = UploadPath.ShipperImageUploadPath + fileNameWithExtension;
+
+            shipper.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+            shipper.PublicId = uploadResult.PublicId;
         }
         shipper.UpdatedAt = DateTime.Now;
 

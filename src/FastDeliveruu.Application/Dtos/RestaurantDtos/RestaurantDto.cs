@@ -8,7 +8,7 @@ public class RestaurantDto
 
     public string Description { get; set; } = null!;
 
-    public string? ImageUrl { get; set; }
+    public string ImageUrl { get; set; } = null!;
 
     public string Address { get; set; } = null!;
 

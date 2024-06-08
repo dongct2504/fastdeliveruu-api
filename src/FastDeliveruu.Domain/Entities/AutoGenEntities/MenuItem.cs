@@ -30,7 +30,10 @@ namespace FastDeliveruu.Domain.Entities
         public decimal DiscountPercent { get; set; }
         [StringLength(1024)]
         [Unicode(false)]
-        public string? ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = null!;
+        [StringLength(256)]
+        [Unicode(false)]
+        public string PublicId { get; set; } = null!;
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; }
         [Column(TypeName = "datetime")]

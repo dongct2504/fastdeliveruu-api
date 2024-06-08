@@ -21,5 +21,5 @@ public class CreateRestaurantCommand : IRequest<Result<RestaurantDto>>
 
     public string City { get; set; } = null!;
 
-    public IFormFile? ImageFile { get; set; }
+    public IFormFile ImageFile { get; set; } = null!;
 }

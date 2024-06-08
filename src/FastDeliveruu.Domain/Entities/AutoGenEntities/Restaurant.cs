@@ -24,7 +24,10 @@ namespace FastDeliveruu.Domain.Entities
         public bool IsVerify { get; set; }
         [StringLength(1024)]
         [Unicode(false)]
-        public string? ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = null!;
+        [StringLength(256)]
+        [Unicode(false)]
+        public string PublicId { get; set; } = null!;
         [StringLength(128)]
         public string Address { get; set; } = null!;
         [StringLength(50)]

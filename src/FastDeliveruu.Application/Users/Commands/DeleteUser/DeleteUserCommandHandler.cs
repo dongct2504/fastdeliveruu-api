@@ -1,3 +1,4 @@
+using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -31,9 +32,18 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
             return Result.Fail(new NotFoundError(message));
         }
 
-        await _localUserRepository.DeleteAsync(localUser);
+        if (!string.IsNullOrEmpty(localUser.PublicId))
+        {
+            DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(localUser.PublicId);
+            if (deletionResult.Error != null)
+            {
+                string message = deletionResult.Error.Message;
+                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new BadRequestError(message));
+            }
+        }
 
-        await _fileStorageServices.DeleteImageAsync(localUser.ImageUrl);
+        await _localUserRepository.DeleteAsync(localUser);
 
         return Result.Ok();
     }

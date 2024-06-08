@@ -33,5 +33,8 @@ public class CreateRestaurantCommandValidator : AbstractValidator<CreateRestaura
         RuleFor(x => x.City)
             .NotEmpty()
             .MaximumLength(30);
+
+        RuleFor(x => x.ImageFile)
+            .NotEmpty();
     }
 }

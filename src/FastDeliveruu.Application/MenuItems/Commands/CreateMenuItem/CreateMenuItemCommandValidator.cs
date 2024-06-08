@@ -29,5 +29,8 @@ public class CreateMenuItemCommandValidator : AbstractValidator<CreateMenuItemCo
 
         RuleFor(x => x.DiscountPercent)
             .InclusiveBetween(0, 1);
+
+        RuleFor(x => x.ImageFile)
+            .NotEmpty();
     }
 }

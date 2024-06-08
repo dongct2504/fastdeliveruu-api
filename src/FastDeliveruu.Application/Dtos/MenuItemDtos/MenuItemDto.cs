@@ -18,5 +18,5 @@ public class MenuItemDto
 
     public decimal DiscountPrice => Price - DiscountAmount;
 
-    public string? ImageUrl { get; set; }
+    public string ImageUrl { get; set; } = null!;
 }

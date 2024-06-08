@@ -1,3 +1,4 @@
+using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
@@ -40,11 +41,22 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 
         if (request.ImageFile != null)
         {
-            await _fileStorageServices.DeleteImageAsync(localUser.ImageUrl);
+            if (!string.IsNullOrEmpty(localUser.PublicId))
+            {
+                DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(localUser.PublicId);
+                if (deletionResult.Error != null)
+                {
+                    string message = deletionResult.Error.Message;
+                    Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+            }
 
-            string? fileNameWithExtension = await _fileStorageServices.UploadImageAsync(
+            UploadResult uploadResult = await _fileStorageServices.UploadImageAsync(
                 request.ImageFile, UploadPath.UserImageUploadPath);
-            localUser.ImageUrl = UploadPath.UserImageUploadPath + fileNameWithExtension;
+
+            localUser.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+            localUser.PublicId = uploadResult.PublicId;
         }
         localUser.Role ??= RoleConstants.Customer;
         localUser.UpdatedAt = DateTime.Now;

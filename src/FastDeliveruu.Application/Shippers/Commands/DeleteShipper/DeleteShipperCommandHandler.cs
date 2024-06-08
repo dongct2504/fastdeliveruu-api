@@ -1,3 +1,4 @@
+using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -31,9 +32,18 @@ public class DeleteShipperCommandHandler : IRequestHandler<DeleteShipperCommand,
             return Result.Fail(new NotFoundError(message));
         }
 
-        await _shipperRepository.DeleteAsync(shipper);
+        if (!string.IsNullOrEmpty(shipper.PublicId))
+        {
+            DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(shipper.PublicId);
+            if (deletionResult.Error != null)
+            {
+                string message = deletionResult.Error.Message;
+                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new BadRequestError(message));
+            }
+        }
 
-        await _fileStorageServices.DeleteImageAsync(shipper.ImageUrl);
+        await _shipperRepository.DeleteAsync(shipper);
 
         return Result.Ok();
     }

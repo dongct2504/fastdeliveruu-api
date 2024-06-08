@@ -3,8 +3,6 @@ using FastDeliveruu.Domain.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Api.Services;
 using FastDeliveruu.Api.Middleware;
 using Asp.Versioning;
 using FastDeliveruu.Infrastructure;
@@ -32,9 +30,8 @@ var builder = WebApplication.CreateBuilder(args);
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers
-    builder.Services.AddSingleton<IFileStorageServices, FileStorageServices>();
     builder.Services
-        .AddApplication(builder.Configuration)
+        .AddApplication()
         .AddInfrastructure(builder.Configuration);
 
     Log.Logger = new LoggerConfiguration()
@@ -74,8 +71,6 @@ var app = builder.Build();
     app.UseSerilogRequestLogging();
 
     app.UseResponseCaching();
-
-    app.UseStaticFiles();
 
     app.UseCors(policy => policy.AllowAnyHeader()
         .AllowAnyMethod()
