@@ -28,7 +28,7 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         GetAllOrdersByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Orders}-{request.UserId}-{request.PageNumber}";
+        string key = $"{CacheConstants.Orders}-{request.UserId}-{request.PageNumber}-{request.PageSize}";
 
         PagedList<OrderDto>? pagedListCache = await _cacheService
             .GetAsync<PagedList<OrderDto>>(key, cancellationToken);
@@ -45,13 +45,13 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         PagedList<OrderDto> pagedList = new PagedList<OrderDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default9,
+            PageSize = request.PageSize,
             TotalRecords = await ordersQuery.CountAsync(cancellationToken),
             Items = await ordersQuery
                 .AsNoTracking()
                 .ProjectToType<OrderDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Other18)
-                .Take(PageConstants.Other18)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

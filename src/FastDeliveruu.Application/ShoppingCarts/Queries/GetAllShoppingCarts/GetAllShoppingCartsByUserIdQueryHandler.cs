@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
@@ -28,7 +27,7 @@ public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllSho
         GetAllShoppingCartsByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.ShoppingCarts}-{request.UserId}-{request.PageNumber}";
+        string key = $"{CacheConstants.ShoppingCarts}-{request.UserId}-{request.PageNumber}-{request.PageSize}";
 
         PagedList<ShoppingCartDto>? pagedListCache = await _cacheService
             .GetAsync<PagedList<ShoppingCartDto>>(key, cancellationToken);
@@ -45,13 +44,13 @@ public class GetAllShoppingCartsByUserIdQueryHandler : IRequestHandler<GetAllSho
         PagedList<ShoppingCartDto> pagedList = new PagedList<ShoppingCartDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default9,
+            PageSize = request.PageSize,
             TotalRecords = await shoppingCartsQuery.CountAsync(cancellationToken),
             Items = await shoppingCartsQuery
                 .AsNoTracking()
                 .ProjectToType<ShoppingCartDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Other18)
-                .Take(PageConstants.Other18)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

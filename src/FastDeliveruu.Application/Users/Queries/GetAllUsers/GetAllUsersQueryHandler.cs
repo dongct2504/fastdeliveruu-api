@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Data;
 using Mapster;
 using MediatR;
@@ -27,7 +26,7 @@ public class GetAllUsersQueryHandler :
         GetAllUsersQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.LocalUsers}-{request.PageNumber}";
+        string key = $"{CacheConstants.LocalUsers}-{request.PageNumber}-{request.PageSize}";
 
         PagedList<LocalUserDto>? pagingResponseCache = await _cacheService
             .GetAsync<PagedList<LocalUserDto>>(key, cancellationToken);
@@ -39,13 +38,13 @@ public class GetAllUsersQueryHandler :
         PagedList<LocalUserDto> paginationResponse = new PagedList<LocalUserDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Other18,
+            PageSize = request.PageSize,
             TotalRecords = await _dbContext.LocalUsers.CountAsync(cancellationToken),
             Items = await _dbContext.LocalUsers
                 .AsNoTracking()
                 .ProjectToType<LocalUserDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Other18)
-                .Take(PageConstants.Other18)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

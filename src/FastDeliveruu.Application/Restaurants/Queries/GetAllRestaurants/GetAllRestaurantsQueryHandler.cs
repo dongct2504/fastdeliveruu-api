@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Data;
 using Mapster;
 using MediatR;
@@ -28,7 +27,7 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         GetAllRestaurantsQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Restaurants}-{request.PageNumber}";
+        string key = $"{CacheConstants.Restaurants}-{request.PageNumber}-{request.PageSize}";
 
         PagedList<RestaurantDto>? paginationResponseCache = await _cacheService
             .GetAsync<PagedList<RestaurantDto>>(key, cancellationToken);
@@ -40,13 +39,13 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
         {
             PageNumber = request.PageNumber,
-            PageSize = PageConstants.Default9,
+            PageSize = request.PageSize,
             TotalRecords = await _dbContext.Restaurants.CountAsync(cancellationToken),
             Items = await _dbContext.Restaurants
                 .AsNoTracking()
                 .ProjectToType<RestaurantDto>()
-                .Skip((request.PageNumber - 1) * PageConstants.Default9)
-                .Take(PageConstants.Default9)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

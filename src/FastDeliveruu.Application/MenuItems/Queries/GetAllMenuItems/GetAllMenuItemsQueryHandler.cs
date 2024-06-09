@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
@@ -79,14 +78,14 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
 
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>
         {
-            PageNumber = request.MenuItemParams.Page,
-            PageSize = PageConstants.Default9,
+            PageNumber = request.MenuItemParams.PageNumber,
+            PageSize = request.MenuItemParams.PageSize,
             TotalRecords = await menuItemsQuery.CountAsync(cancellationToken),
             Items = await menuItemsQuery
                 .AsNoTracking()
                 .ProjectToType<MenuItemDto>()
-                .Skip((request.MenuItemParams.Page - 1) * PageConstants.Default9)
-                .Take(PageConstants.Default9)
+                .Skip((request.MenuItemParams.PageNumber - 1) * request.MenuItemParams.PageSize)
+                .Take(request.MenuItemParams.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

@@ -27,9 +27,9 @@ public class RestaurantsController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedList<RestaurantDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllRestaurants(int page = 1)
+    public async Task<IActionResult> GetAllRestaurants(int pageNumber = 1, int pageSize = 6)
     {
-        GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(page);
+        GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(pageNumber, pageSize);
         PagedList<RestaurantDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }

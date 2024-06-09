@@ -34,11 +34,11 @@ public class OrdersController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedList<OrderDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllOrders(int page = 1)
+    public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 6)
     {
         Guid userId = User.GetCurrentUserId();
 
-        GetAllOrdersByUserIdQuery query = new GetAllOrdersByUserIdQuery(userId, page);
+        GetAllOrdersByUserIdQuery query = new GetAllOrdersByUserIdQuery(userId, pageNumber, pageSize);
         PagedList<OrderDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }

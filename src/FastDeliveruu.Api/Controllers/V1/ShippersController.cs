@@ -27,9 +27,9 @@ public class ShippersController : ApiController
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(PagedList<ShipperDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllShippers(int page = 1)
+    public async Task<IActionResult> GetAllShippers(int pageNumber = 1, int pageSize = 6)
     {
-        GetAllShippersQuery query = new GetAllShippersQuery(page);
+        GetAllShippersQuery query = new GetAllShippersQuery(pageNumber, pageSize);
         PagedList<ShipperDto> getAllShippers = await _mediator.Send(query);
         return Ok(getAllShippers);
     }

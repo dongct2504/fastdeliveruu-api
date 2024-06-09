@@ -29,11 +29,11 @@ public class ShoppingCartsController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedList<ShoppingCartDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllShoppingCarts(int page = 1)
+    public async Task<IActionResult> GetAllShoppingCarts(int pageNumber = 1, int pageSize = 6)
     {
         Guid userId = User.GetCurrentUserId();
 
-        GetAllShoppingCartsByUserIdQuery query = new GetAllShoppingCartsByUserIdQuery(userId, page);
+        GetAllShoppingCartsByUserIdQuery query = new GetAllShoppingCartsByUserIdQuery(userId, pageNumber, pageSize);
         PagedList<ShoppingCartDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);
     }

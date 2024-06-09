@@ -28,9 +28,9 @@ public class UsersController : ApiController
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(PagedList<LocalUserDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllUsers(int page = 1)
+    public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 6)
     {
-        GetAllUsersQuery query = new GetAllUsersQuery(page);
+        GetAllUsersQuery query = new GetAllUsersQuery(pageNumber, pageSize);
         PagedList<LocalUserDto> getAllUsers = await _mediator.Send(query);
 
         return Ok(getAllUsers);
