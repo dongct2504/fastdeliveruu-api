@@ -36,7 +36,7 @@ public class LoginShipperQueryHandler : IRequestHandler<LoginShipperQuery, Resul
         {
             string message = "The user name is incorrect.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationShipperResponse>(new NotFoundError(message));
+            return Result.Fail<AuthenticationShipperResponse>(new BadRequestError(message));
         }
 
         bool verified = BCrypt.Net.BCrypt.Verify(request.Password, shipper.PasswordHash);

@@ -36,7 +36,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         {
             string message = "The user name is incorrect.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationResponse>(new NotFoundError(message));
+            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
         }
 
         bool verified = BCrypt.Net.BCrypt.Verify(request.Password, localUser.PasswordHash);
