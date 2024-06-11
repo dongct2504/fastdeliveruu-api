@@ -69,7 +69,7 @@ public class CustomerCartsController : ApiController
         return NoContent();
     }
 
-    [HttpDelete("menuItemId:guid")]
+    [HttpDelete("{menuItemId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
