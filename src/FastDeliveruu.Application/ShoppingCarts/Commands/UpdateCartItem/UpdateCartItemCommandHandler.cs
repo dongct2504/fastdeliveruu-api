@@ -69,7 +69,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         }
         else
         {
-            _mapper.Map(request, shoppingCartUpdate);
+            shoppingCartUpdate.Quantity += request.Quantity;
         }
 
         await _cacheService.SetAsync(key, customerCartCache, CacheOptions.CartExpiration, cancellationToken);

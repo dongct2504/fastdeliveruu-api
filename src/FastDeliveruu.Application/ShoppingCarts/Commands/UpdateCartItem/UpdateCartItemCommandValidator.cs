@@ -8,5 +8,8 @@ public class UpdateCartItemCommandValidator : AbstractValidator<UpdateCartItemCo
     {
         RuleFor(x => x.MenuItemId)
             .NotEmpty();
+
+        RuleFor(x => x.Quantity)
+            .NotEmpty();
     }
 }
