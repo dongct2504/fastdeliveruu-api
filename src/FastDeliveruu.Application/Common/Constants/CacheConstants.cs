@@ -17,9 +17,8 @@ public static class CacheConstants
     public const string Shippers = "shippers";
     public const string Shipper = "shipper";
 
-    public const string ShoppingCarts = "ShoppingCarts";
-    public const string ShoppingCart = "ShoppingCart";
+    public const string CustomerCart = "customerCart";
 
-    public const string Orders = "Orders";
-    public const string Order = "Order";
+    public const string Orders = "orders";
+    public const string Order = "order";
 }

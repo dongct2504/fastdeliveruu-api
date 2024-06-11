@@ -6,7 +6,9 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommand : IRequest<Result<Order>>
 {
-    public Guid LocalUserId { get; set; }
+    public Guid UserId { get; set; }
+
+    public Guid CustomerCartId { get; set; }
 
     public string ReceiverName { get; set; } = null!;
 

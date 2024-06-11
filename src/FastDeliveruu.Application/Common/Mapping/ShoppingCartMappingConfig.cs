@@ -1,6 +1,5 @@
 ﻿using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
-using FastDeliveruu.Application.ShoppingCarts.Commands.CreateShoppingCart;
-using FastDeliveruu.Application.ShoppingCarts.Commands.UpdateShoppingCart;
+using FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
 
@@ -13,8 +12,6 @@ public class ShoppingCartMappingConfig : IRegister
         config.NewConfig<ShoppingCart, ShoppingCartDto>()
             .Map(dest => dest.MenuItemDto, src => src.MenuItem);
 
-        config.NewConfig<CreateShoppingCartCommand, ShoppingCart>();
-
-        config.NewConfig<UpdateShoppingCartCommand, ShoppingCart>();
+        config.NewConfig<UpdateCartItemCommand, ShoppingCart>();
     }
 }

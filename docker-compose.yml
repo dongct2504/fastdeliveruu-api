@@ -27,5 +27,7 @@ services:
     image: redis:latest
     container_name: fastdeliveruu.cache
     restart: always
+    volumes:
+      - ./.containers/fastdeliveruu-cache:/data
     ports:
       - 6379:6379

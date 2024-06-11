@@ -1,8 +1,8 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Domain.Specifications.ShoppingCarts;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -12,21 +12,21 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Order>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IOrderRepository _orderRepository;
-    private readonly IShoppingCartRepository _shoppingCartRepository;
     private readonly IShipperRepository _shipperRepository;
     private readonly IMapper _mapper;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
-        IShoppingCartRepository shoppingCartRepository,
         IShipperRepository shipperRepository,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _orderRepository = orderRepository;
-        _shoppingCartRepository = shoppingCartRepository;
         _shipperRepository = shipperRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -39,17 +39,17 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.OrderStatus = OrderStatus.Pending;
         order.PaymentStatus = PaymentStatus.Pending;
 
-        var spec = new CartWithMenuItemByUserIdSpecification(request.LocalUserId);
-        IEnumerable<ShoppingCart> shoppingCarts = await _shoppingCartRepository
-            .ListAllWithSpecAsync(spec, asNoTracking: true);
-        if (!shoppingCarts.Any())
+        string key = $"{CacheConstants.CustomerCart}-{request.CustomerCartId}";
+
+        List<ShoppingCart>? customerCart = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
+        if (customerCart == null)
         {
-            string message = "Cart is empty.";
+            string message = "The customer's cart is empty.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<Order>(new BadRequestError(message));
         }
 
-        order.OrderDetails = shoppingCarts.Select(cart => new OrderDetail
+        order.OrderDetails = customerCart.Select(cart => new OrderDetail
         {
             OrderId = order.OrderId,
             MenuItemId = cart.MenuItemId,
@@ -58,6 +58,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
         }).ToList();
+
+        await _cacheService.RemoveAsync(key, cancellationToken);
 
         Guid shipperId = await GetNearestShipper(order);
         if (shipperId == Guid.Empty)
