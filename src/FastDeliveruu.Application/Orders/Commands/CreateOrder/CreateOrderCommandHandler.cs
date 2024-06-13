@@ -39,27 +39,29 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.OrderStatus = OrderStatus.Pending;
         order.PaymentStatus = PaymentStatus.Pending;
 
-        string key = $"{CacheConstants.CustomerCart}-{request.CustomerCartId}";
+        string key = $"{CacheConstants.CustomerCart}-{request.LocalUserId}";
 
         List<ShoppingCart>? customerCart = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
-        if (customerCart == null)
+        if (customerCart == null || !customerCart.Any())
         {
             string message = "The customer's cart is empty.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<Order>(new BadRequestError(message));
         }
 
+        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity);
+
         order.OrderDetails = customerCart.Select(cart => new OrderDetail
         {
             OrderId = order.OrderId,
             MenuItemId = cart.MenuItemId,
-            Price = cart.MenuItem.Price,
+            Price = cart.MenuItem.DiscountPrice,
             Quantity = cart.Quantity,
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
         }).ToList();
 
-        await _cacheService.RemoveAsync(key, cancellationToken);
+        //await _cacheService.RemoveAsync(key, cancellationToken);
 
         Guid shipperId = await GetNearestShipper(order);
         if (shipperId == Guid.Empty)

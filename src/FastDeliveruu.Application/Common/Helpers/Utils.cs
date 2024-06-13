@@ -34,15 +34,22 @@ public static class Utils
 
             if (remoteIpAddress != null)
             {
+                if (remoteIpAddress.IsIPv4MappedToIPv6)
+                {
+                    remoteIpAddress = remoteIpAddress.MapToIPv4();
+                }
+
                 if (remoteIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    remoteIpAddress = Dns.GetHostEntry(remoteIpAddress).AddressList
+                    remoteIpAddress = Dns.GetHostEntry(remoteIpAddress)
+                        .AddressList
                         .FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
                 }
 
-                if (remoteIpAddress != null) ipAddress = remoteIpAddress.ToString();
-
-                return ipAddress;
+                if (remoteIpAddress != null)
+                {
+                    ipAddress = remoteIpAddress.ToString();
+                }
             }
         }
         catch (Exception ex)

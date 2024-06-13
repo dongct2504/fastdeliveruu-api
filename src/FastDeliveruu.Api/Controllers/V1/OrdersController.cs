@@ -66,7 +66,7 @@ public class OrdersController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Checkout([FromBody] CreateOrderCommand command)
     {
-        command.UserId = User.GetCurrentUserId();
+        command.LocalUserId = User.GetCurrentUserId();
 
         Result<Order> createOrderResult = await _mediator.Send(command);
         if (createOrderResult.IsFailed)

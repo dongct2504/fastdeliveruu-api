@@ -6,15 +6,11 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommand : IRequest<Result<Order>>
 {
-    public Guid UserId { get; set; }
-
-    public Guid CustomerCartId { get; set; }
+    public Guid LocalUserId { get; set; }
 
     public string ReceiverName { get; set; } = null!;
 
     public string PhoneNumber { get; set; } = null!;
-
-    public decimal TotalAmount { get; set; }
 
     public string PaymentMethod { get; set; } = null!;
 

@@ -15,10 +15,6 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
-        RuleFor(x => x.TotalAmount)
-            .NotEmpty()
-            .GreaterThanOrEqualTo(1000);
-
         RuleFor(x => x.PaymentMethod)
             .NotEmpty()
             .MaximumLength(25)

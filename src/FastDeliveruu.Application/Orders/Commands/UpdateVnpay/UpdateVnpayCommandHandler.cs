@@ -32,23 +32,41 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
 
         order.TransactionId = request.VnPayResponse.TransactionId;
 
-        if (request.VnPayResponse.VnpayResponseCode != "00")
+        switch (vnpayResponse.VnpayResponseCode)
         {
-            vnpayResponse.IsSuccess = false;
-            order.OrderStatus = OrderStatus.Cancelled;
-            order.PaymentStatus = PaymentStatus.Cancelled;
-            await _orderRepository.UpdateAsync(order);
+            case "00":
+                vnpayResponse.IsSuccess = true;
+                order.OrderStatus = OrderStatus.Success;
+                order.PaymentStatus = PaymentStatus.Approved;
+                await _orderRepository.UpdateAsync(order);
+                return vnpayResponse;
 
-            string message = "Payment was canceled.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<VnpayResponse>(new BadRequestError(message));
+            case "24":
+                vnpayResponse.IsSuccess = false;
+                order.OrderStatus = OrderStatus.Cancelled;
+                order.PaymentStatus = PaymentStatus.Cancelled;
+                await _orderRepository.UpdateAsync(order);
+                string cancelMessage = "Payment was canceled.";
+                Log.Warning($"{request.GetType().Name} - {cancelMessage} - {request}");
+                return Result.Fail(new BadRequestError(cancelMessage));
+
+            case "51":
+                vnpayResponse.IsSuccess = false;
+                order.OrderStatus = OrderStatus.Failed;
+                order.PaymentStatus = PaymentStatus.Failed;
+                await _orderRepository.UpdateAsync(order);
+                string failedMessage = "Payment failed due to insufficient funds.";
+                Log.Warning($"{request.GetType().Name} - {failedMessage} - {request}");
+                return Result.Fail(new BadRequestError(failedMessage));
+
+            default:
+                vnpayResponse.IsSuccess = false;
+                order.OrderStatus = OrderStatus.Failed;
+                order.PaymentStatus = PaymentStatus.Failed;
+                await _orderRepository.UpdateAsync(order);
+                string unknownMessage = $"Payment failed with response code {request.VnPayResponse.VnpayResponseCode}.";
+                Log.Warning($"{request.GetType().Name} - {unknownMessage} - {request}");
+                return Result.Fail(new BadRequestError(unknownMessage));
         }
-
-        vnpayResponse.IsSuccess = true;
-        order.OrderStatus = OrderStatus.Success;
-        order.PaymentStatus = OrderStatus.Success;
-        await _orderRepository.UpdateAsync(order);
-
-        return vnpayResponse;
     }
 }
