@@ -3,7 +3,7 @@ using MediatR;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 
-public class UpdateCartItemCommand : IRequest<Result>
+public class UpdateCartItemCommand : IRequest<Result<int>>
 {
     public Guid LocalUserId { get; set; }
 

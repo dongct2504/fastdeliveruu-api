@@ -1,6 +1,7 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -11,7 +12,7 @@ using Serilog;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 
-public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemCommand, Result>
+public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemCommand, Result<int>>
 {
     private readonly ICacheService _cacheService;
     private readonly IMenuItemRepository _menuItemRepository;
@@ -27,7 +28,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         _menuItemRepository = menuItemRepository;
     }
 
-    public async Task<Result> Handle(
+    public async Task<Result<int>> Handle(
         UpdateCartItemCommand request,
         CancellationToken cancellationToken)
     {
@@ -42,6 +43,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         string key = $"{CacheConstants.CustomerCart}-{request.LocalUserId}";
 
         List<ShoppingCart>? customerCartCache = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
+
         if (customerCartCache == null)
         {
             ShoppingCart cartItem = _mapper.Map<ShoppingCart>(request);
@@ -54,7 +56,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
 
             await _cacheService.SetAsync(key, cartItems, CacheOptions.CartExpiration, cancellationToken);
 
-            return Result.Ok();
+            return cartItem.Quantity;
         }
 
         ShoppingCart? shoppingCartUpdate = customerCartCache
@@ -74,6 +76,6 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
 
         await _cacheService.SetAsync(key, customerCartCache, CacheOptions.CartExpiration, cancellationToken);
 
-        return Result.Ok();
+        return customerCartCache.Sum(cart => cart.Quantity);
     }
 }

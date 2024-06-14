@@ -61,7 +61,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             UpdatedAt = DateTime.Now
         }).ToList();
 
-        //await _cacheService.RemoveAsync(key, cancellationToken);
+        await _cacheService.RemoveAsync(key, cancellationToken);
 
         Guid shipperId = await GetNearestShipper(order);
         if (shipperId == Guid.Empty)
