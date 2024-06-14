@@ -1,11 +1,9 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
-using MapsterMapper;
 using MediatR;
 using Serilog;
 
@@ -14,12 +12,10 @@ namespace FastDeliveruu.Application.ShoppingCarts.Commands.DeleteCartItem;
 public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemCommand, Result<int>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IMapper _mapper;
 
-    public DeleteCartItemCommandHandler(ICacheService cacheService, IMapper mapper)
+    public DeleteCartItemCommandHandler(ICacheService cacheService)
     {
         _cacheService = cacheService;
-        _mapper = mapper;
     }
 
     public async Task<Result<int>> Handle(
@@ -51,7 +47,7 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
 
         customerCartCache.Remove(shoppingCartRemove);
 
-        await _cacheService.SetAsync(key, customerCartCache, CacheOptions.DefaultExpiration, cancellationToken);
+        await _cacheService.SetAsync(key, customerCartCache, CacheOptions.CartExpiration, cancellationToken);
 
         return customerCartCache.Sum(cart => cart.Quantity);
     }

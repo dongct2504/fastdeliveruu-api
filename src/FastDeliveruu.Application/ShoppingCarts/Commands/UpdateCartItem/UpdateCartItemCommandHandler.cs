@@ -1,7 +1,6 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;

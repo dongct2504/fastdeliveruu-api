@@ -1,5 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.DeleteCartItem;
