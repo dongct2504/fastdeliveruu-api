@@ -1,11 +1,8 @@
 using Asp.Versioning;
 using FastDeliveruu.Application.Authentication.Commands.Register;
-using FastDeliveruu.Application.Authentication.Commands.RegisterShipper;
 using FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
 using FastDeliveruu.Application.Authentication.Queries.Login;
-using FastDeliveruu.Application.Authentication.Queries.LoginShipper;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FluentResults;
 using MediatR;
@@ -20,7 +17,9 @@ public class AuthenticationController : ApiController
     private readonly IMediator _mediator;
     private readonly IEmailSender _emailSender;
 
-    public AuthenticationController(IMediator mediator, IEmailSender emailSender)
+    public AuthenticationController(
+        IMediator mediator,
+        IEmailSender emailSender)
     {
         _mediator = mediator;
         _emailSender = emailSender;
@@ -38,26 +37,8 @@ public class AuthenticationController : ApiController
             return Problem(authenticationResult.Errors);
         }
 
-        await SendEmailAsync(authenticationResult.Value.LocalUserDto.Email,
-            authenticationResult.Value.Token);
-
-        return Ok(authenticationResult.Value);
-    }
-
-    [HttpPost("register-shipper")]
-    [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RegisterShipper([FromBody] RegisterShipperCommand command)
-    {
-        Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(command);
-        if (authenticationResult.IsFailed)
-        {
-            return Problem(authenticationResult.Errors);
-        }
-
-        await SendEmailAsync(authenticationResult.Value.ShipperDto.Email,
-            authenticationResult.Value.Token);
+        //await SendEmailAsync(authenticationResult.Value.AppUserDto.Email,
+        //    authenticationResult.Value.Token);
 
         return Ok(authenticationResult.Value);
     }
@@ -76,27 +57,13 @@ public class AuthenticationController : ApiController
         return Ok(authenticationResult.Value);
     }
 
-    [HttpPost("login-shipper")]
-    [ProducesResponseType(typeof(AuthenticationShipperResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> LoginShipper([FromBody] LoginShipperQuery query)
-    {
-        Result<AuthenticationShipperResponse> authenticationResult = await _mediator.Send(query);
-        if (authenticationResult.IsFailed)
-        {
-            return Problem(authenticationResult.Errors);
-        }
-
-        return Ok(authenticationResult.Value);
-    }
-
     [HttpGet("confirm-email")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ConfirmEmail(string email, string token)
+    public async Task<IActionResult> ConfirmEmail(string email, string encodedToken)
     {
-        EmailConfirmQuery query = new EmailConfirmQuery(email, token);
+        EmailConfirmQuery query = new EmailConfirmQuery(email, encodedToken);
 
         Result<bool> isConfirmEmailResult = await _mediator.Send(query);
         if (isConfirmEmailResult.IsFailed)
@@ -108,12 +75,12 @@ public class AuthenticationController : ApiController
     }
 
     [NonAction]
-    private async Task SendEmailAsync(string email, string token)
+    private async Task SendEmailAsync(string email, string encodedToken)
     {
         string? confirmationLink = Url.Action(
             action: nameof(ConfirmEmail),
             controller: "Authentication",
-            values: new { email, token },
+            values: new { email, encodedToken },
             Request.Scheme);
 
         string receiver = email;

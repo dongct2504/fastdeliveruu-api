@@ -1,56 +1,80 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Domain.Specifications.LocalUsers;
+using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Serilog;
+using System.Text;
 
 namespace FastDeliveruu.Application.Authentication.Commands.Register;
 
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResponse>>
 {
-    private readonly ILocalUserRepository _localUserRepository;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IMapper _mapper;
 
     public RegisterCommandHandler(
-        ILocalUserRepository localUserRepository,
-        IJwtTokenGenerator jwtTokenGenerator,
-        IMapper mapper)
+        IMapper mapper,
+        UserManager<AppUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
-        _jwtTokenGenerator = jwtTokenGenerator;
         _mapper = mapper;
-        _localUserRepository = localUserRepository;
+        _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
         RegisterCommand request,
         CancellationToken cancellationToken)
     {
-        var spec = new UserByUsernameOrEmailSpecification(request.UserName, request.Email);
-        LocalUser? localUser = await _localUserRepository.GetWithSpecAsync(spec, asNoTracking: true);
-        if (localUser != null)
+        AppUser user = _mapper.Map<AppUser>(request);
+        user.CreatedAt = DateTime.Now;
+        user.UpdatedAt = DateTime.Now;
+
+        IdentityResult result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
         {
-            string message = "The email or username is already exist.";
+            var errorMessages = result.Errors.Select(e => e.Description);
+
+            string message = string.Join(" ", errorMessages);
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationResponse>(new DuplicateError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
-        localUser = _mapper.Map<LocalUser>(request);
-        localUser.LocalUserId = Guid.NewGuid();
-        localUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        localUser.Role = request.Role ?? "Customer";
-        localUser.CreatedAt = DateTime.Now;
-        localUser.UpdatedAt = DateTime.Now;
+        string[] roleNames = { RoleConstants.Customer, RoleConstants.Staff, RoleConstants.Admin };
+        foreach (string roleName in roleNames)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
 
-        await _localUserRepository.AddAsync(localUser);
+        if (request.UserName == "admin")
+        {
+            await _userManager.AddToRoleAsync(user, RoleConstants.Admin);
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(request.Role))
+            {
+                await _userManager.AddToRoleAsync(user, RoleConstants.Customer);
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(user, request.Role);
+            }
+        }
 
-        string token = _jwtTokenGenerator.GenerateEmailConfirmationToken(localUser.LocalUserId, localUser.Email);
+        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        return _mapper.Map<AuthenticationResponse>((localUser, token));
+        string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        return _mapper.Map<AuthenticationResponse>((user, encodedToken));
     }
 }

@@ -1,57 +1,57 @@
 using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace FastDeliveruu.Application.Users.Queries.GetUserById;
 
-public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<LocalUserDetailDto>>
+public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<AppUserDetailDto>>
 {
-    private readonly FastDeliveruuDbContext _dbContext;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ICacheService _cacheService;
 
-    public GetUserByIdQueryHandler(
-        FastDeliveruuDbContext dbContext,
-        ICacheService cacheService)
+    public GetUserByIdQueryHandler(UserManager<AppUser> userManager, ICacheService cacheService)
     {
-        _dbContext = dbContext;
+        _userManager = userManager;
         _cacheService = cacheService;
     }
 
-    public async Task<Result<LocalUserDetailDto>> Handle(
+    public async Task<Result<AppUserDetailDto>> Handle(
         GetUserByIdQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.LocalUser}-{request.Id}";
+        string key = $"{CacheConstants.AppUser}-{request.Id}";
 
-        LocalUserDetailDto? localUserDetailDtoCache = await _cacheService
-            .GetAsync<LocalUserDetailDto>(key, cancellationToken);
-        if (localUserDetailDtoCache != null)
+        AppUserDetailDto? appUserDetailDtoCache = await _cacheService
+            .GetAsync<AppUserDetailDto>(key);
+        if (appUserDetailDtoCache != null)
         {
-            return localUserDetailDtoCache;
+            return appUserDetailDtoCache;
         }
 
-        LocalUserDetailDto? localUserDetailDto = await _dbContext.LocalUsers
-            .Where(lc => lc.LocalUserId == request.Id)
+        AppUserDetailDto? userDetailDto = await _userManager.Users
+            .Where(u => u.Id == request.Id.ToString())
             .AsNoTracking()
-            .ProjectToType<LocalUserDetailDto>()
+            .ProjectToType<AppUserDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);
-        if (localUserDetailDto == null)
+
+        if (userDetailDto == null)
         {
             string message = "User not found";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        await _cacheService.SetAsync(key, localUserDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
+        await _cacheService.SetAsync(key, userDetailDto, CacheOptions.DefaultExpiration, cancellationToken);
 
-        return localUserDetailDto;
+        return userDetailDto;
     }
 }

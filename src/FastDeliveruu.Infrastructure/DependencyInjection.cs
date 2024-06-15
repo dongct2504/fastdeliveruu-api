@@ -9,6 +9,10 @@ using Microsoft.IdentityModel.Tokens;
 using FastDeliveruu.Infrastructure.Services;
 using FastDeliveruu.Infrastructure.Repositories;
 using FastDeliveruu.Infrastructure.Common;
+using FastDeliveruu.Domain.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
+using FastDeliveruu.Infrastructure.Identity;
+using FastDeliveruu.Application.Common.Constants;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -17,8 +21,9 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services,
         ConfigurationManager configuration)
     {
+        services.AddIdentity();
+
         services.AddAuth(configuration);
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         services.AddStackExchangeRedisCache(options =>
             options.Configuration = configuration.GetConnectionString("Cache"));
@@ -40,6 +45,31 @@ public static class DependencyInjection
         services.AddScoped<ILocalUserRepository, LocalUserRepository>();
         services.AddScoped<IShipperRepository, ShipperRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddIdentity(this IServiceCollection services)
+    {
+        services.AddIdentity<AppUser, IdentityRole>(options =>
+        {
+            // Password settings
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredLength = 3;
+
+            // User settings
+            options.User.RequireUniqueEmail = true;
+
+            // Sign-in settings
+            options.SignIn.RequireConfirmedEmail = true;
+        })
+        .AddEntityFrameworkStores<FastDeliveruuIdentityDbContext>()
+        .AddRoleManager<RoleManager<IdentityRole>>()
+        .AddSignInManager<SignInManager<AppUser>>()
+        .AddDefaultTokenProviders();
 
         return services;
     }

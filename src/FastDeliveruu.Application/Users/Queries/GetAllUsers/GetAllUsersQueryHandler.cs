@@ -1,55 +1,56 @@
 using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Domain.Entities.Identity;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
 
 public class GetAllUsersQueryHandler :
-    IRequestHandler<GetAllUsersQuery, PagedList<LocalUserDto>>
+    IRequestHandler<GetAllUsersQuery, PagedList<AppUserDto>>
 {
-    private readonly FastDeliveruuDbContext _dbContext;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ICacheService _cacheService;
 
-    public GetAllUsersQueryHandler(FastDeliveruuDbContext dbContext, ICacheService cacheService)
+    public GetAllUsersQueryHandler(ICacheService cacheService, UserManager<AppUser> userManager)
     {
-        _dbContext = dbContext;
         _cacheService = cacheService;
+        _userManager = userManager;
     }
 
-    public async Task<PagedList<LocalUserDto>> Handle(
+    public async Task<PagedList<AppUserDto>> Handle(
         GetAllUsersQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.LocalUsers}-{request.PageNumber}-{request.PageSize}";
+        string key = $"{CacheConstants.AppUsers}-{request.PageNumber}-{request.PageSize}";
 
-        PagedList<LocalUserDto>? pagingResponseCache = await _cacheService
-            .GetAsync<PagedList<LocalUserDto>>(key, cancellationToken);
-        if (pagingResponseCache != null)
+        PagedList<AppUserDto>? pagedListCache = await _cacheService
+            .GetAsync<PagedList<AppUserDto>>(key, cancellationToken);
+        if (pagedListCache != null)
         {
-            return pagingResponseCache;
+            return pagedListCache;
         }
 
-        PagedList<LocalUserDto> paginationResponse = new PagedList<LocalUserDto>
+        PagedList<AppUserDto> pagedList = new PagedList<AppUserDto>
         {
             PageNumber = request.PageNumber,
             PageSize = request.PageSize,
-            TotalRecords = await _dbContext.LocalUsers.CountAsync(cancellationToken),
-            Items = await _dbContext.LocalUsers
+            TotalRecords = await _userManager.Users.CountAsync(cancellationToken),
+            Items = await _userManager.Users
                 .AsNoTracking()
-                .ProjectToType<LocalUserDto>()
+                .ProjectToType<AppUserDto>()
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken)
         };
 
-        await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);
+        await _cacheService.SetAsync(key, pagedList, CacheOptions.DefaultExpiration, cancellationToken);
 
-        return paginationResponse;
+        return pagedList;
     }
 }

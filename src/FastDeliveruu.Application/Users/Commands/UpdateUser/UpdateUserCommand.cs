@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
 
 public class UpdateUserCommand : IRequest<Result>
 {
-    public Guid LocalUserId { get; set; }
+    public Guid Id { get; set; }
 
     public string? FirstName { get; set; }
 

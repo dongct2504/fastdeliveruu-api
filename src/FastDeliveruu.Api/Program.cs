@@ -7,6 +7,7 @@ using FastDeliveruu.Api.Middleware;
 using Asp.Versioning;
 using FastDeliveruu.Infrastructure;
 using FastDeliveruu.Api.Extensions;
+using FastDeliveruu.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -19,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSwaggerDocument();
     
     // setting connection string and register DbContext
-    var sqlConnectionStringBuilder = new SqlConnectionStringBuilder
+    var defaultSqlConnectionStringBuilder = new SqlConnectionStringBuilder
     {
         ConnectionString = builder.Configuration.GetConnectionString("FastdeliveruuSqlConnection"),
         UserID = builder.Configuration["UserID"],
@@ -27,7 +28,17 @@ var builder = WebApplication.CreateBuilder(args);
     };
 
     builder.Services.AddDbContext<FastDeliveruuDbContext>(options =>
-        options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
+        options.UseSqlServer(defaultSqlConnectionStringBuilder.ConnectionString));
+
+    var identitySqlConnectionStringBuilder = new SqlConnectionStringBuilder
+    {
+        ConnectionString = builder.Configuration.GetConnectionString("IdentitySqlConnection"),
+        UserID = builder.Configuration["UserID"],
+        Password = builder.Configuration["Password"]
+    };
+
+    builder.Services.AddDbContext<FastDeliveruuIdentityDbContext>(options =>
+        options.UseSqlServer(identitySqlConnectionStringBuilder.ConnectionString));
 
     // register services in other layers
     builder.Services
@@ -65,6 +76,12 @@ var app = builder.Build();
     }
 
     //app.UseHttpsRedirection();
+
+    using IServiceScope serviceScope = app.Services.CreateScope();
+
+    using FastDeliveruuIdentityDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<FastDeliveruuIdentityDbContext>();
+
+    dbContext.Database.Migrate();
 
     app.UseMiddleware<ExceptionHandlerMiddleware>();
 

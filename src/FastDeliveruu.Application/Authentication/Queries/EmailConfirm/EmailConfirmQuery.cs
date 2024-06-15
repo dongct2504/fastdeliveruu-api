@@ -3,15 +3,15 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
 
-public class EmailConfirmQuery : IRequest<Result<bool>>
+public class EmailConfirmQuery : IRequest<Result>
 {
-    public EmailConfirmQuery(string email, string token)
+    public EmailConfirmQuery(string email, string encodedToken)
     {
         Email = email;
-        Token = token;
+        EnCodedToken = encodedToken;
     }
 
     public string Email { get; set; } = null!;
 
-    public string Token { get; set; } = null!;
+    public string EnCodedToken { get; set; } = null!;
 }

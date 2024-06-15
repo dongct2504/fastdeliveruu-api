@@ -1,10 +1,10 @@
 using FastDeliveruu.Application.Dtos;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 using MediatR;
 
 namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
 
-public class GetAllUsersQuery : IRequest<PagedList<LocalUserDto>>
+public class GetAllUsersQuery : IRequest<PagedList<AppUserDto>>
 {
     public GetAllUsersQuery(int pageNumber, int pageSize)
     {

@@ -2,48 +2,48 @@ using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
 
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Result>
 {
-    private readonly ILocalUserRepository _localUserRepository;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
 
     public UpdateUserCommandHandler(
-        ILocalUserRepository localUserRepository,
         IFileStorageServices fileStorageServices,
-        IMapper mapper)
+        IMapper mapper,
+        UserManager<AppUser> userManager)
     {
-        _localUserRepository = localUserRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
+        _userManager = userManager;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        LocalUser? localUser = await _localUserRepository.GetAsync(request.LocalUserId);
-        if (localUser == null)
+        AppUser? user = await _userManager.FindByIdAsync(request.Id.ToString());
+        if (user == null)
         {
             string message = "User not found.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        _mapper.Map(request, localUser);
+        _mapper.Map(request, user);
 
         if (request.ImageFile != null)
         {
-            if (!string.IsNullOrEmpty(localUser.PublicId))
+            if (!string.IsNullOrEmpty(user.PublicId))
             {
-                DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(localUser.PublicId);
+                DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(user.PublicId);
                 if (deletionResult.Error != null)
                 {
                     string message = deletionResult.Error.Message;
@@ -55,13 +55,18 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             UploadResult uploadResult = await _fileStorageServices.UploadImageAsync(
                 request.ImageFile, UploadPath.UserImageUploadPath);
 
-            localUser.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
-            localUser.PublicId = uploadResult.PublicId;
+            user.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+            user.PublicId = uploadResult.PublicId;
         }
-        localUser.Role ??= RoleConstants.Customer;
-        localUser.UpdatedAt = DateTime.Now;
 
-        await _localUserRepository.UpdateAsync(localUser);
+        if (!string.IsNullOrEmpty(request.Role))
+        {
+            await _userManager.AddToRoleAsync(user, request.Role);
+        }
+
+        user.UpdatedAt = DateTime.Now;
+
+        await _userManager.UpdateAsync(user);
 
         return Result.Ok();
     }

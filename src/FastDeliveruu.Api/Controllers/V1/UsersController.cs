@@ -1,5 +1,4 @@
 using FastDeliveruu.Application.Dtos;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using Microsoft.AspNetCore.Mvc;
 using FluentResults;
 using MediatR;
@@ -10,6 +9,8 @@ using FastDeliveruu.Application.Users.Commands.DeleteUser;
 using Microsoft.AspNetCore.Authorization;
 using FastDeliveruu.Application.Common.Constants;
 using Asp.Versioning;
+using FastDeliveruu.Domain.Extensions;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -27,22 +28,39 @@ public class UsersController : ApiController
 
     [HttpGet]
     [Authorize(Roles = RoleConstants.Admin)]
-    [ProducesResponseType(typeof(PagedList<LocalUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<AppUserDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 6)
     {
         GetAllUsersQuery query = new GetAllUsersQuery(pageNumber, pageSize);
-        PagedList<LocalUserDto> getAllUsers = await _mediator.Send(query);
+        PagedList<AppUserDto> getAllUsers = await _mediator.Send(query);
 
         return Ok(getAllUsers);
     }
 
+    [HttpGet("current-user")]
+    [ProducesResponseType(typeof(AppUserDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        Guid userId = User.GetCurrentUserId();
+
+        GetUserByIdQuery query = new GetUserByIdQuery(userId);
+        Result<AppUserDetailDto> getUserResult = await _mediator.Send(query);
+        if (getUserResult.IsFailed)
+        {
+            return Problem(getUserResult.Errors);
+        }
+
+        return Ok(getUserResult.Value);
+    }
+
     [HttpGet("{id:guid}", Name = "GetUserById")]
-    [ProducesResponseType(typeof(LocalUserDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AppUserDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid id)
     {
         GetUserByIdQuery query = new GetUserByIdQuery(id);
-        Result<LocalUserDetailDto> getUserResult = await _mediator.Send(query);
+        Result<AppUserDetailDto> getUserResult = await _mediator.Send(query);
         if (getUserResult.IsFailed)
         {
             return Problem(getUserResult.Errors);
@@ -58,15 +76,15 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromForm] UpdateUserCommand command)
     {
-        if (id != command.LocalUserId)
+        if (id != command.Id)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }
 
-        Result updateLocalUserResult = await _mediator.Send(command);
-        if (updateLocalUserResult.IsFailed)
+        Result updatedUserResult = await _mediator.Send(command);
+        if (updatedUserResult.IsFailed)
         {
-            return Problem(updateLocalUserResult.Errors);
+            return Problem(updatedUserResult.Errors);
         }
 
         return NoContent();

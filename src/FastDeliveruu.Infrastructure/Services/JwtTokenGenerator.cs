@@ -2,7 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Infrastructure.Common;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -11,58 +13,37 @@ namespace FastDeliveruu.Infrastructure.Services;
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly UserManager<AppUser> _userManager;
 
-    public JwtTokenGenerator(IDateTimeProvider dateTimeProvider, IOptions<JwtSettings> jwtOptions)
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, UserManager<AppUser> userManager)
     {
-        _dateTimeProvider = dateTimeProvider;
         _jwtSettings = jwtOptions.Value;
+        _userManager = userManager;
     }
 
-    public string GenerateToken(Guid id, string email, string userName, string role)
+    public async Task<string> GenerateTokenAsync(AppUser appUser)
     {
         SigningCredentials signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
             SecurityAlgorithms.HmacSha256
         );
 
-        Claim[] claims = new Claim[]
+        var roles = await _userManager.GetRolesAsync(appUser);
+
+        IEnumerable<Claim> roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r));
+
+        var claims = new Claim[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
-            new Claim(JwtRegisteredClaimNames.NameId, userName),
-            new Claim(ClaimTypes.Role, role),
+            new Claim(JwtRegisteredClaimNames.Sub, appUser.Id),
+            new Claim(JwtRegisteredClaimNames.NameId, appUser.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+        }
+        .Union(roleClaims);
 
         JwtSecurityToken securityToken = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
-            expires: _dateTimeProvider.UtcNow.AddDays(_jwtSettings.ExpiryDays),
-            claims: claims,
-            signingCredentials: signingCredentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(securityToken);
-    }
-
-    public string GenerateEmailConfirmationToken(Guid id, string email)
-    {
-        SigningCredentials signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
-            SecurityAlgorithms.HmacSha256
-        );
-
-        Claim[] claims = new Claim[]
-        {
-            new Claim("UserId", id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
-
-        JwtSecurityToken securityToken = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            expires: _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.EmailConfirmationExpiryMinutes),
+            expires: DateTime.UtcNow.AddDays(_jwtSettings.ExpiryDays),
             claims: claims,
             signingCredentials: signingCredentials
         );

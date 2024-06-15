@@ -1,66 +1,66 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.LocalUserDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Domain.Specifications.LocalUsers;
+using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 namespace FastDeliveruu.Application.Authentication.Queries.Login;
 
 public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<AuthenticationResponse>>
 {
-    private readonly ILocalUserRepository _localUserRepository;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly SignInManager<AppUser> _signInManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IMapper _mapper;
 
     public LoginQueryHandler(
-        ILocalUserRepository localUserRepository,
-        IJwtTokenGenerator jwtTokenGenerator,
-        IMapper mapper)
+        UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager,
+        IMapper mapper,
+        IJwtTokenGenerator jwtTokenGenerator)
     {
-        _localUserRepository = localUserRepository;
-        _jwtTokenGenerator = jwtTokenGenerator;
+        _userManager = userManager;
+        _signInManager = signInManager;
         _mapper = mapper;
+        _jwtTokenGenerator = jwtTokenGenerator;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(LoginQuery request,
         CancellationToken cancellationToken)
     {
-        var spec = new UserByUsernameSpecification(request.UserName);
-        LocalUser? localUser = await _localUserRepository.GetWithSpecAsync(spec, asNoTracking: true);
-        if (localUser == null)
+        AppUser? user = await _userManager.FindByNameAsync(request.UserName);
+        if (user == null)
         {
-            string message = "The user name is incorrect.";
+            string message = "The username is incorrect.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
-        bool verified = BCrypt.Net.BCrypt.Verify(request.Password, localUser.PasswordHash);
-        if (!verified)
+        bool isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+        if (!isEmailConfirmed)
+        {
+            string message = "The email has not been confirmed yet.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        SignInResult signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        if (!signInResult.Succeeded)
         {
             string message = "The password is incorrect.";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
-        }
-
-        bool isConfirmEmail = localUser.IsConfirmEmail;
-        if (!isConfirmEmail)
-        {
-            string message = "The email is not yet confirmed.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<AuthenticationResponse>(new BadRequestError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         // generate JWT token
-        string token = _jwtTokenGenerator.GenerateToken(localUser.LocalUserId, localUser.Email,
-            localUser.UserName, localUser.Role);
+        string token = await _jwtTokenGenerator.GenerateTokenAsync(user);
 
         Log.Information($"User login at: {DateTime.Now:dd/MM/yyyy hh:mm tt}.");
 
-        return _mapper.Map<AuthenticationResponse>((localUser, token));
+        return _mapper.Map<AuthenticationResponse>((user, token));
     }
 }

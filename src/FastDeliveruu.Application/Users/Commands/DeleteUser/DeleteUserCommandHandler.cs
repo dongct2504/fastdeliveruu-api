@@ -2,39 +2,40 @@ using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 namespace FastDeliveruu.Application.Users.Commands.DeleteUser;
 
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Result>
 {
-    private readonly ILocalUserRepository _localUserRepository;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteUserCommandHandler(
-        ILocalUserRepository localUserRepository,
-        IFileStorageServices fileStorageServices)
+        IFileStorageServices fileStorageServices, UserManager<AppUser> userManager)
     {
-        _localUserRepository = localUserRepository;
         _fileStorageServices = fileStorageServices;
+        _userManager = userManager;
     }
 
     public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        LocalUser? localUser = await _localUserRepository.GetAsync(request.Id);
-        if (localUser == null)
+        AppUser? user = await _userManager.FindByIdAsync(request.Id.ToString());
+        if (user == null)
         {
             string message = "User Not found";
             Log.Warning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        if (!string.IsNullOrEmpty(localUser.PublicId))
+        if (!string.IsNullOrEmpty(user.PublicId))
         {
-            DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(localUser.PublicId);
+            DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(user.PublicId);
             if (deletionResult.Error != null)
             {
                 string message = deletionResult.Error.Message;
@@ -43,7 +44,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
             }
         }
 
-        await _localUserRepository.DeleteAsync(localUser);
+        await _userManager.DeleteAsync(user);
 
         return Result.Ok();
     }

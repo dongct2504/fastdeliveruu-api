@@ -2,6 +2,7 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;
@@ -43,6 +44,13 @@ public class ErrorsController : ApiController
         validationError.Reasons.Add(new ValidationError("propertyName2", "Error message 2."));
 
         return Problem(Result.Fail(validationError).Errors);
+    }
+
+    [HttpGet("unauthorized")]
+    [Authorize]
+    public IActionResult GetAuthErrorRequest()
+    {
+        return Ok("Stuff");
     }
 
     [HttpGet("internal-server-error")]

@@ -7,7 +7,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {
     public UpdateUserCommandValidator()
     {
-        RuleFor(x => x.LocalUserId)
+        RuleFor(x => x.Id)
             .NotEmpty();
 
         RuleFor(x => x.FirstName)

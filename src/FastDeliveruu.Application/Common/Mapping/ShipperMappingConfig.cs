@@ -1,5 +1,4 @@
 using FastDeliveruu.Application.Dtos.ShipperDtos;
-using FastDeliveruu.Application.Shippers.Commands.UpdateShipper;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
 
@@ -13,7 +12,5 @@ public class ShipperMappingConfig : IRegister
 
         config.NewConfig<Shipper, ShipperDetailDto>()
             .Map(dest => dest.OrderDtos, src => src.Orders);
-
-        config.NewConfig<UpdateShipperCommand, Shipper>();
     }
 }
