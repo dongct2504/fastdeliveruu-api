@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FluentResults;
 using MediatR;
 

@@ -9,14 +9,17 @@ public class OrderMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Order, OrderDto>();
+        config.NewConfig<Order, OrderDto>()
+            .Map(dest => dest.DeliveryMethodShortName, src => src.DeliveryMethod.ShortName)
+            .Map(dest => dest.ShippingPrice, src => src.DeliveryMethod.Price);
 
         config.NewConfig<Order, OrderHeaderDetailDto>()
-            .Map(dest => dest.LocalUserDto, src => src.LocalUser)
-            .Map(dest => dest.ShipperDto, src => src.Shipper)
+            .Map(dest => dest.DeliveryMethodDto, src => src.DeliveryMethod)
             .Map(dest => dest.OrderDetailDtos, src => src.OrderDetails);
 
         config.NewConfig<OrderDetail, OrderDetailDto>();
+
+        config.NewConfig<DeliveryMethod, DeliveryMethodDto>();
 
         config.NewConfig<CreateOrderCommand, Order>();
     }

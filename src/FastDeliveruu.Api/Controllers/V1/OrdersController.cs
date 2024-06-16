@@ -8,6 +8,7 @@ using FastDeliveruu.Application.Orders.Commands.CreateOrder;
 using FastDeliveruu.Application.Orders.Commands.DeleteOrder;
 using FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 using FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
+using FastDeliveruu.Application.Orders.Queries.GetDeliveryMethods;
 using FastDeliveruu.Application.Orders.Queries.GetOrderById;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
@@ -60,13 +61,22 @@ public class OrdersController : ApiController
         return Ok(getOrderResult.Value);
     }
 
+    [HttpGet("delivery-methods")]
+    [ProducesResponseType(typeof(List<DeliveryMethodDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeliveryMethods()
+    {
+        GetDeliveryMethodsQuery query = new GetDeliveryMethodsQuery();
+        List<DeliveryMethodDto> deliveryMethodDtos = await _mediator.Send(query);
+        return Ok(deliveryMethodDtos);
+    }
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Checkout([FromBody] CreateOrderCommand command)
     {
-        command.LocalUserId = User.GetCurrentUserId();
+        command.AppUserId = User.GetCurrentUserId();
 
         Result<Order> createOrderResult = await _mediator.Send(command);
         if (createOrderResult.IsFailed)

@@ -12,6 +12,10 @@ public class OrderDto
 
     public decimal TotalAmount { get; set; }
 
+    public string DeliveryMethodShortName { get; set; } = null!;
+
+    public string ShippingPrice { get; set; } = null!;
+
     public string? OrderStatus { get; set; }
 
     public string? PaymentStatus { get; set; }

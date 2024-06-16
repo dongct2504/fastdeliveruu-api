@@ -1,6 +1,4 @@
-using FastDeliveruu.Application.Dtos.AppUserDtos;
-
-namespace FastDeliveruu.Application.Dtos.LocalUserDtos;
+﻿namespace FastDeliveruu.Application.Dtos.AppUserDtos;
 
 public class AuthenticationResponse
 {

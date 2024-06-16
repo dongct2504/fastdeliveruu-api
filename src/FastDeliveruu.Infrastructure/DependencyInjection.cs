@@ -12,7 +12,6 @@ using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using FastDeliveruu.Infrastructure.Identity;
-using FastDeliveruu.Application.Common.Constants;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -42,8 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<IMenuItemRepository, MenuItemRepository>();
-        services.AddScoped<ILocalUserRepository, LocalUserRepository>();
-        services.AddScoped<IShipperRepository, ShipperRepository>();
+        services.AddScoped<IDeliveryMethodRepository, DeliveryMethodRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
 
         return services;

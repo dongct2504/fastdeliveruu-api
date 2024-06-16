@@ -14,8 +14,7 @@ public static class CacheConstants
     public const string AppUsers = "appUsers";
     public const string AppUser = "appUser";
 
-    public const string Shippers = "shippers";
-    public const string Shipper = "shipper";
+    public const string DeliveryMethods = "deliveryMethods";
 
     public const string CustomerCart = "customerCart";
 

@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Constants;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
@@ -40,7 +39,7 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
         IQueryable<Order> ordersQuery = _dbContext.Orders.AsQueryable();
 
         ordersQuery = ordersQuery
-            .Where(o => o.LocalUserId == request.UserId);
+            .Where(o => o.AppUserId == request.UserId);
 
         PagedList<OrderDto> pagedList = new PagedList<OrderDto>
         {

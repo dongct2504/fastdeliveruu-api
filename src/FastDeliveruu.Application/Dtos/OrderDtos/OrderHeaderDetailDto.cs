@@ -1,7 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.LocalUserDtos;
-using FastDeliveruu.Application.Dtos.ShipperDtos;
-
-namespace FastDeliveruu.Application.Dtos.OrderDtos;
+﻿namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderHeaderDetailDto
 {
@@ -35,9 +32,7 @@ public class OrderHeaderDetailDto
 
     public string City { get; set; } = null!;
 
-    public LocalUserDto LocalUserDto { get; set; } = null!;
-
-    public ShipperDto ShipperDto { get; set; } = null!;
+    public DeliveryMethodDto DeliveryMethodDto { get; set; } = null!;
 
     public IEnumerable<OrderDetailDto> OrderDetailDtos { get; set; } = null!;
 }

@@ -6,23 +6,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
 {
-    [Index("LocalUserId", Name = "SHOPPINGCARTLOCALUSERS_FK")]
+    [Index("AppUserId", Name = "SHOPPINGCARTLOCALUSERS_FK")]
     [Index("MenuItemId", Name = "SHOPPINGCARTMENUITEMS_FK")]
     public partial class ShoppingCart
     {
         [Key]
         public Guid MenuItemId { get; set; }
         [Key]
-        public Guid LocalUserId { get; set; }
+        public Guid AppUserId { get; set; }
         public int Quantity { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime UpdatedAt { get; set; }
 
-        [ForeignKey("LocalUserId")]
-        [InverseProperty("ShoppingCarts")]
-        public virtual LocalUser LocalUser { get; set; } = null!;
         [ForeignKey("MenuItemId")]
         [InverseProperty("ShoppingCarts")]
         public virtual MenuItem MenuItem { get; set; } = null!;

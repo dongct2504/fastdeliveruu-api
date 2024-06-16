@@ -39,7 +39,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
             return Result.Fail(new NotFoundError(message));
         }
 
-        string key = $"{CacheConstants.CustomerCart}-{request.LocalUserId}";
+        string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
 
         List<ShoppingCart>? customerCartCache = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
 
@@ -59,7 +59,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         }
 
         ShoppingCart? shoppingCartUpdate = customerCartCache
-            .Where(sc => sc.LocalUserId == request.LocalUserId && sc.MenuItemId == request.MenuItemId)
+            .Where(sc => sc.AppUserId == request.AppUserId && sc.MenuItemId == request.MenuItemId)
             .FirstOrDefault();
 
         if (shoppingCartUpdate == null)

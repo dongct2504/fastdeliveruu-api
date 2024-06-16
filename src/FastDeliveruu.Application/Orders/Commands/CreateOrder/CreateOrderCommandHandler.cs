@@ -14,19 +14,19 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 {
     private readonly ICacheService _cacheService;
     private readonly IOrderRepository _orderRepository;
-    private readonly IShipperRepository _shipperRepository;
+    private readonly IDeliveryMethodRepository _deliveryMethodRepository;
     private readonly IMapper _mapper;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
-        IShipperRepository shipperRepository,
         IMapper mapper,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IDeliveryMethodRepository deliveryMethodRepository)
     {
         _orderRepository = orderRepository;
-        _shipperRepository = shipperRepository;
         _mapper = mapper;
         _cacheService = cacheService;
+        _deliveryMethodRepository = deliveryMethodRepository;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -39,7 +39,15 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.OrderStatus = OrderStatus.Pending;
         order.PaymentStatus = PaymentStatus.Pending;
 
-        string key = $"{CacheConstants.CustomerCart}-{request.LocalUserId}";
+        DeliveryMethod? deliveryMethod = await _deliveryMethodRepository.GetAsync(request.DeliveryMethodId);
+        if (deliveryMethod == null)
+        {
+            string message = "The delivery method does not exist.";
+            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail<Order>(new BadRequestError(message));
+        }
+
+        string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
 
         List<ShoppingCart>? customerCart = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
         if (customerCart == null || !customerCart.Any())
@@ -49,7 +57,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail<Order>(new BadRequestError(message));
         }
 
-        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity);
+        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity) + deliveryMethod.Price;
+
+        await _cacheService.RemoveAsync(key, cancellationToken);
 
         order.OrderDetails = customerCart.Select(cart => new OrderDetail
         {
@@ -61,61 +71,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             UpdatedAt = DateTime.Now
         }).ToList();
 
-        await _cacheService.RemoveAsync(key, cancellationToken);
-
-        Guid shipperId = await GetNearestShipper(order);
-        if (shipperId == Guid.Empty)
-        {
-            string message = "Shipper not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<Order>(new NotFoundError(message));
-        }
-
-        order.ShipperId = shipperId;
         order.CreatedAt = DateTime.Now;
         order.UpdatedAt = DateTime.Now;
 
         await _orderRepository.AddAsync(order);
 
         return order;
-    }
-
-    private async Task<Guid> GetNearestShipper(Order order)
-    {
-        IEnumerable<Shipper> shippers = await _shipperRepository.ListAllAsync();
-        if (!shippers.Any())
-        {
-            return Guid.Empty;
-        }
-
-        Shipper? nearestShipper = null;
-
-        nearestShipper = shippers.FirstOrDefault(s => s.Address == order.Address && s.Ward == order.Ward &&
-            s.District == order.District && s.City == order.City);
-        if (nearestShipper != null)
-        {
-            return nearestShipper.ShipperId;
-        }
-
-        nearestShipper = shippers.FirstOrDefault(s => s.Ward == order.Ward && s.District == order.District &&
-            s.City == order.City);
-        if (nearestShipper != null)
-        {
-            return nearestShipper.ShipperId;
-        }
-
-        nearestShipper = shippers.FirstOrDefault(s => s.District == order.District && s.City == order.City);
-        if (nearestShipper != null)
-        {
-            return nearestShipper.ShipperId;
-        }
-
-        nearestShipper = shippers.FirstOrDefault(s => s.City == order.City);
-        if (nearestShipper != null)
-        {
-            return nearestShipper.ShipperId;
-        }
-
-        return shippers.First().ShipperId;
     }
 }

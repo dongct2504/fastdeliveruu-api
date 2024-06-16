@@ -4,12 +4,8 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;
-using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -41,7 +37,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
         }
 
         OrderHeaderDetailDto? orderHeaderDetailDto = await _dbContext.Orders
-            .Where(o => o.LocalUserId == request.UserId && o.OrderId == request.OrderId)
+            .Where(o => o.AppUserId == request.UserId && o.OrderId == request.OrderId)
             .AsNoTracking()
             .ProjectToType<OrderHeaderDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

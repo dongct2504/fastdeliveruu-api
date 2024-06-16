@@ -35,7 +35,7 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
         }
 
         ShoppingCart? shoppingCartRemove = customerCartCache
-            .Where(sc => sc.LocalUserId == request.UserId && sc.MenuItemId == request.MenuItemId)
+            .Where(sc => sc.AppUserId == request.UserId && sc.MenuItemId == request.MenuItemId)
             .FirstOrDefault();
 
         if (shoppingCartRemove == null)

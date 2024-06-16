@@ -17,13 +17,12 @@ namespace FastDeliveruu.Domain.Data
         {
         }
 
+        public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; } = null!;
         public virtual DbSet<Genre> Genres { get; set; } = null!;
-        public virtual DbSet<LocalUser> LocalUsers { get; set; } = null!;
         public virtual DbSet<MenuItem> MenuItems { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public virtual DbSet<Restaurant> Restaurants { get; set; } = null!;
-        public virtual DbSet<Shipper> Shippers { get; set; } = null!;
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -32,16 +31,14 @@ namespace FastDeliveruu.Domain.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<DeliveryMethod>(entity =>
+            {
+                entity.Property(e => e.DeliveryMethodId).ValueGeneratedNever();
+            });
+
             modelBuilder.Entity<Genre>(entity =>
             {
                 entity.Property(e => e.GenreId).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<LocalUser>(entity =>
-            {
-                entity.Property(e => e.LocalUserId).ValueGeneratedNever();
-
-                entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<MenuItem>(entity =>
@@ -63,17 +60,10 @@ namespace FastDeliveruu.Domain.Data
             {
                 entity.Property(e => e.OrderId).ValueGeneratedNever();
 
-                entity.Property(e => e.PhoneNumber).IsFixedLength();
-
-                entity.HasOne(d => d.LocalUser)
+                entity.HasOne(d => d.DeliveryMethod)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.LocalUserId)
-                    .HasConstraintName("FK_ORDERS_ORDERLOCA_LOCALUSE");
-
-                entity.HasOne(d => d.Shipper)
-                    .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.ShipperId)
-                    .HasConstraintName("FK_ORDERS_ORDERSHIP_SHIPPERS");
+                    .HasForeignKey(d => d.DeliveryMethodId)
+                    .HasConstraintName("FK_ORDERS_ORDERDELI_DELIVERY");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
@@ -95,26 +85,12 @@ namespace FastDeliveruu.Domain.Data
             modelBuilder.Entity<Restaurant>(entity =>
             {
                 entity.Property(e => e.RestaurantId).ValueGeneratedNever();
-
-                entity.Property(e => e.PhoneNumber).IsFixedLength();
-            });
-
-            modelBuilder.Entity<Shipper>(entity =>
-            {
-                entity.Property(e => e.ShipperId).ValueGeneratedNever();
-
-                entity.Property(e => e.PhoneNumber).IsFixedLength();
             });
 
             modelBuilder.Entity<ShoppingCart>(entity =>
             {
-                entity.HasKey(e => new { e.MenuItemId, e.LocalUserId })
+                entity.HasKey(e => new { e.MenuItemId, e.AppUserId })
                     .HasName("PK_SHOPPINGCARTS");
-
-                entity.HasOne(d => d.LocalUser)
-                    .WithMany(p => p.ShoppingCarts)
-                    .HasForeignKey(d => d.LocalUserId)
-                    .HasConstraintName("FK_SHOPPING_SHOPPINGC_LOCALUSE");
 
                 entity.HasOne(d => d.MenuItem)
                     .WithMany(p => p.ShoppingCarts)

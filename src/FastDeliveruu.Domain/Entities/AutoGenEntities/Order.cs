@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
 {
-    [Index("LocalUserId", Name = "ORDERLOCALUSERS_FK")]
-    [Index("ShipperId", Name = "ORDERSHIPPERS_FK")]
+    [Index("DeliveryMethodId", Name = "ORDERDELIVERYME_FK")]
+    [Index("AppUserId", Name = "ORDERLOCALUSERS_FK")]
     public partial class Order
     {
         public Order()
@@ -17,8 +17,8 @@ namespace FastDeliveruu.Domain.Entities
 
         [Key]
         public Guid OrderId { get; set; }
-        public Guid ShipperId { get; set; }
-        public Guid LocalUserId { get; set; }
+        public Guid AppUserId { get; set; }
+        public Guid DeliveryMethodId { get; set; }
         [StringLength(128)]
         public string ReceiverName { get; set; } = null!;
         [Column(TypeName = "datetime")]
@@ -58,12 +58,9 @@ namespace FastDeliveruu.Domain.Entities
         [Column(TypeName = "datetime")]
         public DateTime UpdatedAt { get; set; }
 
-        [ForeignKey("LocalUserId")]
+        [ForeignKey("DeliveryMethodId")]
         [InverseProperty("Orders")]
-        public virtual LocalUser LocalUser { get; set; } = null!;
-        [ForeignKey("ShipperId")]
-        [InverseProperty("Orders")]
-        public virtual Shipper Shipper { get; set; } = null!;
+        public virtual DeliveryMethod DeliveryMethod { get; set; } = null!;
         [InverseProperty("Order")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }

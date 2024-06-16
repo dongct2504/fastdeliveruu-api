@@ -2,7 +2,7 @@
 
 namespace FastDeliveruu.Domain.Extensions;
 
-public static class LocalUserExtensions
+public static class UserExtensions
 {
     public static Guid GetCurrentUserId(this ClaimsPrincipal user)
     {

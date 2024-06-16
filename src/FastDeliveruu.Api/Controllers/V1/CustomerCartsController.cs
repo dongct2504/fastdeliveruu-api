@@ -41,7 +41,7 @@ public class CustomerCartsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemCommand command)
     {
-        command.LocalUserId = User.GetCurrentUserId();
+        command.AppUserId = User.GetCurrentUserId();
 
         Result<int> updatedCartResult = await _mediator.Send(command);
         if (updatedCartResult.IsFailed)

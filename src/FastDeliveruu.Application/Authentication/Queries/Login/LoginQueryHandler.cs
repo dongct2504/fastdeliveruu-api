@@ -1,5 +1,5 @@
 using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.LocalUserDtos;
+using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;

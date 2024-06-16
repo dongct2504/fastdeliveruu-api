@@ -1,5 +1,4 @@
 using FastDeliveruu.Application;
-using FastDeliveruu.Domain.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -8,6 +7,7 @@ using Asp.Versioning;
 using FastDeliveruu.Infrastructure;
 using FastDeliveruu.Api.Extensions;
 using FastDeliveruu.Infrastructure.Identity;
+using FastDeliveruu.Domain.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 {

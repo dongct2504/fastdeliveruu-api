@@ -24,7 +24,7 @@ public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, List<
         GetAllGenresQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Genres}-{request.PageNumber}";
+        string key = $"{CacheConstants.Genres}";
 
         List<GenreDto>? genreDtosCache = await _cacheService
             .GetAsync<List<GenreDto>>(key, cancellationToken);

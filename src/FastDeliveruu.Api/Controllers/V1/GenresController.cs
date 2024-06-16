@@ -26,9 +26,9 @@ public class GenresController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(List<GenreDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllGenres(int page = 1)
+    public async Task<IActionResult> GetAllGenres()
     {
-        GetAllGenresQuery query = new GetAllGenresQuery(page);
+        GetAllGenresQuery query = new GetAllGenresQuery();
         List<GenreDto> getAllGenres = await _mediator.Send(query);
         return Ok(getAllGenres);
     }
