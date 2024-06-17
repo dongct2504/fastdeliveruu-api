@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Helpers;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
@@ -136,15 +137,16 @@ public class OrdersController : ApiController
         }
 
         string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-        string vnpayResponseJson = JsonSerializer.Serialize(updateVnpayResult.Value);
 
         if (updateVnpayResult.Value.IsSuccess)
         {
-            return Redirect($"{redirectUrlBase}/checkout/success?data={vnpayResponseJson}");
+            return Redirect(Utils
+                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/success", updateVnpayResult.Value));
         }
         else
         {
-            return Redirect($"{redirectUrlBase}/checkout/failed?data={vnpayResponseJson}");
+            return Redirect(Utils
+                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/failed", updateVnpayResult.Value));
         }
     }
 

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FastDeliveruu.Application.Dtos.PaymentResponses;
+using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 
 namespace FastDeliveruu.Application.Common.Helpers;
 
@@ -58,6 +60,28 @@ public static class Utils
         }
 
         return ipAddress;
+    }
+
+    public static string CreateResponsePaymentUrl(string redirectUrl, PaymentResponse paymentResponse)
+    {
+        UriBuilder uriBuilder = new UriBuilder(redirectUrl);
+        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+        query["orderId"] = paymentResponse.OrderId.ToString();
+        query["isSuccess"] = paymentResponse.IsSuccess.ToString();
+        query["totalAmount"] = paymentResponse.TotalAmount.ToString();
+        query["transactionId"] = paymentResponse.TransactionId;
+        query["paymentMethod"] = paymentResponse.PaymentMethod;
+        query["orderDescription"] = paymentResponse.OrderDescription;
+
+        if (paymentResponse is VnpayResponse)
+        {
+            VnpayResponse vnpayResponse = (VnpayResponse)paymentResponse;
+            query["vnpayResponseCode"] = vnpayResponse.VnpayResponseCode;
+        }
+
+        uriBuilder.Query = query.ToString();
+        return uriBuilder.ToString();
     }
 }
 
