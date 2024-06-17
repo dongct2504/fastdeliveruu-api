@@ -10,9 +10,13 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
         RuleFor(x => x.DeliveryMethodId)
             .NotEmpty();
 
-        RuleFor(x => x.ReceiverName)
+        RuleFor(x => x.FirstName)
             .NotEmpty()
-            .MaximumLength(128);
+            .MaximumLength(50);
+
+        RuleFor(x => x.LastName)
+            .NotEmpty()
+            .MaximumLength(50);
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()

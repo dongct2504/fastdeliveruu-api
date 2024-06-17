@@ -10,7 +10,9 @@ public class CreateOrderCommand : IRequest<Result<Order>>
 
     public Guid DeliveryMethodId { get; set; }
 
-    public string ReceiverName { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+
+    public string LastName { get; set; } = null!;
 
     public string PhoneNumber { get; set; } = null!;
 

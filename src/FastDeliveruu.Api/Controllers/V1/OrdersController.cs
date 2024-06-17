@@ -16,6 +16,7 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -25,12 +26,14 @@ namespace FastDeliveruu.Api.Controllers.V1;
 public class OrdersController : ApiController
 {
     private readonly IMediator _mediator;
+    private readonly IConfiguration _configuration;
     private readonly IVnpayServices _vnPayServices;
 
-    public OrdersController(IMediator mediator, IVnpayServices vnPayServices)
+    public OrdersController(IMediator mediator, IVnpayServices vnPayServices, IConfiguration configuration)
     {
         _mediator = mediator;
         _vnPayServices = vnPayServices;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -70,11 +73,10 @@ public class OrdersController : ApiController
         return Ok(deliveryMethodDtos);
     }
 
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [HttpPost("checkout-cash")]
+    [ProducesResponseType(typeof(PaymentResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Checkout([FromBody] CreateOrderCommand command)
+    public async Task<IActionResult> CheckoutCash([FromBody] CreateOrderCommand command)
     {
         command.AppUserId = User.GetCurrentUserId();
 
@@ -84,32 +86,38 @@ public class OrdersController : ApiController
             return Problem(createOrderResult.Errors);
         }
 
-        string paymentUrl = string.Empty;
-
-        switch (command.PaymentMethod)
+        PaymentResponse paymentResponse = new PaymentResponse()
         {
-            case PaymentMethods.Cash:
-                PaymentResponse paymentResponse = new PaymentResponse()
-                {
-                    IsSuccess = true,
-                    OrderId = createOrderResult.Value.OrderId,
-                    OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
-                    PaymentMethod = createOrderResult.Value.PaymentMethod ?? PaymentMethods.Cash,
-                    TotalAmount = createOrderResult.Value.TotalAmount,
-                    TransactionId = createOrderResult.Value.TransactionId ?? "0"
-                };
-                return Ok(paymentResponse);
-            case PaymentMethods.Vnpay:
-                paymentUrl = _vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value);
-                break;
+            IsSuccess = true,
+            OrderId = createOrderResult.Value.OrderId,
+            OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
+            PaymentMethod = createOrderResult.Value.PaymentMethod ?? PaymentMethods.Cash,
+            TotalAmount = createOrderResult.Value.TotalAmount,
+            TransactionId = createOrderResult.Value.TransactionId ?? "0"
+        };
+
+        return Ok(paymentResponse);
+    }
+
+    [HttpPost("checkout-vnpay")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CheckoutVnpay([FromBody] CreateOrderCommand command)
+    {
+        command.AppUserId = User.GetCurrentUserId();
+
+        Result<Order> createOrderResult = await _mediator.Send(command);
+        if (createOrderResult.IsFailed)
+        {
+            return Problem(createOrderResult.Errors);
         }
 
-        return Ok(paymentUrl);
+        return Ok(_vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value));
     }
 
     [AllowAnonymous]
     [HttpGet("vnpay-return")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VnpayReturn()
@@ -127,7 +135,17 @@ public class OrdersController : ApiController
             return Problem(updateVnpayResult.Errors);
         }
 
-        return Ok(updateVnpayResult.Value);
+        string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
+        string vnpayResponseJson = JsonSerializer.Serialize(updateVnpayResult.Value);
+
+        if (updateVnpayResult.Value.IsSuccess)
+        {
+            return Redirect($"{redirectUrlBase}/checkout/success?data={vnpayResponseJson}");
+        }
+        else
+        {
+            return Redirect($"{redirectUrlBase}/checkout/failed?data={vnpayResponseJson}");
+        }
     }
 
     [HttpDelete("{id:guid}")]

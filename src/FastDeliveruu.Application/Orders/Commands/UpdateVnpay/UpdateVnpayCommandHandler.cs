@@ -39,25 +39,14 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                 order.OrderStatus = OrderStatus.Success;
                 order.PaymentStatus = PaymentStatus.Approved;
                 await _orderRepository.UpdateAsync(order);
-                return vnpayResponse;
+                break;
 
             case "24":
                 vnpayResponse.IsSuccess = false;
                 order.OrderStatus = OrderStatus.Cancelled;
                 order.PaymentStatus = PaymentStatus.Cancelled;
                 await _orderRepository.UpdateAsync(order);
-                string cancelMessage = "Payment was canceled.";
-                Log.Warning($"{request.GetType().Name} - {cancelMessage} - {request}");
-                return Result.Fail(new BadRequestError(cancelMessage));
-
-            case "51":
-                vnpayResponse.IsSuccess = false;
-                order.OrderStatus = OrderStatus.Failed;
-                order.PaymentStatus = PaymentStatus.Failed;
-                await _orderRepository.UpdateAsync(order);
-                string failedMessage = "Payment failed due to insufficient funds.";
-                Log.Warning($"{request.GetType().Name} - {failedMessage} - {request}");
-                return Result.Fail(new BadRequestError(failedMessage));
+                break;
 
             default:
                 vnpayResponse.IsSuccess = false;
@@ -68,5 +57,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                 Log.Warning($"{request.GetType().Name} - {unknownMessage} - {request}");
                 return Result.Fail(new BadRequestError(unknownMessage));
         }
+
+        return vnpayResponse;
     }
 }

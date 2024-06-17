@@ -4,7 +4,9 @@ public class OrderDto
 {
     public Guid OrderId { get; set; }
 
-    public string ReceiverName { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+
+    public string LastName { get; set; } = null!;
 
     public DateTime? OrderDate { get; set; }
 

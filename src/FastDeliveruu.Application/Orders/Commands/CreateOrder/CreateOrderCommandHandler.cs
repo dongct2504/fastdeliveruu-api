@@ -31,14 +31,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        Order order = _mapper.Map<Order>(request);
-        order.OrderId = Guid.NewGuid();
-        order.OrderDescription = $"Create payment for order: {order.OrderId}";
-        order.OrderDate = DateTime.Now;
-        order.TransactionId = "0";
-        order.OrderStatus = OrderStatus.Pending;
-        order.PaymentStatus = PaymentStatus.Pending;
-
         DeliveryMethod? deliveryMethod = await _deliveryMethodRepository.GetAsync(request.DeliveryMethodId);
         if (deliveryMethod == null)
         {
@@ -57,9 +49,15 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail<Order>(new BadRequestError(message));
         }
 
-        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity) + deliveryMethod.Price;
+        Order order = _mapper.Map<Order>(request);
+        order.OrderId = Guid.NewGuid();
+        order.OrderDescription = $"Create payment for order: {order.OrderId}";
+        order.OrderDate = DateTime.Now;
+        order.TransactionId = "0";
+        order.OrderStatus = OrderStatus.Pending;
+        order.PaymentStatus = PaymentStatus.Pending;
 
-        await _cacheService.RemoveAsync(key, cancellationToken);
+        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity) + deliveryMethod.Price;
 
         order.OrderDetails = customerCart.Select(cart => new OrderDetail
         {
@@ -75,6 +73,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.UpdatedAt = DateTime.Now;
 
         await _orderRepository.AddAsync(order);
+
+        await _cacheService.RemoveAsync(key, cancellationToken);
 
         return order;
     }

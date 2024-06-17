@@ -19,8 +19,10 @@ namespace FastDeliveruu.Domain.Entities
         public Guid OrderId { get; set; }
         public Guid AppUserId { get; set; }
         public Guid DeliveryMethodId { get; set; }
-        [StringLength(128)]
-        public string ReceiverName { get; set; } = null!;
+        [StringLength(50)]
+        public string FirstName { get; set; } = null!;
+        [StringLength(50)]
+        public string LastName { get; set; } = null!;
         [Column(TypeName = "datetime")]
         public DateTime? OrderDate { get; set; }
         [StringLength(256)]
