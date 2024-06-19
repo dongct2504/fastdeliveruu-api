@@ -17,7 +17,6 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 

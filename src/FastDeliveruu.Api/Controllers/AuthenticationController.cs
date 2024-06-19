@@ -16,13 +16,16 @@ public class AuthenticationController : ApiController
 {
     private readonly IMediator _mediator;
     private readonly IEmailSender _emailSender;
+    private readonly IConfiguration _configuration;
 
     public AuthenticationController(
         IMediator mediator,
-        IEmailSender emailSender)
+        IEmailSender emailSender,
+        IConfiguration configuration)
     {
         _mediator = mediator;
         _emailSender = emailSender;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -37,8 +40,7 @@ public class AuthenticationController : ApiController
             return Problem(authenticationResult.Errors);
         }
 
-        //await SendEmailAsync(authenticationResult.Value.AppUserDto.Email,
-        //    authenticationResult.Value.Token);
+        await SendEmailAsync(authenticationResult.Value.AppUserDto.Email, authenticationResult.Value.Token);
 
         return Ok(authenticationResult.Value);
     }
@@ -58,7 +60,7 @@ public class AuthenticationController : ApiController
     }
 
     [HttpGet("confirm-email")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ConfirmEmail(string email, string encodedToken)
@@ -71,7 +73,9 @@ public class AuthenticationController : ApiController
             return Problem(isConfirmEmailResult.Errors);
         }
 
-        return Ok();
+        string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
+
+        return Redirect($"{redirectUrlBase}/authen/login");
     }
 
     [NonAction]
