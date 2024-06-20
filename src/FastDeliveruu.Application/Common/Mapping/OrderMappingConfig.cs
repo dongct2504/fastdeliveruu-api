@@ -17,7 +17,8 @@ public class OrderMappingConfig : IRegister
             .Map(dest => dest.DeliveryMethodDto, src => src.DeliveryMethod)
             .Map(dest => dest.OrderDetailDtos, src => src.OrderDetails);
 
-        config.NewConfig<OrderDetail, OrderDetailDto>();
+        config.NewConfig<OrderDetail, OrderDetailDto>()
+            .Map(dest => dest.MenuItemDto, src => src.MenuItem);
 
         config.NewConfig<DeliveryMethod, DeliveryMethodDto>();
 

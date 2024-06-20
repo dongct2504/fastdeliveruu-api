@@ -1,4 +1,6 @@
-﻿namespace FastDeliveruu.Application.Dtos.OrderDtos;
+﻿using FastDeliveruu.Application.Dtos.MenuItemDtos;
+
+namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderDetailDto
 {
@@ -9,4 +11,8 @@ public class OrderDetailDto
     public decimal Price { get; set; }
 
     public int Quantity { get; set; }
+
+    public string ImageUrl { get; set; } = null!;
+
+    public MenuItemDto MenuItemDto { get; set; } = null!;
 }

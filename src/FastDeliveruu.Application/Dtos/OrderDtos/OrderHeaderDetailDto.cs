@@ -8,9 +8,9 @@ public class OrderHeaderDetailDto
 
     public string LastName { get; set; } = null!;
 
-    public DateTime OrderDate { get; set; }
+    public DateTime? OrderDate { get; set; }
 
-    public string OrderDescription { get; set; } = null!;
+    public string? OrderDescription { get; set; }
 
     public string PhoneNumber { get; set; } = null!;
 
