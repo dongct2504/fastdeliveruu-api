@@ -50,6 +50,13 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
             menuItemsQuery = menuItemsQuery.Where(mi => mi.RestaurantId == request.MenuItemParams.RestaurantId);
         }
 
+        if (!string.IsNullOrEmpty(request.MenuItemParams.Search))
+        {
+            string lowerCaseSearch = request.MenuItemParams.Search.ToLower();
+            menuItemsQuery = menuItemsQuery
+                .Where(mi => EF.Functions.Like(mi.Name.ToLower(), $"%{lowerCaseSearch}%"));
+        }
+
         if (!string.IsNullOrEmpty(request.MenuItemParams.Sort))
         {
             switch (request.MenuItemParams.Sort)
@@ -67,13 +74,6 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
                     menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Name);
                     break;
             }
-        }
-
-        if (!string.IsNullOrEmpty(request.MenuItemParams.Search))
-        {
-            string lowerCaseSearch = request.MenuItemParams.Search.ToLower();
-            menuItemsQuery = menuItemsQuery
-                .Where(mi => EF.Functions.Like(mi.Name.ToLower(), $"%{lowerCaseSearch}%"));
         }
 
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>

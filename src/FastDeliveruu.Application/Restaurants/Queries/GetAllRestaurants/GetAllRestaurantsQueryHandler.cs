@@ -4,6 +4,7 @@ using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         GetAllRestaurantsQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Restaurants}-{request.PageNumber}-{request.PageSize}";
+        string key = $"{CacheConstants.Restaurants}-{request.RestaurantParams}";
 
         PagedList<RestaurantDto>? paginationResponseCache = await _cacheService
             .GetAsync<PagedList<RestaurantDto>>(key, cancellationToken);
@@ -36,16 +37,38 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
             return paginationResponseCache;
         }
 
+        IQueryable<Restaurant> restaurantsQuery = _dbContext.Restaurants.AsQueryable();
+
+        if (!string.IsNullOrEmpty(request.RestaurantParams.Search))
+        {
+            string lowerCaseSearch = request.RestaurantParams.Search.ToLower();
+            restaurantsQuery = restaurantsQuery
+                .Where(r => EF.Functions.Like(r.Name.ToLower(), $"%{lowerCaseSearch}%"));
+        }
+
+        if (!string.IsNullOrEmpty(request.RestaurantParams.Sort))
+        {
+            switch (request.RestaurantParams.Sort)
+            {
+                case RestaurantSortConstants.LatestUpdateDesc:
+                    restaurantsQuery = restaurantsQuery.OrderByDescending(r => r.UpdatedAt);
+                    break;
+                case RestaurantSortConstants.Name:
+                    restaurantsQuery = restaurantsQuery.OrderBy(r => r.Name);
+                    break;
+            }
+        }
+
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
         {
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize,
-            TotalRecords = await _dbContext.Restaurants.CountAsync(cancellationToken),
-            Items = await _dbContext.Restaurants
+            PageNumber = request.RestaurantParams.PageNumber,
+            PageSize = request.RestaurantParams.PageSize,
+            TotalRecords = await restaurantsQuery.CountAsync(cancellationToken),
+            Items = await restaurantsQuery
                 .AsNoTracking()
                 .ProjectToType<RestaurantDto>()
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
+                .Skip((request.RestaurantParams.PageNumber - 1) * request.RestaurantParams.PageSize)
+                .Take(request.RestaurantParams.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

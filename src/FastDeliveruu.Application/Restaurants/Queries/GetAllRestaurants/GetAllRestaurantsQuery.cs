@@ -6,13 +6,10 @@ namespace FastDeliveruu.Application.Restaurants.Queries.GetAllRestaurants;
 
 public class GetAllRestaurantsQuery : IRequest<PagedList<RestaurantDto>>
 {
-    public GetAllRestaurantsQuery(int pageNumber, int pageSize)
+    public GetAllRestaurantsQuery(RestaurantParams restaurantParams)
     {
-        PageNumber = pageNumber;
-        PageSize = pageSize;
+        RestaurantParams = restaurantParams;
     }
 
-    public int PageNumber { get; }
-
-    public int PageSize { get; }
+    public RestaurantParams RestaurantParams { get; }
 }
