@@ -38,7 +38,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
         }
 
         AppUserDetailDto? userDetailDto = await _userManager.Users
-            .Where(u => u.Id == request.Id.ToString())
+            .Where(u => u.Id == request.Id)
             .AsNoTracking()
             .ProjectToType<AppUserDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

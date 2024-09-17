@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 
 public class UpdateMenuItemCommand : IRequest<Result>
 {
-    public Guid MenuItemId { get; set; }
+    public Guid Id { get; set; }
 
     public Guid RestaurantId { get; set; }
 
@@ -15,8 +15,6 @@ public class UpdateMenuItemCommand : IRequest<Result>
     public string Name { get; set; } = null!;
 
     public string Description { get; set; } = null!;
-
-    public int Inventory { get; set; }
 
     public decimal Price { get; set; }
 

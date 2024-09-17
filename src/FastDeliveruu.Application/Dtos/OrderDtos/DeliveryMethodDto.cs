@@ -2,7 +2,7 @@
 
 public class DeliveryMethodDto
 {
-    public Guid DeliveryMethodId { get; set; }
+    public Guid Id { get; set; }
 
     public string ShortName { get; set; } = null!;
 

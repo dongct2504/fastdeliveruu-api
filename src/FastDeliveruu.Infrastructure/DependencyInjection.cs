@@ -11,7 +11,7 @@ using FastDeliveruu.Infrastructure.Repositories;
 using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
-using FastDeliveruu.Infrastructure.Identity;
+using FastDeliveruu.Domain.Data;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -29,6 +29,8 @@ public static class DependencyInjection
 
         services.AddSingleton<ICacheService, CacheService>();
 
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
@@ -41,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+        services.AddScoped<IMenuVariantRepository, MenuVariantRepository>();
         services.AddScoped<IDeliveryMethodRepository, DeliveryMethodRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
 
@@ -49,7 +52,7 @@ public static class DependencyInjection
 
     private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<AppUser, IdentityRole>(options =>
+        services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
         {
             // Password settings
             options.Password.RequireDigit = true;
@@ -64,8 +67,8 @@ public static class DependencyInjection
             // Sign-in settings
             options.SignIn.RequireConfirmedEmail = true;
         })
-        .AddEntityFrameworkStores<FastDeliveruuIdentityDbContext>()
-        .AddRoleManager<RoleManager<IdentityRole>>()
+        .AddEntityFrameworkStores<FastDeliveruuDbContext>()
+        .AddRoleManager<RoleManager<IdentityRole<Guid>>>()
         .AddSignInManager<SignInManager<AppUser>>()
         .AddDefaultTokenProviders();
 

@@ -64,7 +64,7 @@ public class MenuItemsController : ApiController
 
         return CreatedAtRoute(
             nameof(GetMenuItemById),
-            new { Id = createMenuItemResult.Value.MenuItemId },
+            new { id = createMenuItemResult.Value.Id },
             createMenuItemResult.Value);
     }
 
@@ -75,7 +75,7 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] UpdateMenuItemCommand command)
     {
-        if (id != command.MenuItemId)
+        if (id != command.Id)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }

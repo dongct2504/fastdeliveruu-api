@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Domain.Entities;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using MediatR;
 
@@ -16,7 +17,7 @@ public class CreateOrderCommand : IRequest<Result<Order>>
 
     public string PhoneNumber { get; set; } = null!;
 
-    public string PaymentMethod { get; set; } = null!;
+    public PaymentMethods PaymentMethod { get; set; }
 
     public string Address { get; set; } = null!;
 

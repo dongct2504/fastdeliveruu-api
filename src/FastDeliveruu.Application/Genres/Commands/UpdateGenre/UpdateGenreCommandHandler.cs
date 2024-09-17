@@ -25,7 +25,7 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
 
     public async Task<Result> Handle(UpdateGenreCommand request, CancellationToken cancellationToken)
     {
-        Genre? genre = await _genreRepository.GetAsync(request.GenreId);
+        Genre? genre = await _genreRepository.GetAsync(request.Id);
         if (genre == null)
         {
             string message = "Genre not found.";
@@ -38,7 +38,7 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
 
         await _genreRepository.UpdateAsync(genre);
 
-        await _cacheService.RemoveAsync($"{CacheConstants.Genre}-{request.GenreId}", cancellationToken);
+        await _cacheService.RemoveAsync($"{CacheConstants.Genre}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

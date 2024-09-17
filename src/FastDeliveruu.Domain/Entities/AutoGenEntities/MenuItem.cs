@@ -6,38 +6,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
 {
-    [Index("GenreId", Name = "MENUITEMGENRES_FK")]
-    [Index("RestaurantId", Name = "MENUITEMRESTAURANTS_FK")]
+    [Index("GenreId", Name = "IX_MenuItems_GenreId")]
+    [Index("RestaurantId", Name = "IX_MenuItems_RestaurantId")]
     public partial class MenuItem
     {
         public MenuItem()
         {
+            MenuItemReviews = new HashSet<MenuItemReview>();
+            MenuVariants = new HashSet<MenuVariant>();
             OrderDetails = new HashSet<OrderDetail>();
-            ShoppingCarts = new HashSet<ShoppingCart>();
+            WishLists = new HashSet<WishList>();
         }
 
         [Key]
-        public Guid MenuItemId { get; set; }
+        public Guid Id { get; set; }
         public Guid RestaurantId { get; set; }
         public Guid GenreId { get; set; }
         [StringLength(50)]
         public string Name { get; set; } = null!;
+        [StringLength(1200)]
         public string Description { get; set; } = null!;
-        public int Inventory { get; set; }
-        [Column(TypeName = "money")]
+        [Column(TypeName = "decimal(19, 4)")]
         public decimal Price { get; set; }
         [Column(TypeName = "decimal(3, 2)")]
         public decimal DiscountPercent { get; set; }
-        [StringLength(1024)]
+        [StringLength(256)]
         [Unicode(false)]
         public string ImageUrl { get; set; } = null!;
         [StringLength(256)]
         [Unicode(false)]
         public string PublicId { get; set; } = null!;
         [Column(TypeName = "datetime")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("GenreId")]
         [InverseProperty("MenuItems")]
@@ -46,8 +48,12 @@ namespace FastDeliveruu.Domain.Entities
         [InverseProperty("MenuItems")]
         public virtual Restaurant Restaurant { get; set; } = null!;
         [InverseProperty("MenuItem")]
+        public virtual ICollection<MenuItemReview> MenuItemReviews { get; set; }
+        [InverseProperty("MenuItem")]
+        public virtual ICollection<MenuVariant> MenuVariants { get; set; }
+        [InverseProperty("MenuItem")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         [InverseProperty("MenuItem")]
-        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
+        public virtual ICollection<WishList> WishLists { get; set; }
     }
 }

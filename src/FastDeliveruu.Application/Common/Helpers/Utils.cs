@@ -71,7 +71,7 @@ public static class Utils
         query["isSuccess"] = paymentResponse.IsSuccess.ToString();
         query["totalAmount"] = paymentResponse.TotalAmount.ToString();
         query["transactionId"] = paymentResponse.TransactionId;
-        query["paymentMethod"] = paymentResponse.PaymentMethod;
+        query["paymentMethod"] = paymentResponse.PaymentMethod.ToString();
         query["orderDescription"] = paymentResponse.OrderDescription;
 
         if (paymentResponse is VnpayResponse)

@@ -8,6 +8,7 @@ using FastDeliveruu.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 
@@ -16,13 +17,16 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
 {
     private readonly ICacheService _cacheService;
     private readonly FastDeliveruuDbContext _dbContext;
+    private readonly ILogger<GetAllMenuItemsQueryHandler> _logger;
 
     public GetAllMenuItemsQueryHandler(
         ICacheService cacheService,
-        FastDeliveruuDbContext dbContext)
+        FastDeliveruuDbContext dbContext,
+        ILogger<GetAllMenuItemsQueryHandler> logger)
     {
         _cacheService = cacheService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<PagedList<MenuItemDto>> Handle(

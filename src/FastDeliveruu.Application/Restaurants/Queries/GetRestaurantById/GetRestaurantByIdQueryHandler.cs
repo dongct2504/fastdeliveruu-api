@@ -39,7 +39,7 @@ public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQu
         }
 
         RestaurantDetailDto? restaurantDetailDto = await _dbContext.Restaurants
-            .Where(r => r.RestaurantId == request.Id)
+            .Where(r => r.Id == request.Id)
             .AsNoTracking()
             .ProjectToType<RestaurantDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

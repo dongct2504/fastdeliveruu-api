@@ -38,7 +38,7 @@ public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery,
         }
 
         MenuItemDetailDto? menuItemDetailDto = await _dbContext.MenuItems
-            .Where(mi => mi.MenuItemId == request.Id)
+            .Where(mi => mi.Id == request.Id)
             .AsNoTracking()
             .ProjectToType<MenuItemDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

@@ -50,18 +50,18 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         }
 
         Order order = _mapper.Map<Order>(request);
-        order.OrderId = Guid.NewGuid();
-        order.OrderDescription = $"Create payment for order: {order.OrderId}";
+        order.Id = Guid.NewGuid();
+        order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = DateTime.Now;
         order.TransactionId = "0";
-        order.OrderStatus = OrderStatus.Pending;
-        order.PaymentStatus = PaymentStatus.Pending;
+        order.OrderStatus = (byte?)OrderStatus.Pending;
+        order.PaymentStatus = (byte?)PaymentStatus.Pending;
 
         order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity) + deliveryMethod.Price;
 
         order.OrderDetails = customerCart.Select(cart => new OrderDetail
         {
-            OrderId = order.OrderId,
+            OrderId = order.Id,
             MenuItemId = cart.MenuItemId,
             Price = cart.MenuItem.DiscountPrice,
             Quantity = cart.Quantity,

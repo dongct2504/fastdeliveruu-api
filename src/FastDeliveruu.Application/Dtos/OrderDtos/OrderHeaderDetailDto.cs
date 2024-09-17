@@ -2,7 +2,7 @@
 
 public class OrderHeaderDetailDto
 {
-    public Guid OrderId { get; set; }
+    public Guid Id { get; set; }
 
     public string FirstName { get; set; } = null!;
 

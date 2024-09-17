@@ -36,22 +36,22 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
         {
             case "00":
                 vnpayResponse.IsSuccess = true;
-                order.OrderStatus = OrderStatus.Success;
-                order.PaymentStatus = PaymentStatus.Approved;
+                order.OrderStatus = (byte?)OrderStatus.Success;
+                order.PaymentStatus = (byte?)PaymentStatus.Approved;
                 await _orderRepository.UpdateAsync(order);
                 break;
 
             case "24":
                 vnpayResponse.IsSuccess = false;
-                order.OrderStatus = OrderStatus.Cancelled;
-                order.PaymentStatus = PaymentStatus.Cancelled;
+                order.OrderStatus = (byte?)OrderStatus.Cancelled;
+                order.PaymentStatus = (byte?)PaymentStatus.Cancelled;
                 await _orderRepository.UpdateAsync(order);
                 break;
 
             default:
                 vnpayResponse.IsSuccess = false;
-                order.OrderStatus = OrderStatus.Failed;
-                order.PaymentStatus = PaymentStatus.Failed;
+                order.OrderStatus = (byte?)OrderStatus.Failed;
+                order.PaymentStatus = (byte?)PaymentStatus.Failed;
                 await _orderRepository.UpdateAsync(order);
                 string unknownMessage = $"Payment failed with response code {request.VnPayResponse.VnpayResponseCode}.";
                 Log.Warning($"{request.GetType().Name} - {unknownMessage} - {request}");

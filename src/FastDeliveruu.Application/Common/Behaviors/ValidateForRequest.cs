@@ -28,7 +28,7 @@ public static class ValidateForRequest
         return false;
     }
 
-    public static bool BeValidPaymentMethod(string paymentMethod)
+    public static bool BeValidPaymentMethod(PaymentMethods paymentMethod)
     {
         return paymentMethod == PaymentMethods.Cash ||
             paymentMethod == PaymentMethods.Vnpay ||

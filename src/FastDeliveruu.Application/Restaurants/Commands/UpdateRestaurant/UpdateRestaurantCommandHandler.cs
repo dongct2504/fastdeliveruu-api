@@ -33,7 +33,7 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
 
     public async Task<Result> Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
     {
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(request.RestaurantId);
+        Restaurant? restaurant = await _restaurantRepository.GetAsync(request.Id);
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
@@ -69,7 +69,7 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
 
         await _restaurantRepository.UpdateAsync(restaurant);
 
-        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.RestaurantId}", cancellationToken);
+        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

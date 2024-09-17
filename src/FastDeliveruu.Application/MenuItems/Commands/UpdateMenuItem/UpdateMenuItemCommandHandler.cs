@@ -7,18 +7,20 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 
 public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemCommand, Result>
 {
     private readonly ICacheService _cacheService;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMenuItemRepository _menuItemRepository;
     private readonly IGenreRepository _genreRepository;
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
+    private readonly ILogger<UpdateMenuItemCommandHandler> _logger;
 
     public UpdateMenuItemCommandHandler(
         IMenuItemRepository menuItemRepository,
@@ -26,7 +28,9 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         IRestaurantRepository restaurantRepository,
         IMapper mapper,
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        ILogger<UpdateMenuItemCommandHandler> logger,
+        IDateTimeProvider dateTimeProvider)
     {
         _menuItemRepository = menuItemRepository;
         _genreRepository = genreRepository;
@@ -34,6 +38,8 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _cacheService = cacheService;
+        _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result> Handle(UpdateMenuItemCommand request, CancellationToken cancellationToken)
@@ -42,7 +48,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         if (genre == null)
         {
             string message = "Genre not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -50,15 +56,15 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(request.MenuItemId);
+        MenuItem? menuItem = await _menuItemRepository.GetAsync(request.Id);
         if (menuItem == null)
         {
             string message = "MenuItem not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -70,7 +76,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
             if (deletionResult.Error != null)
             {
                 string message = deletionResult.Error.Message;
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new BadRequestError(message));
             }
 
@@ -79,18 +85,18 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
             if (uploadResult.Error != null)
             {
                 string message = uploadResult.Error.Message;
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new BadRequestError(message));
             }
 
             menuItem.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
             menuItem.PublicId = uploadResult.PublicId;
         }
-        menuItem.UpdatedAt = DateTime.Now;
+        menuItem.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _menuItemRepository.UpdateAsync(menuItem);
 
-        await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.MenuItemId}", cancellationToken);
+        await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

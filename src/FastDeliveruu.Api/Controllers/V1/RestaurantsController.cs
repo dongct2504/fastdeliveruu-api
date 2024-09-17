@@ -64,7 +64,7 @@ public class RestaurantsController : ApiController
 
         return CreatedAtRoute(
             nameof(GetRestaurantById),
-            new { Id = createRestaurantResult.Value.RestaurantId },
+            new { id = createRestaurantResult.Value.Id },
             createRestaurantResult.Value);
     }
 
@@ -75,7 +75,7 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateRestaurant(Guid id, [FromForm] UpdateRestaurantCommand command)
     {
-        if (id != command.RestaurantId)
+        if (id != command.Id)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }

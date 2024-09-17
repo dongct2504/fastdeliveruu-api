@@ -14,17 +14,19 @@ namespace FastDeliveruu.Domain.Entities
         }
 
         [Key]
-        public Guid DeliveryMethodId { get; set; }
+        public int Id { get; set; }
         [StringLength(20)]
-        [Unicode(false)]
         public string ShortName { get; set; } = null!;
-        [StringLength(10)]
-        [Unicode(false)]
-        public string? DeliveryTime { get; set; }
+        [StringLength(20)]
+        public string? EstimatedDeliveryTime { get; set; }
         [StringLength(64)]
         public string Description { get; set; } = null!;
-        [Column(TypeName = "money")]
+        [Column(TypeName = "decimal(19, 4)")]
         public decimal Price { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? CreatedAt { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? UpdatedAt { get; set; }
 
         [InverseProperty("DeliveryMethod")]
         public virtual ICollection<Order> Orders { get; set; }

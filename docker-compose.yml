@@ -18,7 +18,7 @@ services:
     container_name: fastdeliveruu.db
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=super_secret_password_123
+      - SA_PASSWORD=Password123456
       - MSSQL_PID=Express
     volumes:
       - ./.containers/fastdeliveruu-db:/var/opt/mssql/data

@@ -89,9 +89,9 @@ public class OrdersController : ApiController
         PaymentResponse paymentResponse = new PaymentResponse()
         {
             IsSuccess = true,
-            OrderId = createOrderResult.Value.OrderId,
+            OrderId = createOrderResult.Value.Id,
             OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
-            PaymentMethod = createOrderResult.Value.PaymentMethod ?? PaymentMethods.Cash,
+            PaymentMethod = (PaymentMethods)(createOrderResult.Value.PaymentMethod ?? 0), // cash
             TotalAmount = createOrderResult.Value.TotalAmount,
             TransactionId = createOrderResult.Value.TransactionId ?? "0"
         };

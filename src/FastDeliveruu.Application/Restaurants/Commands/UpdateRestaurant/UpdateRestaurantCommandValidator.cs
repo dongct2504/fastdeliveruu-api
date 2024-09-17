@@ -7,7 +7,7 @@ public class UpdateRestaurantCommandValidator : AbstractValidator<UpdateRestaura
 {
     public UpdateRestaurantCommandValidator()
     {
-        RuleFor(x => x.RestaurantId)
+        RuleFor(x => x.Id)
             .NotEmpty();
 
         RuleFor(x => x.Name)

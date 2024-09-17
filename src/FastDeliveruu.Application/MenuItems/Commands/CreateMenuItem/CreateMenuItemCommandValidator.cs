@@ -19,10 +19,6 @@ public class CreateMenuItemCommandValidator : AbstractValidator<CreateMenuItemCo
         RuleFor(x => x.Description)
             .NotEmpty();
 
-        RuleFor(x => x.Inventory)
-            .NotEmpty()
-            .GreaterThan(0);
-
         RuleFor(x => x.Price)
             .NotEmpty()
             .GreaterThanOrEqualTo(1000);

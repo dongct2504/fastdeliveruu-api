@@ -15,8 +15,6 @@ public class CreateMenuItemCommand : IRequest<Result<MenuItemDto>>
 
     public string Description { get; set; } = null!;
 
-    public int Inventory { get; set; }
-
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }

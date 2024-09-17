@@ -1,4 +1,6 @@
-﻿namespace FastDeliveruu.Application.Dtos.PaymentResponses;
+﻿using FastDeliveruu.Application.Common.Constants;
+
+namespace FastDeliveruu.Application.Dtos.PaymentResponses;
 
 public class PaymentResponse
 {
@@ -10,7 +12,7 @@ public class PaymentResponse
 
     public string TransactionId { get; set; } = null!;
 
-    public string PaymentMethod { get; set; } = null!;
+    public PaymentMethods PaymentMethod { get; set; }
 
     public string OrderDescription { get; set; } = null!;
 }

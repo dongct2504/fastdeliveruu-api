@@ -41,7 +41,7 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         }
 
         restaurant = _mapper.Map<Restaurant>(request);
-        restaurant.RestaurantId = Guid.NewGuid();
+        restaurant.Id = Guid.NewGuid();
 
         UploadResult uploadResult = await _fileStorageServices.UploadImageAsync(request.ImageFile,
             UploadPath.RestaurantImageUploadPath);

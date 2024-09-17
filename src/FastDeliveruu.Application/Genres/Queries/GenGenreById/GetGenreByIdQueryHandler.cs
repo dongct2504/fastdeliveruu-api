@@ -36,7 +36,7 @@ public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Resul
         }
 
         GenreDetailDto? genreDetailDto = await _dbContext.Genres
-            .Where(g => g.GenreId == request.Id)
+            .Where(g => g.Id == request.Id)
             .AsNoTracking()
             .ProjectToType<GenreDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

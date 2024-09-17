@@ -33,7 +33,7 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
         }
 
         genre = _mapper.Map<Genre>(request);
-        genre.GenreId = Guid.NewGuid();
+        genre.Id = Guid.NewGuid();
         genre.CreatedAt = DateTime.Now;
         genre.UpdatedAt = DateTime.Now;
 

@@ -15,13 +15,13 @@ namespace FastDeliveruu.Application.Authentication.Commands.Register;
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResponse>>
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly IMapper _mapper;
 
     public RegisterCommandHandler(
         IMapper mapper,
         UserManager<AppUser> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager)
     {
         _mapper = mapper;
         _userManager = userManager;
@@ -51,7 +51,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                await _roleManager.CreateAsync(new IdentityRole(roleName));
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
             }
         }
 

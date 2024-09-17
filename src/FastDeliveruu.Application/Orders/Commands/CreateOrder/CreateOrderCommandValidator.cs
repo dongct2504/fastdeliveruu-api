@@ -24,7 +24,6 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 
         RuleFor(x => x.PaymentMethod)
             .NotEmpty()
-            .MaximumLength(25)
             .Must(ValidateForRequest.BeValidPaymentMethod).WithMessage("Must be cash, vnpay or momo.");
 
         RuleFor(x => x.Address)

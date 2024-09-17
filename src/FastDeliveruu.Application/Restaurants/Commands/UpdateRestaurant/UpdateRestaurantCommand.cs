@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 
 public class UpdateRestaurantCommand : IRequest<Result>
 {
-    public Guid RestaurantId { get; set; }
+    public Guid Id { get; set; }
 
     public string Name { get; set; } = null!;
 

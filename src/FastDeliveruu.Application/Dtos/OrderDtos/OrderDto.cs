@@ -2,7 +2,7 @@ namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderDto
 {
-    public Guid OrderId { get; set; }
+    public Guid Id { get; set; }
 
     public string FirstName { get; set; } = null!;
 

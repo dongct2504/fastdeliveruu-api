@@ -6,7 +6,7 @@ public class UpdateMenuItemCommandValidator : AbstractValidator<UpdateMenuItemCo
 {
     public UpdateMenuItemCommandValidator()
     {
-        RuleFor(x => x.MenuItemId)
+        RuleFor(x => x.Id)
             .NotEmpty();
 
         RuleFor(x => x.RestaurantId)
@@ -21,10 +21,6 @@ public class UpdateMenuItemCommandValidator : AbstractValidator<UpdateMenuItemCo
 
         RuleFor(x => x.Description)
             .NotEmpty();
-
-        RuleFor(x => x.Inventory)
-            .NotEmpty()
-            .GreaterThan(0);
 
         RuleFor(x => x.Price)
             .NotEmpty()

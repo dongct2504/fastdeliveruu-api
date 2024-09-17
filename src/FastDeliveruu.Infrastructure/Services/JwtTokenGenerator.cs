@@ -14,11 +14,13 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, UserManager<AppUser> userManager)
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, UserManager<AppUser> userManager, IDateTimeProvider dateTimeProvider)
     {
         _jwtSettings = jwtOptions.Value;
         _userManager = userManager;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<string> GenerateTokenAsync(AppUser appUser)
@@ -34,7 +36,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         var claims = new Claim[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, appUser.Id),
+            new Claim(JwtRegisteredClaimNames.Sub, appUser.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.NameId, appUser.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         }
@@ -43,7 +45,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         JwtSecurityToken securityToken = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
-            expires: DateTime.UtcNow.AddDays(_jwtSettings.ExpiryDays),
+            expires: _dateTimeProvider.VietnamDateTimeNow.AddDays(_jwtSettings.ExpiryDays),
             claims: claims,
             signingCredentials: signingCredentials
         );

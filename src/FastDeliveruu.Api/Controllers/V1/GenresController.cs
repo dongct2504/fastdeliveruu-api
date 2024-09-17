@@ -63,7 +63,7 @@ public class GenresController : ApiController
 
         return CreatedAtRoute(
             nameof(GetGenreById),
-            new { Id = createGenreResult.Value.GenreId },
+            new { id = createGenreResult.Value.Id },
             createGenreResult.Value);
     }
 
@@ -74,7 +74,7 @@ public class GenresController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateGenre(Guid id, [FromBody] UpdateGenreCommand command)
     {
-        if (id != command.GenreId)
+        if (id != command.Id)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
         }

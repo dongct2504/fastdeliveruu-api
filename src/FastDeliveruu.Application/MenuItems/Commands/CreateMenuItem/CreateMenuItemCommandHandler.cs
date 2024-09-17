@@ -9,7 +9,7 @@ using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Commands.CreateMenuItem;
 
@@ -20,19 +20,25 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
+    private readonly ILogger<CreateMenuItemCommandHandler> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
     public CreateMenuItemCommandHandler(
         IMenuItemRepository menuItemRepository,
         IGenreRepository genreRepository,
         IRestaurantRepository restaurantRepository,
         IFileStorageServices fileStorageServices,
-        IMapper mapper)
+        IMapper mapper,
+        ILogger<CreateMenuItemCommandHandler> logger,
+        IDateTimeProvider dateTimeProvider)
     {
         _menuItemRepository = menuItemRepository;
         _genreRepository = genreRepository;
         _restaurantRepository = restaurantRepository;
         _fileStorageServices = fileStorageServices;
         _mapper = mapper;
+        _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result<MenuItemDto>> Handle(
@@ -43,16 +49,16 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         if (genre == null)
         {
             string message = "Genre not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<MenuItemDto>(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
         }
 
         Restaurant? restaurant = await _restaurantRepository.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<MenuItemDto>(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
         }
 
         var spec = new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name);
@@ -61,27 +67,26 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         if (menuItem != null)
         {
             string message = "MenuItem is already exist.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<MenuItemDto>(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new DuplicateError(message));
         }
 
         menuItem = _mapper.Map<MenuItem>(request);
-        menuItem.MenuItemId = Guid.NewGuid();
+        menuItem.Id = Guid.NewGuid();
 
         UploadResult uploadResult = await _fileStorageServices
             .UploadImageAsync(request.ImageFile, UploadPath.MenuItemImageUploadPath);
         if (uploadResult.Error != null)
         {
             string message = uploadResult.Error.Message;
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
         menuItem.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
         menuItem.PublicId = uploadResult.PublicId;
 
-        menuItem.CreatedAt = DateTime.Now;
-        menuItem.UpdatedAt = DateTime.Now;
+        menuItem.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _menuItemRepository.AddAsync(menuItem);
 

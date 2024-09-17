@@ -1,15 +1,13 @@
 namespace FastDeliveruu.Application.Common.Constants;
 
-public class PaymentStatus
+public enum PaymentStatus
 {
-    public const string Pending = "Pending";
-    public const string Processing = "Processing";
-    public const string Cancelled = "Cancelled";
-    public const string Failed = "Failed";
-
-    public const string Approved = "Approved";
-    public const string Shipped = "Shipped";
-    public const string Refunded = "Refunded";
-
-    public const string DelayedPayment = "DelayedPayment";
+    Pending,
+    Processing,
+    Cancelled,
+    Failed,
+    Approved,
+    Shipped,
+    Refunded,
+    DelayedPayment
 }

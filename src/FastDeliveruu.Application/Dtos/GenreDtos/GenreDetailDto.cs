@@ -4,7 +4,7 @@ namespace FastDeliveruu.Application.Dtos.GenreDtos;
 
 public class GenreDetailDto
 {
-    public Guid GenreId { get; set; }
+    public Guid Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
 
