@@ -704,6 +704,40 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ShoppingCarts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuVariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShoppingCarts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCarts_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCarts_MenuItems_MenuItemId",
+                        column: x => x.MenuItemId,
+                        principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCarts_MenuVariants_MenuVariantId",
+                        column: x => x.MenuVariantId,
+                        principalTable: "MenuVariants",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AddressCustomers_AppUserId",
                 table: "AddressesCustomers",
@@ -925,6 +959,21 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "WardId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShoppingCart_AppUserId",
+                table: "ShoppingCarts",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShoppingCart_MenuItemId",
+                table: "ShoppingCarts",
+                column: "MenuItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShoppingCart_MenuVariantId",
+                table: "ShoppingCarts",
+                column: "MenuVariantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Wards_DistrictId",
                 table: "Wards",
                 column: "DistrictId");
@@ -988,25 +1037,28 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "RestaurantReviews");
 
             migrationBuilder.DropTable(
+                name: "ShoppingCarts");
+
+            migrationBuilder.DropTable(
                 name: "WishLists");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "MenuVariants");
-
-            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "MenuItems");
+                name: "MenuVariants");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "DeliveryMethods");
+
+            migrationBuilder.DropTable(
+                name: "MenuItems");
 
             migrationBuilder.DropTable(
                 name: "Genres");

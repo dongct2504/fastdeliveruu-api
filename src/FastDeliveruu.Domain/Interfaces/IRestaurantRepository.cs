@@ -4,5 +4,5 @@ namespace FastDeliveruu.Domain.Interfaces;
 
 public interface IRestaurantRepository : IRepository<Restaurant>
 {
-    Task UpdateAsync(Restaurant restaurant);
+    void Update(Restaurant restaurant);
 }

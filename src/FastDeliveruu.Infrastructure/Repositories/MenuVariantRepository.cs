@@ -10,9 +10,8 @@ public class MenuVariantRepository : Repository<MenuVariant>, IMenuVariantReposi
     {
     }
 
-    public async Task UpdateAsync(MenuVariant menuVariant)
+    public void Update(MenuVariant menuVariant)
     {
         _dbContext.Update(menuVariant);
-        await _dbContext.SaveChangesAsync();
     }
 }

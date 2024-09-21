@@ -12,6 +12,7 @@ namespace FastDeliveruu.Domain.Entities
         public MenuVariant()
         {
             OrderDetails = new HashSet<OrderDetail>();
+            ShoppingCarts = new HashSet<ShoppingCart>();
         }
 
         [Key]
@@ -33,5 +34,7 @@ namespace FastDeliveruu.Domain.Entities
         public virtual MenuItem MenuItem { get; set; } = null!;
         [InverseProperty("MenuVariant")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        [InverseProperty("MenuVariant")]
+        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
     }
 }

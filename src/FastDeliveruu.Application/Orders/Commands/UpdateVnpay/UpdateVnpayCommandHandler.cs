@@ -5,28 +5,30 @@ using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 
 public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Result<VnpayResponse>>
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateVnpayCommandHandler> _logger;
 
-    public UpdateVnpayCommandHandler(IOrderRepository orderRepository)
+    public UpdateVnpayCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<UpdateVnpayCommandHandler> logger)
     {
-        _orderRepository = orderRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result<VnpayResponse>> Handle(UpdateVnpayCommand request, CancellationToken cancellationToken)
     {
         VnpayResponse vnpayResponse = request.VnPayResponse;
 
-        Order? order = await _orderRepository.GetAsync(vnpayResponse.OrderId);
+        Order? order = await _unitOfWork.Orders.GetAsync(vnpayResponse.OrderId);
         if (order == null)
         {
             string message = "Order not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<VnpayResponse>(new NotFoundError(message));
         }
 
@@ -38,25 +40,28 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                 vnpayResponse.IsSuccess = true;
                 order.OrderStatus = (byte?)OrderStatus.Success;
                 order.PaymentStatus = (byte?)PaymentStatus.Approved;
-                await _orderRepository.UpdateAsync(order);
+                _unitOfWork.Orders.Update(order);
                 break;
 
             case "24":
                 vnpayResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatus.Cancelled;
                 order.PaymentStatus = (byte?)PaymentStatus.Cancelled;
-                await _orderRepository.UpdateAsync(order);
+                _unitOfWork.Orders.Update(order);
                 break;
 
             default:
                 vnpayResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatus.Failed;
                 order.PaymentStatus = (byte?)PaymentStatus.Failed;
-                await _orderRepository.UpdateAsync(order);
+                _unitOfWork.Orders.Update(order);
+                await _unitOfWork.SaveChangesAsync();
                 string unknownMessage = $"Payment failed with response code {request.VnPayResponse.VnpayResponseCode}.";
-                Log.Warning($"{request.GetType().Name} - {unknownMessage} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {unknownMessage} - {request}");
                 return Result.Fail(new BadRequestError(unknownMessage));
         }
+
+        await _unitOfWork.SaveChangesAsync();
 
         return vnpayResponse;
     }

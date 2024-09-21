@@ -11,29 +11,26 @@ namespace FastDeliveruu.Application.MenuVariants.Commands.UpdateMenuVariant;
 
 public class UpdateMenuVariantCommandHandler : IRequestHandler<UpdateMenuVariantCommand, Result>
 {
-    private readonly IMenuVariantRepository _menuVariantRepository;
-    private readonly IMenuItemRepository _menuItemRepository;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateMenuVariantCommandHandler> _logger;
 
     public UpdateMenuVariantCommandHandler(
-        IMenuVariantRepository menuVariantRepository,
         IMapper mapper,
         ILogger<UpdateMenuVariantCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IMenuItemRepository menuItemRepository)
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
-        _menuVariantRepository = menuVariantRepository;
         _mapper = mapper;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
-        _menuItemRepository = menuItemRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(UpdateMenuVariantCommand request, CancellationToken cancellationToken)
     {
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(request.MenuItemId);
+        MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
             string message = "MenuItem not found.";
@@ -41,7 +38,7 @@ public class UpdateMenuVariantCommandHandler : IRequestHandler<UpdateMenuVariant
             return Result.Fail(new NotFoundError(message));
         }
 
-        MenuVariant? menuVariant = await _menuVariantRepository.GetAsync(request.Id);
+        MenuVariant? menuVariant = await _unitOfWork.MenuVariants.GetAsync(request.Id);
         if (menuVariant == null)
         {
             string message = "MenuVariant not found.";
@@ -52,7 +49,8 @@ public class UpdateMenuVariantCommandHandler : IRequestHandler<UpdateMenuVariant
         _mapper.Map(request, menuVariant);
         menuVariant.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _menuVariantRepository.UpdateAsync(menuVariant);
+        _unitOfWork.MenuVariants.Update(menuVariant);
+        await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();
     }

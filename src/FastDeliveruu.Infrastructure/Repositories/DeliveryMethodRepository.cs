@@ -10,9 +10,8 @@ public class DeliveryMethodRepository : Repository<DeliveryMethod>, IDeliveryMet
     {
     }
 
-    public async Task UpdateAsync(DeliveryMethod deliveryMethod)
+    public void Update(DeliveryMethod deliveryMethod)
     {
         _dbContext.Update(deliveryMethod);
-        await _dbContext.SaveChangesAsync();
     }
 }

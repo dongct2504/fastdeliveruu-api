@@ -13,38 +13,32 @@ namespace FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 
 public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemCommand, Result>
 {
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IMenuItemRepository _menuItemRepository;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateMenuItemCommandHandler> _logger;
 
     public UpdateMenuItemCommandHandler(
-        IMenuItemRepository menuItemRepository,
-        IGenreRepository genreRepository,
-        IRestaurantRepository restaurantRepository,
         IMapper mapper,
         IFileStorageServices fileStorageServices,
         ICacheService cacheService,
         ILogger<UpdateMenuItemCommandHandler> logger,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
-        _menuItemRepository = menuItemRepository;
-        _genreRepository = genreRepository;
-        _restaurantRepository = restaurantRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _cacheService = cacheService;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(UpdateMenuItemCommand request, CancellationToken cancellationToken)
     {
-        Genre? genre = await _genreRepository.GetAsync(request.GenreId);
+        Genre? genre = await _unitOfWork.Genres.GetAsync(request.GenreId);
         if (genre == null)
         {
             string message = "Genre not found.";
@@ -52,7 +46,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
             return Result.Fail(new NotFoundError(message));
         }
 
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(request.RestaurantId);
+        Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
@@ -60,7 +54,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
             return Result.Fail(new NotFoundError(message));
         }
 
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(request.Id);
+        MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.Id);
         if (menuItem == null)
         {
             string message = "MenuItem not found.";
@@ -94,7 +88,8 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         }
         menuItem.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _menuItemRepository.UpdateAsync(menuItem);
+        _unitOfWork.MenuItems.Update(menuItem);
+        await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.Id}", cancellationToken);
 

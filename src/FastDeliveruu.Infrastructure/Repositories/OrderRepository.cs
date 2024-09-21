@@ -10,9 +10,8 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     {
     }
 
-    public async Task UpdateAsync(Order order)
+    public void Update(Order order)
     {
         _dbContext.Update(order);
-        await _dbContext.SaveChangesAsync();
     }
 }

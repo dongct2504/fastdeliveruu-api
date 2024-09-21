@@ -7,22 +7,22 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace FastDeliveruu.Application.MenuVariants.Queries.GetById;
+namespace FastDeliveruu.Application.MenuVariants.Queries.GetMenuVariantById;
 
-public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, Result<MenuVariantDto>>
+public class GetMenuVariantByIdQueryHandler : IRequestHandler<GetMenuVariantByIdQuery, Result<MenuVariantDto>>
 {
     private readonly FastDeliveruuDbContext _fastDeliveruuDbContext;
-    private readonly ILogger<GetByIdQueryHandler> _logger;
+    private readonly ILogger<GetMenuVariantByIdQueryHandler> _logger;
 
-    public GetByIdQueryHandler(
+    public GetMenuVariantByIdQueryHandler(
         FastDeliveruuDbContext fastDeliveruuDbContext,
-        ILogger<GetByIdQueryHandler> logger)
+        ILogger<GetMenuVariantByIdQueryHandler> logger)
     {
         _fastDeliveruuDbContext = fastDeliveruuDbContext;
         _logger = logger;
     }
 
-    public async Task<Result<MenuVariantDto>> Handle(GetByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MenuVariantDto>> Handle(GetMenuVariantByIdQuery request, CancellationToken cancellationToken)
     {
         MenuVariantDto? menuVariantDto = await _fastDeliveruuDbContext.MenuVariants
             .AsNoTracking()

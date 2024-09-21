@@ -4,5 +4,5 @@ namespace FastDeliveruu.Domain.Interfaces;
 
 public interface IGenreRepository : IRepository<Genre>
 {
-    Task UpdateAsync(Genre genre);
+    void Update(Genre genre);
 }

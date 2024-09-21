@@ -12,10 +12,10 @@ public interface IRepository<T> where T : class
 
     Task<int> GetCountAsync();
 
-    Task AddAsync(T entity);
-    Task DeleteAsync(T entity);
-    Task DeleteRangeAsync(T entity);
-    Task DeleteRangeAsync(IEnumerable<T> entities);
+    void Add(T entity);
+    void Delete(T entity);
+    void DeleteRange(T entity);
+    void DeleteRange(IEnumerable<T> entities);
 
     Task<IEnumerable<T>> ListAllWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false);
 

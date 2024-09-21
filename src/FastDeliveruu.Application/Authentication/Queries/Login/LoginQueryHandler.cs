@@ -6,7 +6,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Authentication.Queries.Login;
 
@@ -15,18 +15,24 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ILogger<LoginQueryHandler> _logger;
     private readonly IMapper _mapper;
 
     public LoginQueryHandler(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IMapper mapper,
-        IJwtTokenGenerator jwtTokenGenerator)
+        IJwtTokenGenerator jwtTokenGenerator,
+        IDateTimeProvider dateTimeProvider,
+        ILogger<LoginQueryHandler> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _mapper = mapper;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _dateTimeProvider = dateTimeProvider;
+        _logger = logger;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(LoginQuery request,
@@ -36,7 +42,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         if (user == null)
         {
             string message = "The username is incorrect.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
@@ -44,7 +50,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         if (!isEmailConfirmed)
         {
             string message = "The email has not been confirmed yet.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
@@ -52,14 +58,14 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         if (!signInResult.Succeeded)
         {
             string message = "The password is incorrect.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
         // generate JWT token
         string token = await _jwtTokenGenerator.GenerateTokenAsync(user);
 
-        Log.Information($"User login at: {DateTime.Now:dd/MM/yyyy hh:mm tt}.");
+        _logger.LogWarning($"User login at: {_dateTimeProvider.VietnamDateTimeNow:dd/MM/yyyy hh:mm tt}.");
 
         return _mapper.Map<AuthenticationResponse>((user, token));
     }

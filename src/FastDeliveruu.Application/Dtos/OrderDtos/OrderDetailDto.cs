@@ -4,9 +4,13 @@ namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderDetailDto
 {
-    public Guid MenuItemId { get; set; }
+    public Guid Id { get; set; }
 
     public Guid OrderId { get; set; }
+
+    public Guid MenuItemId { get; set; }
+
+    public Guid? MenuVariantId { get; set; }
 
     public decimal Price { get; set; }
 

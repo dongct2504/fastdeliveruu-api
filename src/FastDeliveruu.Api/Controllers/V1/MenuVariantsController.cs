@@ -1,11 +1,10 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Dtos.MenuVariantDtos;
 using FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
-using FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 using FastDeliveruu.Application.MenuVariants.Commands.CreateMenuVariant;
 using FastDeliveruu.Application.MenuVariants.Commands.UpdateMenuVariant;
-using FastDeliveruu.Application.MenuVariants.Queries.GetById;
 using FastDeliveruu.Application.MenuVariants.Queries.GetByMenuItem;
+using FastDeliveruu.Application.MenuVariants.Queries.GetMenuVariantById;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +35,7 @@ public class MenuVariantsController : ApiController
     [ProducesResponseType(typeof(MenuVariantDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(Guid id)
     {
-        GetByIdQuery query = new GetByIdQuery(id);
+        GetMenuVariantByIdQuery query = new GetMenuVariantByIdQuery(id);
         Result<MenuVariantDto> result = await _mediator.Send(query);
         if (result.IsFailed)
         {

@@ -6,37 +6,47 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Genres.Commands.UpdateGenre;
 
 public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Result>
 {
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateGenreCommandHandler> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
-    private readonly IGenreRepository _genreRepository;
     private readonly IMapper _mapper;
 
-    public UpdateGenreCommandHandler(IGenreRepository genreRepository, IMapper mapper, ICacheService cacheService)
+    public UpdateGenreCommandHandler(
+        IMapper mapper,
+        ICacheService cacheService,
+        IFastDeliveruuUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ILogger<UpdateGenreCommandHandler> logger)
     {
-        _genreRepository = genreRepository;
         _mapper = mapper;
         _cacheService = cacheService;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(UpdateGenreCommand request, CancellationToken cancellationToken)
     {
-        Genre? genre = await _genreRepository.GetAsync(request.Id);
+        Genre? genre = await _unitOfWork.Genres.GetAsync(request.Id);
         if (genre == null)
         {
             string message = "Genre not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
         _mapper.Map(request, genre);
-        genre.UpdatedAt = DateTime.Now;
+        genre.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _genreRepository.UpdateAsync(genre);
+        _unitOfWork.Genres.Update(genre);
+        await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync($"{CacheConstants.Genre}-{request.Id}", cancellationToken);
 

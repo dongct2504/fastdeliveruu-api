@@ -4,17 +4,19 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
 
 public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Result>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<EmailConfirmQueryHandler> _logger;
 
-    public EmailConfirmQueryHandler(UserManager<AppUser> userManager)
+    public EmailConfirmQueryHandler(UserManager<AppUser> userManager, ILogger<EmailConfirmQueryHandler> logger)
     {
         _userManager = userManager;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(EmailConfirmQuery request, CancellationToken cancellationToken)
@@ -23,7 +25,7 @@ public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Resul
         if (user == null)
         {
             string message = "User not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -35,7 +37,7 @@ public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Resul
             var errorMessages = result.Errors.Select(e => e.Description);
 
             string message = string.Join(" ", errorMessages);
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 

@@ -52,6 +52,8 @@ namespace FastDeliveruu.Domain.Entities
         [InverseProperty("MenuItem")]
         public virtual ICollection<MenuVariant> MenuVariants { get; set; }
         [InverseProperty("MenuItem")]
+        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
+        [InverseProperty("MenuItem")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         [InverseProperty("MenuItem")]
         public virtual ICollection<WishList> WishLists { get; set; }

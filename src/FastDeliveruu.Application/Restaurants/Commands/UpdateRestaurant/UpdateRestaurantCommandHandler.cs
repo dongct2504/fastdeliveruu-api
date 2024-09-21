@@ -3,41 +3,46 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
-using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 
 public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCommand, Result>
 {
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateRestaurantCommandHandler> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
-    private readonly IRestaurantRepository _restaurantRepository;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
 
     public UpdateRestaurantCommandHandler(
-        IRestaurantRepository restaurantRepository,
         IMapper mapper,
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IFastDeliveruuUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ILogger<UpdateRestaurantCommandHandler> logger)
     {
-        _restaurantRepository = restaurantRepository;
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _cacheService = cacheService;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
     {
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(request.Id);
+        Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.Id);
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -49,7 +54,7 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
             if (deletionResult.Error != null)
             {
                 string message = deletionResult.Error.Message;
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new BadRequestError(message));
             }
 
@@ -58,16 +63,17 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
             if (uploadResult.Error != null)
             {
                 string message = uploadResult.Error.Message;
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new BadRequestError(message));
             }
 
             restaurant.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
             restaurant.PublicId = uploadResult.PublicId;
         }
-        restaurant.UpdatedAt = DateTime.Now;
+        restaurant.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _restaurantRepository.UpdateAsync(restaurant);
+        _unitOfWork.Restaurants.Update(restaurant);
+        await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.Id}", cancellationToken);
 

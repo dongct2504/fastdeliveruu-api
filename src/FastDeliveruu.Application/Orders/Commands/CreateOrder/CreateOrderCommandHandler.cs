@@ -6,37 +6,40 @@ using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Order>>
 {
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<CreateOrderCommandHandler> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
-    private readonly IOrderRepository _orderRepository;
-    private readonly IDeliveryMethodRepository _deliveryMethodRepository;
     private readonly IMapper _mapper;
 
     public CreateOrderCommandHandler(
-        IOrderRepository orderRepository,
         IMapper mapper,
         ICacheService cacheService,
-        IDeliveryMethodRepository deliveryMethodRepository)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ILogger<CreateOrderCommandHandler> logger,
+        IDateTimeProvider dateTimeProvider)
     {
-        _orderRepository = orderRepository;
         _mapper = mapper;
         _cacheService = cacheService;
-        _deliveryMethodRepository = deliveryMethodRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        DeliveryMethod? deliveryMethod = await _deliveryMethodRepository.GetAsync(request.DeliveryMethodId);
+        DeliveryMethod? deliveryMethod = await _unitOfWork.DeliveryMethods.GetAsync(request.DeliveryMethodId);
         if (deliveryMethod == null)
         {
             string message = "The delivery method does not exist.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<Order>(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
 
         string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
@@ -45,14 +48,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         if (customerCart == null || !customerCart.Any())
         {
             string message = "The customer's cart is empty.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<Order>(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
 
         Order order = _mapper.Map<Order>(request);
         order.Id = Guid.NewGuid();
         order.OrderDescription = $"Create payment for order: {order.Id}";
-        order.OrderDate = DateTime.Now;
+        order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;
         order.TransactionId = "0";
         order.OrderStatus = (byte?)OrderStatus.Pending;
         order.PaymentStatus = (byte?)PaymentStatus.Pending;
@@ -63,16 +66,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         {
             OrderId = order.Id,
             MenuItemId = cart.MenuItemId,
+            MenuVariantId = cart.MenuVariantId,
             Price = cart.MenuItem.DiscountPrice,
             Quantity = cart.Quantity,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
         }).ToList();
 
-        order.CreatedAt = DateTime.Now;
-        order.UpdatedAt = DateTime.Now;
+        order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _orderRepository.AddAsync(order);
+        _unitOfWork.Orders.Add(order);
+        await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync(key, cancellationToken);
 

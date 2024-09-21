@@ -8,6 +8,7 @@ namespace FastDeliveruu.Domain.Entities
 {
     [Index("MenuItemId", Name = "IX_OrderDetails_MenuItemId")]
     [Index("OrderId", Name = "IX_OrderDetails_OrderId")]
+    [Index("MenuVariantId", Name = "IX_OrderDetails_MenuVariantId")]
     public partial class OrderDetail
     {
         [Key]

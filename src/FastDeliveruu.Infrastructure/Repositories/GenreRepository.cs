@@ -10,9 +10,8 @@ public class GenreRepository : Repository<Genre>, IGenreRepository
     {
     }
 
-    public async Task UpdateAsync(Genre genre)
+    public void Update(Genre genre)
     {
         _dbContext.Update(genre);
-        await _dbContext.SaveChangesAsync();
     }
 }

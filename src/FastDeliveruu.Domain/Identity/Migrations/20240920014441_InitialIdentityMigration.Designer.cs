@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20240917083426_InitialIdentityMigration")]
+    [Migration("20240920014441_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -666,9 +666,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MenuVariantId");
-
                     b.HasIndex(new[] { "MenuItemId" }, "IX_OrderDetails_MenuItemId");
+
+                    b.HasIndex(new[] { "MenuVariantId" }, "IX_OrderDetails_MenuVariantId");
 
                     b.HasIndex(new[] { "OrderId" }, "IX_OrderDetails_OrderId");
 
@@ -851,6 +851,41 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasIndex(new[] { "RestaurantId" }, "IX_RestaurantsReviews_RestaurantId");
 
                     b.ToTable("RestaurantReviews");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShoppingCart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("MenuVariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "AppUserId" }, "IX_ShoppingCart_AppUserId");
+
+                    b.HasIndex(new[] { "MenuItemId" }, "IX_ShoppingCart_MenuItemId");
+
+                    b.HasIndex(new[] { "MenuVariantId" }, "IX_ShoppingCart_MenuVariantId");
+
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Ward", b =>
@@ -1319,6 +1354,31 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShoppingCart", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
+                        .WithMany("ShoppingCarts")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.MenuItem", "MenuItem")
+                        .WithMany("ShoppingCarts")
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.MenuVariant", "MenuVariant")
+                        .WithMany("ShoppingCarts")
+                        .HasForeignKey("MenuVariantId");
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("MenuItem");
+
+                    b.Navigation("MenuVariant");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Ward", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
@@ -1446,6 +1506,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Navigation("RestaurantReviews");
 
+                    b.Navigation("ShoppingCarts");
+
                     b.Navigation("WishLists");
                 });
 
@@ -1457,12 +1519,16 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Navigation("OrderDetails");
 
+                    b.Navigation("ShoppingCarts");
+
                     b.Navigation("WishLists");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuVariant", b =>
                 {
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("ShoppingCarts");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Order", b =>

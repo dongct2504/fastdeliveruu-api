@@ -26,6 +26,7 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<MenuItem> MenuItems { get; set; } = null!;
         public virtual DbSet<MenuItemReview> MenuItemReviews { get; set; } = null!;
         public virtual DbSet<MenuVariant> MenuVariants { get; set; } = null!;
+        public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderDelivery> OrderDeliveries { get; set; } = null!;

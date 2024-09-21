@@ -47,4 +47,7 @@ public class AppUser : IdentityUser<Guid>
 
     [InverseProperty("AppUser")]
     public virtual ICollection<Coupon> Coupons { get; set; } = new HashSet<Coupon>();
+
+    [InverseProperty("AppUser")]
+    public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new HashSet<ShoppingCart>();
 }

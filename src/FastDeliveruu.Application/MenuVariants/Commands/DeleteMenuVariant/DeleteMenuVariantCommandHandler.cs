@@ -9,20 +9,20 @@ namespace FastDeliveruu.Application.MenuVariants.Commands.DeleteMenuVariant;
 
 public class DeleteMenuVariantCommandHandler : IRequestHandler<DeleteMenuVariantCommand, Result>
 {
-    private readonly IMenuVariantRepository _menuVariantRepository;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteMenuVariantCommandHandler> _logger;
 
     public DeleteMenuVariantCommandHandler(
-        IMenuVariantRepository menuVariantRepository,
-        ILogger<DeleteMenuVariantCommandHandler> logger)
+        ILogger<DeleteMenuVariantCommandHandler> logger,
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
-        _menuVariantRepository = menuVariantRepository;
         _logger = logger;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(DeleteMenuVariantCommand request, CancellationToken cancellationToken)
     {
-        MenuVariant? menuVariant = await _menuVariantRepository.GetAsync(request.Id);
+        MenuVariant? menuVariant = await _unitOfWork.MenuVariants.GetAsync(request.Id);
         if (menuVariant == null)
         {
             string message = "MenuVariant does not exist";
@@ -30,7 +30,9 @@ public class DeleteMenuVariantCommandHandler : IRequestHandler<DeleteMenuVariant
             return Result.Fail(new NotFoundError(message));
         }
 
-        await _menuVariantRepository.DeleteAsync(menuVariant);
+        _unitOfWork.MenuVariants.Delete(menuVariant);
+        await _unitOfWork.SaveChangesAsync();
+
         return Result.Ok();
     }
 }

@@ -6,33 +6,36 @@ using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
 
 public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemCommand, Result>
 {
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<DeleteMenuItemCommandHandler> _logger;
     private readonly ICacheService _cacheService;
-    private readonly IMenuItemRepository _menuItemRepository;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteMenuItemCommandHandler(
-        IMenuItemRepository menuItemRepository,
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ILogger<DeleteMenuItemCommandHandler> logger)
     {
-        _menuItemRepository = menuItemRepository;
         _fileStorageServices = fileStorageServices;
         _cacheService = cacheService;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(DeleteMenuItemCommand request, CancellationToken cancellationToken)
     {
-        MenuItem? menuItem = await _menuItemRepository.GetAsync(request.Id);
+        MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.Id);
         if (menuItem == null)
         {
             string message = "MenuItem not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -40,11 +43,12 @@ public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemComman
         if (deletionResult.Error != null)
         {
             string message = deletionResult.Error.Message;
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
-        await _menuItemRepository.DeleteAsync(menuItem);
+        _unitOfWork.MenuItems.Delete(menuItem);
+        await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.Id}", cancellationToken);
 

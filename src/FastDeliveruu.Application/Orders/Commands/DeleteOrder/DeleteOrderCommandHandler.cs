@@ -3,30 +3,33 @@ using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Commands.DeleteOrder;
 
 public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, Result>
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<DeleteOrderCommandHandler> _logger;
 
-    public DeleteOrderCommandHandler(IOrderRepository orderRepository)
+    public DeleteOrderCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<DeleteOrderCommandHandler> logger)
     {
-        _orderRepository = orderRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
     {
-        Order? order = await _orderRepository.GetAsync(request.Id);
+        Order? order = await _unitOfWork.Orders.GetAsync(request.Id);
         if (order == null)
         {
             string message = "Order not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        await _orderRepository.DeleteAsync(order);
+        _unitOfWork.Orders.Delete(order);
+        await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();
     }

@@ -10,9 +10,8 @@ public class RestaurantHourRepository : Repository<RestaurantHour>, IRestaurantH
     {
     }
 
-    public async Task UpdateAsync(RestaurantHour restaurantHour)
+    public void Update(RestaurantHour restaurantHour)
     {
         _dbContext.Update(restaurantHour);
-        await _dbContext.SaveChangesAsync();
     }
 }

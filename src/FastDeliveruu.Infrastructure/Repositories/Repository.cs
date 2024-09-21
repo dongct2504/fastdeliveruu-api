@@ -42,10 +42,9 @@ public class Repository<T> : IRepository<T> where T : class
         return await _dbSet.FindAsync(id);
     }
 
-    public async Task AddAsync(T entity)
+    public void Add(T entity)
     {
-        await _dbSet.AddAsync(entity);
-        await _dbContext.SaveChangesAsync();
+        _dbSet.Add(entity);
     }
 
     public async Task<int> GetCountAsync()
@@ -53,22 +52,19 @@ public class Repository<T> : IRepository<T> where T : class
         return await _dbSet.CountAsync();
     }
 
-    public async Task DeleteAsync(T entity)
+    public void Delete(T entity)
     {
         _dbSet.Remove(entity);
-        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteRangeAsync(T entity)
+    public void DeleteRange(T entity)
     {
         _dbSet.RemoveRange(entity);
-        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteRangeAsync(IEnumerable<T> entities)
+    public void DeleteRange(IEnumerable<T> entities)
     {
         _dbSet.RemoveRange(entities);
-        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<T>> ListAllWithSpecAsync(ISpecification<T> spec, bool asNoTracking = false)

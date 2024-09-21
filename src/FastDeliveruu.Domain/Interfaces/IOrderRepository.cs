@@ -4,5 +4,5 @@ namespace FastDeliveruu.Domain.Interfaces;
 
 public interface IOrderRepository : IRepository<Order>
 {
-    Task UpdateAsync(Order order);
+    void Update(Order order);
 }

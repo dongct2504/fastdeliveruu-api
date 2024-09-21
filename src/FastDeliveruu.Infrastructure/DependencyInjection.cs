@@ -7,11 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using FastDeliveruu.Infrastructure.Services;
-using FastDeliveruu.Infrastructure.Repositories;
 using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Infrastructure.UnitOfWork;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -40,12 +40,7 @@ public static class DependencyInjection
         services.Configure<VnpaySettings>(configuration.GetSection(VnpaySettings.SectionName));
         services.AddSingleton<IVnpayServices, VnpayServices>();
 
-        services.AddScoped<IGenreRepository, GenreRepository>();
-        services.AddScoped<IRestaurantRepository, RestaurantRepository>();
-        services.AddScoped<IMenuItemRepository, MenuItemRepository>();
-        services.AddScoped<IMenuVariantRepository, MenuVariantRepository>();
-        services.AddScoped<IDeliveryMethodRepository, DeliveryMethodRepository>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
 
         return services;
     }

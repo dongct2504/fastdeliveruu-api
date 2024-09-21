@@ -15,37 +15,31 @@ namespace FastDeliveruu.Application.MenuItems.Commands.CreateMenuItem;
 
 public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemCommand, Result<MenuItemDto>>
 {
-    private readonly IMenuItemRepository _menuItemRepository;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IRestaurantRepository _restaurantRepository;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateMenuItemCommandHandler> _logger;
-    private readonly IDateTimeProvider _dateTimeProvider;
 
     public CreateMenuItemCommandHandler(
-        IMenuItemRepository menuItemRepository,
-        IGenreRepository genreRepository,
-        IRestaurantRepository restaurantRepository,
         IFileStorageServices fileStorageServices,
         IMapper mapper,
         ILogger<CreateMenuItemCommandHandler> logger,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
-        _menuItemRepository = menuItemRepository;
-        _genreRepository = genreRepository;
-        _restaurantRepository = restaurantRepository;
         _fileStorageServices = fileStorageServices;
         _mapper = mapper;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<MenuItemDto>> Handle(
         CreateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        Genre? genre = await _genreRepository.GetAsync(request.GenreId);
+        Genre? genre = await _unitOfWork.Genres.GetAsync(request.GenreId);
         if (genre == null)
         {
             string message = "Genre not found.";
@@ -53,7 +47,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             return Result.Fail(new NotFoundError(message));
         }
 
-        Restaurant? restaurant = await _restaurantRepository.GetAsync(request.RestaurantId);
+        Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
             string message = "Restaurant not found.";
@@ -63,7 +57,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
 
         var spec = new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name);
 
-        MenuItem? menuItem = await _menuItemRepository.GetWithSpecAsync(spec, asNoTracking: true);
+        MenuItem? menuItem = await _unitOfWork.MenuItems.GetWithSpecAsync(spec, asNoTracking: true);
         if (menuItem != null)
         {
             string message = "MenuItem is already exist.";
@@ -88,7 +82,8 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
 
         menuItem.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        await _menuItemRepository.AddAsync(menuItem);
+        _unitOfWork.MenuItems.Add(menuItem);
+        await _unitOfWork.SaveChangesAsync();
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }
