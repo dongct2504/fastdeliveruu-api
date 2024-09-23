@@ -16,7 +16,7 @@ public class OrderDto
 
     public string DeliveryMethodShortName { get; set; } = null!;
 
-    public string ShippingPrice { get; set; } = null!;
+    public decimal ShippingPrice { get; set; }
 
     public string? OrderStatus { get; set; }
 

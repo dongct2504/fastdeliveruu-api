@@ -10,8 +10,10 @@ public class OrderMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<Order, OrderDto>()
-            .Map(dest => dest.DeliveryMethodShortName, src => src.DeliveryMethod.ShortName)
-            .Map(dest => dest.ShippingPrice, src => src.DeliveryMethod.Price);
+            .Map(dest => dest.DeliveryMethodShortName,
+                src => src.DeliveryMethod == null ? string.Empty : src.DeliveryMethod.ShortName)
+            .Map(dest => dest.ShippingPrice,
+                src => src.DeliveryMethod == null ? 0 : src.DeliveryMethod.Price);
 
         config.NewConfig<Order, OrderHeaderDetailDto>()
             .Map(dest => dest.DeliveryMethodDto, src => src.DeliveryMethod)
