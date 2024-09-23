@@ -30,16 +30,13 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
             .NotEmpty()
             .MaximumLength(128);
 
-        RuleFor(x => x.Ward)
-            .NotEmpty()
-            .MaximumLength(50);
+        RuleFor(x => x.WardId)
+            .NotEmpty();
 
-        RuleFor(x => x.District)
-            .NotEmpty()
-            .MaximumLength(30);
+        RuleFor(x => x.DistrictId)
+            .NotEmpty();
 
-        RuleFor(x => x.City)
-            .NotEmpty()
-            .MaximumLength(30);
+        RuleFor(x => x.CityId)
+            .NotEmpty();
     }
 }

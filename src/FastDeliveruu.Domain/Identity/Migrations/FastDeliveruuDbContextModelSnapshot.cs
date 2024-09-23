@@ -138,56 +138,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("Coupons");
                 });
 
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.DeliveryAddress", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<int>("WardId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId")
-                        .HasDatabaseName("IX_DeliveryAddresses_CityId1");
-
-                    b.HasIndex("DistrictId")
-                        .HasDatabaseName("IX_DeliveryAddresses_DistrictId1");
-
-                    b.HasIndex("WardId")
-                        .HasDatabaseName("IX_DeliveryAddresses_WardId1");
-
-                    b.HasIndex(new[] { "OrderId" }, "IX_DeliveryAddresses_OrderId");
-
-                    b.ToTable("DeliveryAddresses");
-                });
-
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.DeliveryMethod", b =>
                 {
                     b.Property<int>("Id")
@@ -280,18 +230,12 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime");
-
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -347,15 +291,12 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("WardId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -471,11 +412,23 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<decimal>("DiscountPercent")
                         .HasColumnType("decimal(3,2)");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)");
+
                     b.Property<Guid>("MenuItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(19,4)");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
@@ -529,13 +482,24 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<Guid>("AppUserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<int?>("DeliveryMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DistrictId")
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
@@ -547,6 +511,12 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime");
@@ -590,11 +560,20 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
 
+                    b.Property<int>("WardId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "AppUserId" }, "IX_Orders_AppUserId");
 
+                    b.HasIndex(new[] { "CityId" }, "IX_Orders_CityId");
+
                     b.HasIndex(new[] { "DeliveryMethodId" }, "IX_Orders_DeliveryMethodId");
+
+                    b.HasIndex(new[] { "DistrictId" }, "IX_Orders_DistrictId");
+
+                    b.HasIndex(new[] { "WardId" }, "IX_Orders_WardId");
 
                     b.ToTable("Orders");
                 });
@@ -690,9 +669,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Property<byte?>("PaymentMethod")
                         .HasColumnType("tinyint");
-
-                    b.Property<int>("PaymentMethodId")
-                        .HasColumnType("int");
 
                     b.Property<byte?>("PaymentStatus")
                         .HasColumnType("tinyint");
@@ -1116,45 +1092,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.DeliveryAddress", b =>
-                {
-                    b.HasOne("FastDeliveruu.Domain.Entities.City", "City")
-                        .WithMany("DeliveryAddresses")
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_DeliveryAddresses_Cities");
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
-                        .WithMany("DeliveryAddresses")
-                        .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_DeliveryAddresses_Districts");
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Order", "Order")
-                        .WithMany("DeliveryAddresses")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DeliveryAddresses_Orders");
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
-                        .WithMany("DeliveryAddresses")
-                        .HasForeignKey("WardId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_DeliveryAddresses_Wards");
-
-                    b.Navigation("City");
-
-                    b.Navigation("District");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Ward");
-                });
-
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.District", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.City", "City")
@@ -1234,15 +1171,42 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FastDeliveruu.Domain.Entities.City", "City")
+                        .WithMany("Orders")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_Cities");
+
                     b.HasOne("FastDeliveruu.Domain.Entities.DeliveryMethod", "DeliveryMethod")
                         .WithMany("Orders")
                         .HasForeignKey("DeliveryMethodId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Orders_DeliveryMethods");
 
+                    b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
+                        .WithMany("Orders")
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_Districts");
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
+                        .WithMany("Orders")
+                        .HasForeignKey("WardId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_Wards");
+
                     b.Navigation("AppUser");
 
+                    b.Navigation("City");
+
                     b.Navigation("DeliveryMethod");
+
+                    b.Navigation("District");
+
+                    b.Navigation("Ward");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.OrderDelivery", b =>
@@ -1462,9 +1426,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     b.Navigation("AddressesCustomers");
 
-                    b.Navigation("DeliveryAddresses");
-
                     b.Navigation("Districts");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
                 });
@@ -1478,7 +1442,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     b.Navigation("AddressesCustomers");
 
-                    b.Navigation("DeliveryAddresses");
+                    b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
 
@@ -1531,8 +1495,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Order", b =>
                 {
-                    b.Navigation("DeliveryAddresses");
-
                     b.Navigation("OrderDeliveries");
 
                     b.Navigation("OrderDetails");
@@ -1553,7 +1515,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     b.Navigation("AddressesCustomers");
 
-                    b.Navigation("DeliveryAddresses");
+                    b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
                 });

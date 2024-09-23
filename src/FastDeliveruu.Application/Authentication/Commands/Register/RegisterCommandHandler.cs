@@ -2,7 +2,9 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -16,6 +18,7 @@ namespace FastDeliveruu.Application.Authentication.Commands.Register;
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResponse>>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<RegisterCommandHandler> _logger;
@@ -26,13 +29,15 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         UserManager<AppUser> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         IDateTimeProvider dateTimeProvider,
-        ILogger<RegisterCommandHandler> logger)
+        ILogger<RegisterCommandHandler> logger,
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
         _mapper = mapper;
         _userManager = userManager;
         _roleManager = roleManager;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(
@@ -43,7 +48,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         user.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         IdentityResult result = await _userManager.CreateAsync(user, request.Password);
-    if (!result.Succeeded)
+        if (!result.Succeeded)
         {
             var errorMessages = result.Errors.Select(e => e.Description);
 
@@ -75,6 +80,40 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
             {
                 await _userManager.AddToRoleAsync(user, request.Role);
             }
+        }
+
+        if (!string.IsNullOrEmpty(request.Address) || 
+            request.CityId.HasValue || 
+            request.DistrictId.HasValue ||
+            request.WardId.HasValue)
+        {
+            AddressesCustomer addressesCustomer = new AddressesCustomer
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = user.Id,
+                IsPrimary = true,
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+            };
+
+            if (!string.IsNullOrEmpty(request.Address))
+            {
+                addressesCustomer.Address = request.Address;
+            }
+            if (request.CityId.HasValue)
+            {
+                addressesCustomer.CityId = request.CityId.Value;
+            }
+            if (request.DistrictId.HasValue)
+            {
+                addressesCustomer.DistrictId = request.DistrictId.Value;
+            }
+            if (request.WardId.HasValue)
+            {
+                addressesCustomer.WardId = request.WardId.Value;
+            }
+
+            user.AddressesCustomers.Add(addressesCustomer);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

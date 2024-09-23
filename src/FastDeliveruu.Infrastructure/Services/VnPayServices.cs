@@ -1,4 +1,3 @@
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Options;
 using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Application.Common.Libraries.Vnpay;
 using FastDeliveruu.Application.Common.Helpers;
+using FastDeliveruu.Application.Common.Enums;
 
 namespace FastDeliveruu.Infrastructure.Services;
 

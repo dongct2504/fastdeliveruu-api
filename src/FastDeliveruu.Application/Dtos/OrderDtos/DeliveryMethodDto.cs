@@ -2,11 +2,11 @@
 
 public class DeliveryMethodDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string ShortName { get; set; } = null!;
 
-    public string? DeliveryTime { get; set; }
+    public string? EstimatedDeliveryTime { get; set; }
 
     public string Description { get; set; } = null!;
 

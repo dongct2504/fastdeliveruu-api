@@ -32,11 +32,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ImageUrl = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
                     PublicId = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
-                    CityId = table.Column<int>(type: "int", nullable: false),
-                    DistrictId = table.Column<int>(type: "int", nullable: false),
-                    WardId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -277,43 +274,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Orders",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeliveryMethodId = table.Column<int>(type: "int", nullable: true),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    OrderDescription = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    PhoneNumber = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
-                    TrackingNumber = table.Column<string>(type: "varchar(128)", unicode: false, maxLength: 128, nullable: true),
-                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
-                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
-                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
-                    TransactionId = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Orders_DeliveryMethods",
-                        column: x => x.DeliveryMethodId,
-                        principalTable: "DeliveryMethods",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Wards",
                 columns: table => new
                 {
@@ -329,55 +289,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_Wards_Districts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OrderDeliveries",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeliveryStatus = table.Column<byte>(type: "tinyint", nullable: false),
-                    EstimatedDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ActualDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderDeliveries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderDeliveries_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Payments",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PaymentMethodId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
-                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true),
-                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
-                    TransactionId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Payments_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -425,11 +336,23 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DeliveryAddresses",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeliveryMethodId = table.Column<int>(type: "int", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    OrderDescription = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
+                    TrackingNumber = table.Column<string>(type: "varchar(128)", unicode: false, maxLength: 128, nullable: true),
+                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
+                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
+                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
+                    TransactionId = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
                     CityId = table.Column<int>(type: "int", nullable: false),
                     DistrictId = table.Column<int>(type: "int", nullable: false),
@@ -441,25 +364,30 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DeliveryAddresses", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DeliveryAddresses_Cities",
+                        name: "FK_Orders_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Cities",
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DeliveryAddresses_Districts",
+                        name: "FK_Orders_DeliveryMethods",
+                        column: x => x.DeliveryMethodId,
+                        principalTable: "DeliveryMethods",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_Districts",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DeliveryAddresses_Orders",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DeliveryAddresses_Wards",
+                        name: "FK_Orders_Wards",
                         column: x => x.WardId,
                         principalTable: "Wards",
                         principalColumn: "Id");
@@ -503,6 +431,54 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         column: x => x.WardId,
                         principalTable: "Wards",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderDeliveries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeliveryStatus = table.Column<byte>(type: "tinyint", nullable: false),
+                    EstimatedDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
+                    ActualDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderDeliveries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderDeliveries_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
+                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true),
+                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
+                    TransactionId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -628,6 +604,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     VarietyName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Price = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
                     DiscountPercent = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    PublicId = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
@@ -824,26 +802,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DeliveryAddresses_CityId1",
-                table: "DeliveryAddresses",
-                column: "CityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DeliveryAddresses_DistrictId1",
-                table: "DeliveryAddresses",
-                column: "DistrictId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DeliveryAddresses_OrderId",
-                table: "DeliveryAddresses",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DeliveryAddresses_WardId1",
-                table: "DeliveryAddresses",
-                column: "WardId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Districts_CityId",
                 table: "Districts",
                 column: "CityId");
@@ -914,9 +872,24 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_CityId",
+                table: "Orders",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_DeliveryMethodId",
                 table: "Orders",
                 column: "DeliveryMethodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_DistrictId",
+                table: "Orders",
+                column: "DistrictId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_WardId",
+                table: "Orders",
+                column: "WardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",
@@ -1011,9 +984,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "Coupons");
-
-            migrationBuilder.DropTable(
-                name: "DeliveryAddresses");
 
             migrationBuilder.DropTable(
                 name: "MenuItemReviews");

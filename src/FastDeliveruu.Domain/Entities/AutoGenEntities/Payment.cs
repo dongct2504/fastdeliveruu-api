@@ -11,7 +11,6 @@ namespace FastDeliveruu.Domain.Entities
         [Key]
         public Guid Id { get; set; }
         public Guid OrderId { get; set; }
-        public int PaymentMethodId { get; set; }
         [Column(TypeName = "decimal(19, 4)")]
         public decimal Amount { get; set; }
         public byte? PaymentStatus { get; set; }

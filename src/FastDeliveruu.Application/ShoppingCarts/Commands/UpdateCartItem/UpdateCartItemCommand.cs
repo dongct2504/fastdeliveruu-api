@@ -5,6 +5,8 @@ namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 
 public class UpdateCartItemCommand : IRequest<Result<int>>
 {
+    public Guid Id { get; set; }
+
     public Guid AppUserId { get; set; }
 
     public Guid MenuItemId { get; set; }

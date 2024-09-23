@@ -1,6 +1,7 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -8,6 +9,7 @@ using FastDeliveruu.Domain.Specifications.MenuVariants;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
@@ -16,16 +18,19 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
 {
     private readonly ICacheService _cacheService;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateCartItemCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public UpdateCartItemCommandHandler(
         IMapper mapper,
         ICacheService cacheService,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ILogger<UpdateCartItemCommandHandler> logger)
     {
         _mapper = mapper;
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result<int>> Handle(
@@ -57,12 +62,13 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
 
         string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
 
-        List<ShoppingCart>? customerCartCache = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
+        List<ShoppingCartDto>? customerCartDtoCache = await _cacheService.GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
 
-        if (customerCartCache == null)
+        if (customerCartDtoCache == null)
         {
             // cart doesn't exist yet, create a new one
             ShoppingCart cartItem = _mapper.Map<ShoppingCart>(request);
+            cartItem.Id = Guid.NewGuid();
             cartItem.MenuItem = menuItem;
 
             if (menuVariant != null)
@@ -70,26 +76,41 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
                 cartItem.MenuVariant = menuVariant;
             }
 
-            List<ShoppingCart> cartItems = new List<ShoppingCart>
+            List<ShoppingCartDto> cartItemDtos = new List<ShoppingCartDto>
             {
-                cartItem
+                _mapper.Map<ShoppingCartDto>(cartItem)
             };
 
-            await _cacheService.SetAsync(key, cartItems, CacheOptions.CartExpiration, cancellationToken);
+            await _cacheService.SetAsync(key, cartItemDtos, CacheOptions.CartExpiration, cancellationToken);
 
             return cartItem.Quantity;
         }
 
         // check if the item already exists in the cart (check both menu item and menu variant)
-        ShoppingCart? shoppingCartUpdate = customerCartCache
-            .FirstOrDefault(sc => 
-                sc.AppUserId == request.AppUserId && 
-                sc.MenuItemId == request.MenuItemId &&
-                (!request.MenuVariantId.HasValue || sc.MenuVariantId == request.MenuVariantId));
+        //ShoppingCartDto? shoppingCartUpdate = customerCartDtoCache
+        //    .FirstOrDefault(sc => 
+        //        sc.AppUserId == request.AppUserId && 
+        //        sc.MenuItemId == request.MenuItemId &&
+        //        (!request.MenuVariantId.HasValue || sc.MenuVariantId == request.MenuVariantId));
 
-        if (shoppingCartUpdate == null) // item doesn't exist, hence create a new item and add it to the cart
+        // check if the item already exists in the cart (check both menu item and menu variant)
+        ShoppingCartDto? shoppingCartDto = null;
+
+        if (request.Id != Guid.Empty)
+        {
+            shoppingCartDto = customerCartDtoCache.FirstOrDefault(sc => sc.Id == request.Id);
+            if (shoppingCartDto == null)
+            {
+                string message = "cart item doesn't exist";
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new NotFoundError(message));
+            }
+        }
+
+        if (shoppingCartDto == null) // item doesn't exist, hence create a new item and add it to the cart
         {
             ShoppingCart newCartItem = _mapper.Map<ShoppingCart>(request);
+            newCartItem.Id = Guid.NewGuid();
             newCartItem.MenuItem = menuItem;
 
             if (menuVariant != null)
@@ -97,15 +118,15 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
                 newCartItem.MenuVariant = menuVariant;
             }
 
-            customerCartCache.Add(newCartItem);
+            customerCartDtoCache.Add(_mapper.Map<ShoppingCartDto>(newCartItem));
         }
         else // item exist
         {
-            shoppingCartUpdate.Quantity += request.Quantity;
+            shoppingCartDto.Quantity += request.Quantity;
         }
 
-        await _cacheService.SetAsync(key, customerCartCache, CacheOptions.CartExpiration, cancellationToken);
+        await _cacheService.SetAsync(key, customerCartDtoCache, CacheOptions.CartExpiration, cancellationToken);
 
-        return customerCartCache.Sum(cart => cart.Quantity);
+        return customerCartDtoCache.Sum(cart => cart.Quantity);
     }
 }

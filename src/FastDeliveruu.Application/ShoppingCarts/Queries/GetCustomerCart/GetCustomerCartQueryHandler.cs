@@ -1,8 +1,6 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
-using MapsterMapper;
 using MediatR;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Queries.GetCustomerCart;
@@ -10,12 +8,10 @@ namespace FastDeliveruu.Application.ShoppingCarts.Queries.GetCustomerCart;
 public class GetCustomerCartQueryHandler : IRequestHandler<GetCustomerCartQuery, List<ShoppingCartDto>>
 {
     private readonly ICacheService _cacheService;
-    private readonly IMapper _mapper;
 
-    public GetCustomerCartQueryHandler(ICacheService cacheService, IMapper mapper)
+    public GetCustomerCartQueryHandler(ICacheService cacheService)
     {
         _cacheService = cacheService;
-        _mapper = mapper;
     }
 
     public async Task<List<ShoppingCartDto>> Handle(
@@ -24,12 +20,12 @@ public class GetCustomerCartQueryHandler : IRequestHandler<GetCustomerCartQuery,
     {
         string key = $"{CacheConstants.CustomerCart}-{request.UserId}";
 
-        List<ShoppingCart>? customerCart = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
+        List<ShoppingCartDto>? customerCart = await _cacheService.GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
         if (customerCart == null)
         {
             return new List<ShoppingCartDto>();
         }
 
-        return _mapper.Map<List<ShoppingCartDto>>(customerCart);
+        return customerCart;
     }
 }

@@ -9,6 +9,10 @@ public interface IFastDeliveruuUnitOfWork : IDisposable
     IMenuVariantRepository MenuVariants { get; }
     IDeliveryMethodRepository DeliveryMethods { get; }
     IOrderRepository Orders { get; }
+    ICityRepository Cities { get; }
+    IDistrictRepository Districts { get; }
+    IWardRepository Wards { get; }
+    IAddressesCustomerRepository AddressesCustomers { get; }
 
     Task SaveChangesAsync();
 }

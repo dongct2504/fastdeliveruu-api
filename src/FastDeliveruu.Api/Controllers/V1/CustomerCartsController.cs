@@ -69,15 +69,15 @@ public class CustomerCartsController : ApiController
         return NoContent();
     }
 
-    [HttpDelete("{menuItemId:guid}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteCartItem(Guid menuItemId)
+    public async Task<IActionResult> DeleteCartItem(Guid id)
     {
         Guid userId = User.GetCurrentUserId();
 
-        DeleteCartItemCommand command = new DeleteCartItemCommand(userId, menuItemId);
+        DeleteCartItemCommand command = new DeleteCartItemCommand(userId, id);
         Result<int> updatedCartResult = await _mediator.Send(command);
         if (updatedCartResult.IsFailed)
         {

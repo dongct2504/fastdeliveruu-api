@@ -1,5 +1,7 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -42,10 +44,34 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail(new BadRequestError(message));
         }
 
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            string message = "City does not exist.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId);
+        if (district == null)
+        {
+            string message = "District does not exist.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        Ward? ward = await _unitOfWork.Wards.GetAsync(request.WardId);
+        if (ward == null)
+        {
+            string message = "Ward does not exist.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
         string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
 
-        List<ShoppingCart>? customerCart = await _cacheService.GetAsync<List<ShoppingCart>>(key, cancellationToken);
-        if (customerCart == null || !customerCart.Any())
+        List<ShoppingCartDto>? customerCartDto = await _cacheService.GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
+        if (customerCartDto == null || !customerCartDto.Any())
         {
             string message = "The customer's cart is empty.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
@@ -54,24 +80,36 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
         Order order = _mapper.Map<Order>(request);
         order.Id = Guid.NewGuid();
+
+        decimal totalAmount = 0;
+        List<OrderDetail> orderDetails = new List<OrderDetail>();
+
+        foreach (ShoppingCartDto cartItemDto in customerCartDto)
+        {
+            // if it has menu variant, get the price of the menu variant not menu item
+            decimal itemPrice = cartItemDto.MenuVariantDto?.DiscountPrice ?? cartItemDto.MenuItemDto.DiscountPrice;
+
+            orderDetails.Add(new OrderDetail
+            {
+                OrderId = order.Id,
+                MenuItemId = cartItemDto.MenuItemId,
+                MenuVariantId = cartItemDto.MenuVariantId,
+                Price = itemPrice,
+                Quantity = cartItemDto.Quantity,
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+            });
+
+            totalAmount += itemPrice * cartItemDto.Quantity;
+        }
+
+        order.TotalAmount = totalAmount;
+        order.OrderDetails = orderDetails;
+
         order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;
         order.TransactionId = "0";
         order.OrderStatus = (byte?)OrderStatus.Pending;
         order.PaymentStatus = (byte?)PaymentStatus.Pending;
-
-        order.TotalAmount = customerCart.Sum(cart => cart.MenuItem.DiscountPrice * cart.Quantity) + deliveryMethod.Price;
-
-        order.OrderDetails = customerCart.Select(cart => new OrderDetail
-        {
-            OrderId = order.Id,
-            MenuItemId = cart.MenuItemId,
-            MenuVariantId = cart.MenuVariantId,
-            Price = cart.MenuItem.DiscountPrice,
-            Quantity = cart.Quantity,
-            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
-        }).ToList();
-
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         _unitOfWork.Orders.Add(order);

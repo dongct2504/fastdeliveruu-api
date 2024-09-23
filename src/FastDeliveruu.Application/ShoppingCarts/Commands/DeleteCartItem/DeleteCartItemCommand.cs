@@ -5,13 +5,13 @@ namespace FastDeliveruu.Application.ShoppingCarts.Commands.DeleteCartItem;
 
 public class DeleteCartItemCommand : IRequest<Result<int>>
 {
-    public DeleteCartItemCommand(Guid userId, Guid menuItemId)
+    public DeleteCartItemCommand(Guid userId, Guid id)
     {
         UserId = userId;
-        MenuItemId = menuItemId;
+        Id = id;
     }
 
     public Guid UserId { get; }
 
-    public Guid MenuItemId { get; }
+    public Guid Id { get; }
 }

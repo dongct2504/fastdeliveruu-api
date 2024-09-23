@@ -9,11 +9,13 @@ namespace FastDeliveruu.Domain.Entities
 {
     [Index("AppUserId", Name = "IX_Orders_AppUserId")]
     [Index("DeliveryMethodId", Name = "IX_Orders_DeliveryMethodId")]
+    [Index("CityId", Name = "IX_Orders_CityId")]
+    [Index("DistrictId", Name = "IX_Orders_DistrictId")]
+    [Index("WardId", Name = "IX_Orders_WardId")]
     public partial class Order
     {
         public Order()
         {
-            DeliveryAddresses = new HashSet<DeliveryAddress>();
             OrderDeliveries = new HashSet<OrderDelivery>();
             OrderDetails = new HashSet<OrderDetail>();
             Payments = new HashSet<Payment>();
@@ -45,17 +47,34 @@ namespace FastDeliveruu.Domain.Entities
         [StringLength(20)]
         [Unicode(false)]
         public string? TransactionId { get; set; }
+        [StringLength(60)]
+        public string Address { get; set; } = null!;
+        public int CityId { get; set; }
+        public int DistrictId { get; set; }
+        public int WardId { get; set; }
+        [Column(TypeName = "decimal(9, 6)")]
+        public decimal? Latitude { get; set; }
+        [Column(TypeName = "decimal(9, 6)")]
+        public decimal? Longitude { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
 
+        [ForeignKey("CityId")]
+        [InverseProperty("Orders")]
+        public virtual City City { get; set; } = null!;
+        [ForeignKey("DistrictId")]
+        [InverseProperty("Orders")]
+        public virtual District District { get; set; } = null!;
+        [ForeignKey("WardId")]
+        [InverseProperty("Orders")]
+        public virtual Ward Ward { get; set; } = null!;
+
         [ForeignKey("DeliveryMethodId")]
         [InverseProperty("Orders")]
         public virtual DeliveryMethod? DeliveryMethod { get; set; }
 
-        [InverseProperty("Order")]
-        public virtual ICollection<DeliveryAddress> DeliveryAddresses { get; set; }
         [InverseProperty("Order")]
         public virtual ICollection<OrderDelivery> OrderDeliveries { get; set; }
         [InverseProperty("Order")]

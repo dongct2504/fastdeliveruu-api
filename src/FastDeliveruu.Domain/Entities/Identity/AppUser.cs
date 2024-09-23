@@ -7,7 +7,6 @@ namespace FastDeliveruu.Domain.Entities.Identity;
 
 public class AppUser : IdentityUser<Guid>
 {
-
     [StringLength(50)]
     public string? FirstName { get; set; }
 
@@ -22,15 +21,11 @@ public class AppUser : IdentityUser<Guid>
     [Unicode(false)]
     public string? PublicId { get; set; }
 
-    public int CityId { get; set; }
-    public int DistrictId { get; set; }
-    public int WardId { get; set; }
+    [Column(TypeName = "datetime")]
+    public DateTime? CreatedAt { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime CreatedAt { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     [InverseProperty("AppUser")]
     public virtual ICollection<WishList> WishLists { get; set; } = new HashSet<WishList>();

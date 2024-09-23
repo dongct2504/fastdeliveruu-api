@@ -24,6 +24,12 @@ namespace FastDeliveruu.Domain.Entities
         public decimal Price { get; set; }
         [Column(TypeName = "decimal(3, 2)")]
         public decimal DiscountPercent { get; set; }
+        [StringLength(256)]
+        [Unicode(false)]
+        public string ImageUrl { get; set; } = null!;
+        [StringLength(256)]
+        [Unicode(false)]
+        public string PublicId { get; set; } = null!;
         [Column(TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
         [Column(TypeName = "datetime")]

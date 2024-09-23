@@ -19,7 +19,6 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<AddressesCustomer> AddressesCustomers { get; set; } = null!;
         public virtual DbSet<City> Cities { get; set; } = null!;
         public virtual DbSet<Coupon> Coupons { get; set; } = null!;
-        public virtual DbSet<DeliveryAddress> DeliveryAddresses { get; set; } = null!;
         public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; } = null!;
         public virtual DbSet<District> Districts { get; set; } = null!;
         public virtual DbSet<Genre> Genres { get; set; } = null!;
@@ -70,34 +69,6 @@ namespace FastDeliveruu.Domain.Data
                     .HasConstraintName("FK_AddressCustomers_Wards");
             });
 
-            modelBuilder.Entity<DeliveryAddress>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.HasOne(d => d.City)
-                    .WithMany(p => p.DeliveryAddresses)
-                    .HasForeignKey(d => d.CityId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_DeliveryAddresses_Cities");
-
-                entity.HasOne(d => d.District)
-                    .WithMany(p => p.DeliveryAddresses)
-                    .HasForeignKey(d => d.DistrictId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_DeliveryAddresses_Districts");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.DeliveryAddresses)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_DeliveryAddresses_Orders");
-
-                entity.HasOne(d => d.Ward)
-                    .WithMany(p => p.DeliveryAddresses)
-                    .HasForeignKey(d => d.WardId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_DeliveryAddresses_Wards");
-            });
-
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -111,6 +82,24 @@ namespace FastDeliveruu.Domain.Data
                     .HasForeignKey(d => d.DeliveryMethodId)
                     .OnDelete(DeleteBehavior.NoAction)
                     .HasConstraintName("FK_Orders_DeliveryMethods");
+
+                entity.HasOne(d => d.City)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.CityId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Orders_Cities");
+
+                entity.HasOne(d => d.District)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.DistrictId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Orders_Districts");
+
+                entity.HasOne(d => d.Ward)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.WardId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Orders_Wards");
             });
 
             modelBuilder.Entity<Restaurant>(entity =>

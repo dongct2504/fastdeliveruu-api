@@ -11,4 +11,10 @@ public class MenuVariantDto
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }
+
+    public decimal DiscountAmount => Price * DiscountPercent;
+
+    public decimal DiscountPrice => Price - DiscountAmount;
+
+    public string ImageUrl { get; set; } = null!;
 }

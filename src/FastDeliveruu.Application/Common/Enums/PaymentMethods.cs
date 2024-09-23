@@ -1,4 +1,4 @@
-﻿namespace FastDeliveruu.Application.Common.Constants;
+﻿namespace FastDeliveruu.Application.Common.Enums;
 
 public enum PaymentMethods
 {

@@ -65,7 +65,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         // generate JWT token
         string token = await _jwtTokenGenerator.GenerateTokenAsync(user);
 
-        _logger.LogWarning($"User login at: {_dateTimeProvider.VietnamDateTimeNow:dd/MM/yyyy hh:mm tt}.");
+        _logger.LogInformation($"User login at: {_dateTimeProvider.VietnamDateTimeNow:dd/MM/yyyy hh:mm tt}.");
 
         return _mapper.Map<AuthenticationResponse>((user, token));
     }

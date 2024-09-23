@@ -12,9 +12,9 @@ namespace FastDeliveruu.Domain.Entities
         public City()
         {
             AddressesCustomers = new HashSet<AddressesCustomer>();
-            DeliveryAddresses = new HashSet<DeliveryAddress>();
             Districts = new HashSet<District>();
             Restaurants = new HashSet<Restaurant>();
+            Orders = new HashSet<Order>();
         }
 
         [Key]
@@ -25,10 +25,10 @@ namespace FastDeliveruu.Domain.Entities
         [InverseProperty("City")]
         public virtual ICollection<AddressesCustomer> AddressesCustomers { get; set; }
         [InverseProperty("City")]
-        public virtual ICollection<DeliveryAddress> DeliveryAddresses { get; set; }
-        [InverseProperty("City")]
         public virtual ICollection<District> Districts { get; set; }
         [InverseProperty("City")]
         public virtual ICollection<Restaurant> Restaurants { get; set; }
+        [InverseProperty("City")]
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }
