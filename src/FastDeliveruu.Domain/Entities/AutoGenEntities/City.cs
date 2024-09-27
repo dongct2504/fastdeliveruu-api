@@ -21,6 +21,10 @@ namespace FastDeliveruu.Domain.Entities
         public int Id { get; set; }
         [StringLength(50)]
         public string Name { get; set; } = null!;
+        [Column(TypeName = "datetime")]
+        public DateTime? CreatedAt { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? UpdatedAt { get; set; }
 
         [InverseProperty("City")]
         public virtual ICollection<AddressesCustomer> AddressesCustomers { get; set; }

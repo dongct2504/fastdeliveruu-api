@@ -22,6 +22,10 @@ namespace FastDeliveruu.Domain.Entities
         public int CityId { get; set; }
         [StringLength(50)]
         public string Name { get; set; } = null!;
+        [Column(TypeName = "datetime")]
+        public DateTime? CreatedAt { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("CityId")]
         [InverseProperty("Districts")]

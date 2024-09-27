@@ -12,7 +12,7 @@ public class PaymentResponse
 
     public string TransactionId { get; set; } = null!;
 
-    public PaymentMethods PaymentMethod { get; set; }
+    public PaymentMethodsEnum PaymentMethod { get; set; }
 
     public string OrderDescription { get; set; } = null!;
 }
