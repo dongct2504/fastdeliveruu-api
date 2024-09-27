@@ -8,19 +8,24 @@ using FluentResults;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Result<OrderHeaderDetailDto>>
 {
     private readonly ICacheService _cacheService;
+    private readonly ILogger<GetOrderByIdQueryHandler> _logger;
     private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetOrderByIdQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
+    public GetOrderByIdQueryHandler(
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext,
+        ILogger<GetOrderByIdQueryHandler> logger)
     {
         _cacheService = cacheService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<Result<OrderHeaderDetailDto>> Handle(
@@ -44,7 +49,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
         if (orderHeaderDetailDto == null)
         {
             string message = "Order not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<OrderHeaderDetailDto>(new NotFoundError(message));
         }
 

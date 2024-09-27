@@ -8,21 +8,24 @@ using FluentResults;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetMenuItemById;
 
 public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery, Result<MenuItemDetailDto>>
 {
     private readonly ICacheService _cacheService;
+    private readonly ILogger<GetMenuItemByIdQueryHandler> _logger;
     private readonly FastDeliveruuDbContext _dbContext;
 
     public GetMenuItemByIdQueryHandler(
         ICacheService cacheService,
-        FastDeliveruuDbContext dbContext)
+        FastDeliveruuDbContext dbContext,
+        ILogger<GetMenuItemByIdQueryHandler> logger)
     {
         _cacheService = cacheService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<Result<MenuItemDetailDto>> Handle(
@@ -46,7 +49,7 @@ public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery,
         if (menuItemDetailDto == null)
         {
             string message = "MenuItem not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<MenuItemDetailDto>(new NotFoundError(message));
         }
 

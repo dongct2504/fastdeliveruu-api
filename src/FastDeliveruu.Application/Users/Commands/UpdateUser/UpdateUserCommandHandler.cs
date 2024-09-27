@@ -7,7 +7,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
 
@@ -15,16 +15,22 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IFileStorageServices _fileStorageServices;
+    private readonly ILogger<UpdateUserCommand> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
 
     public UpdateUserCommandHandler(
         IFileStorageServices fileStorageServices,
         IMapper mapper,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        IDateTimeProvider dateTimeProvider,
+        ILogger<UpdateUserCommand> logger)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _userManager = userManager;
+        _dateTimeProvider = dateTimeProvider;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -33,7 +39,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         if (user == null)
         {
             string message = "User not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -47,7 +53,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
                 if (deletionResult.Error != null)
                 {
                     string message = deletionResult.Error.Message;
-                    Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                     return Result.Fail(new BadRequestError(message));
                 }
             }
@@ -64,7 +70,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             await _userManager.AddToRoleAsync(user, request.Role);
         }
 
-        user.UpdatedAt = DateTime.Now;
+        user.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _userManager.UpdateAsync(user);
 

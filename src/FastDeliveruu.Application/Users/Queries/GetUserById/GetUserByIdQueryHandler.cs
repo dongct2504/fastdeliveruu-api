@@ -9,19 +9,24 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Users.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<AppUserDetailDto>>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<GetUserByIdQueryHandler> _logger;
     private readonly ICacheService _cacheService;
 
-    public GetUserByIdQueryHandler(UserManager<AppUser> userManager, ICacheService cacheService)
+    public GetUserByIdQueryHandler(
+        UserManager<AppUser> userManager,
+        ICacheService cacheService,
+        ILogger<GetUserByIdQueryHandler> logger)
     {
         _userManager = userManager;
         _cacheService = cacheService;
+        _logger = logger;
     }
 
     public async Task<Result<AppUserDetailDto>> Handle(
@@ -46,7 +51,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
         if (userDetailDto == null)
         {
             string message = "User not found";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 

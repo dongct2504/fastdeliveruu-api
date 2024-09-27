@@ -8,19 +8,24 @@ using FluentResults;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Genres.Queries.GenGenreById;
 
 public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Result<GenreDetailDto>>
 {
     private readonly ICacheService _cacheService;
+    private readonly ILogger<GetGenreByIdQueryHandler> _logger;
     private readonly FastDeliveruuDbContext _dbContext;
 
-    public GetGenreByIdQueryHandler(ICacheService cacheService, FastDeliveruuDbContext dbContext)
+    public GetGenreByIdQueryHandler(
+        ICacheService cacheService,
+        FastDeliveruuDbContext dbContext,
+        ILogger<GetGenreByIdQueryHandler> logger)
     {
         _cacheService = cacheService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<Result<GenreDetailDto>> Handle(
@@ -43,7 +48,7 @@ public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Resul
         if (genreDetailDto == null)
         {
             string message = "Genre not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 

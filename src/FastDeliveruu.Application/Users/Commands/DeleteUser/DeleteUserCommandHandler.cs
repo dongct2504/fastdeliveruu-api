@@ -1,13 +1,11 @@
 using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
-using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Users.Commands.DeleteUser;
 
@@ -15,12 +13,14 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IFileStorageServices _fileStorageServices;
+    private readonly ILogger<DeleteUserCommandHandler> _logger;
 
     public DeleteUserCommandHandler(
-        IFileStorageServices fileStorageServices, UserManager<AppUser> userManager)
+        IFileStorageServices fileStorageServices, UserManager<AppUser> userManager, ILogger<DeleteUserCommandHandler> logger)
     {
         _fileStorageServices = fileStorageServices;
         _userManager = userManager;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
         if (user == null)
         {
             string message = "User Not found";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
@@ -39,7 +39,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
             if (deletionResult.Error != null)
             {
                 string message = deletionResult.Error.Message;
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new BadRequestError(message));
             }
         }
