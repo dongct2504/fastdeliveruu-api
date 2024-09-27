@@ -1,5 +1,4 @@
 ﻿using CloudinaryDotNet.Actions;
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -14,17 +13,14 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteRestaurantCommandHandler> _logger;
-    private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteRestaurantCommandHandler(
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService,
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<DeleteRestaurantCommandHandler> logger)
     {
         _fileStorageServices = fileStorageServices;
-        _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -49,8 +45,6 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
 
         _unitOfWork.Restaurants.Delete(restaurant);
         await _unitOfWork.SaveChangesAsync();
-
-        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

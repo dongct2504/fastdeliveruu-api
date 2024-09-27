@@ -16,6 +16,7 @@ namespace FastDeliveruu.Domain.Entities
             MenuVariants = new HashSet<MenuVariant>();
             OrderDetails = new HashSet<OrderDetail>();
             WishLists = new HashSet<WishList>();
+            ShoppingCarts = new HashSet<ShoppingCart>();
         }
 
         [Key]

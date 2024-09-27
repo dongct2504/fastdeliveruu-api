@@ -1,6 +1,4 @@
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
@@ -11,13 +9,11 @@ namespace FastDeliveruu.Application.Genres.Commands.DeleteGenre;
 
 public class DeleteGenreCommandHandler : IRequestHandler<DeleteGenreCommand, Result>
 {
-    private readonly ICacheService _cacheService;
     private readonly ILogger<DeleteGenreCommandHandler> _logger;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
 
-    public DeleteGenreCommandHandler(ICacheService cacheService, IFastDeliveruuUnitOfWork unitOfWork, ILogger<DeleteGenreCommandHandler> logger)
+    public DeleteGenreCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<DeleteGenreCommandHandler> logger)
     {
-        _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -34,8 +30,6 @@ public class DeleteGenreCommandHandler : IRequestHandler<DeleteGenreCommand, Res
 
         _unitOfWork.Genres.Delete(genre);
         await _unitOfWork.SaveChangesAsync();
-
-        await _cacheService.RemoveAsync($"{CacheConstants.Genre}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

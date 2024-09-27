@@ -1,8 +1,5 @@
-using FastDeliveruu.Application.Common;
-using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
 using Mapster;
@@ -14,16 +11,13 @@ namespace FastDeliveruu.Application.Restaurants.Queries.GetRestaurantById;
 
 public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQuery, Result<RestaurantDetailDto>>
 {
-    private readonly ICacheService _cacheService;
     private readonly ILogger<GetRestaurantByIdQueryHandler> _logger;
     private readonly FastDeliveruuDbContext _dbContext;
 
     public GetRestaurantByIdQueryHandler(
-        ICacheService cacheService,
         FastDeliveruuDbContext dbContext,
         ILogger<GetRestaurantByIdQueryHandler> logger)
     {
-        _cacheService = cacheService;
         _dbContext = dbContext;
         _logger = logger;
     }
@@ -32,15 +26,6 @@ public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQu
         GetRestaurantByIdQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Restaurant}-{request.Id}";
-
-        RestaurantDetailDto? restaurantCache = await _cacheService
-            .GetAsync<RestaurantDetailDto>(key, cancellationToken);
-        if (restaurantCache != null)
-        {
-            return restaurantCache;
-        }
-
         RestaurantDetailDto? restaurantDetailDto = await _dbContext.Restaurants
             .Where(r => r.Id == request.Id)
             .AsNoTracking()
@@ -52,12 +37,6 @@ public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQu
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<RestaurantDetailDto>(new NotFoundError(message));
         }
-
-        await _cacheService.SetAsync(
-            key,
-            restaurantDetailDto,
-            CacheOptions.DefaultExpiration,
-            cancellationToken);
 
         return restaurantDetailDto;
     }

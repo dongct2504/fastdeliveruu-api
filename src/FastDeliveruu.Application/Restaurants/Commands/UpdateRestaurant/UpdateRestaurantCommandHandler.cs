@@ -16,21 +16,18 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateRestaurantCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
 
     public UpdateRestaurantCommandHandler(
         IMapper mapper,
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ILogger<UpdateRestaurantCommandHandler> logger)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
-        _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
@@ -74,8 +71,6 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
 
         _unitOfWork.Restaurants.Update(restaurant);
         await _unitOfWork.SaveChangesAsync();
-
-        await _cacheService.RemoveAsync($"{CacheConstants.Restaurant}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

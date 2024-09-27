@@ -14,7 +14,6 @@ namespace FastDeliveruu.Application.MenuItems.Commands.UpdateMenuItem;
 public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
-    private readonly ICacheService _cacheService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly IMapper _mapper;
@@ -23,14 +22,12 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
     public UpdateMenuItemCommandHandler(
         IMapper mapper,
         IFileStorageServices fileStorageServices,
-        ICacheService cacheService,
         ILogger<UpdateMenuItemCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
         IFastDeliveruuUnitOfWork unitOfWork)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
-        _cacheService = cacheService;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
@@ -90,8 +87,6 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
 
         _unitOfWork.MenuItems.Update(menuItem);
         await _unitOfWork.SaveChangesAsync();
-
-        await _cacheService.RemoveAsync($"{CacheConstants.MenuItem}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

@@ -15,18 +15,15 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateGenreCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
     public UpdateGenreCommandHandler(
         IMapper mapper,
-        ICacheService cacheService,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ILogger<UpdateGenreCommandHandler> logger)
     {
         _mapper = mapper;
-        _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
@@ -47,8 +44,6 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
 
         _unitOfWork.Genres.Update(genre);
         await _unitOfWork.SaveChangesAsync();
-
-        await _cacheService.RemoveAsync($"{CacheConstants.Genre}-{request.Id}", cancellationToken);
 
         return Result.Ok();
     }

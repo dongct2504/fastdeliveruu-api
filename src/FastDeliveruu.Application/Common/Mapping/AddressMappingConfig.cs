@@ -17,6 +17,8 @@ public class AddressMappingConfig : IRegister
         config.NewConfig<UpdateCityCommand, City>();
 
         config.NewConfig<District, DistrictDto>();
+        config.NewConfig<District, DistrictDetailDto>()
+            .Map(dest => dest.WardDtos, src => src.Wards);
 
         config.NewConfig<Ward, WardDto>();
     }
