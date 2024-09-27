@@ -8,56 +8,56 @@ using FluentResults;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace FastDeliveruu.Application.Cities.Commands.DeleteCity;
+namespace FastDeliveruu.Application.Districts.Commands.DeleteDistrict;
 
-public class DeleteCityCommandHandler : IRequestHandler<DeleteCityCommand, Result>
+public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
-    private readonly ILogger<DeleteCityCommandHandler> _logger;
+    private readonly ILogger<DeleteDistrictCommandHandler> _logger;
 
-    public DeleteCityCommandHandler(
+    public DeleteDistrictCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<DeleteCityCommandHandler> logger)
+        ILogger<DeleteDistrictCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(DeleteCityCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteDistrictCommand request, CancellationToken cancellationToken)
     {
-        City? city = await _unitOfWork.Cities.GetAsync(request.Id);
-        if (city == null)
+        District? district = await _unitOfWork.Districts.GetAsync(request.Id);
+        if (district == null)
         {
-            string message = "city not found.";
+            string message = "district not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
         if ((await _unitOfWork.AddressesCustomers
-                .GetWithSpecAsync(new AddressesCustomerByCityIdSpecification(request.Id), true)) != null)
+                .GetWithSpecAsync(new AddressesCustomerByDistrictIdSpecification(request.Id))) != null)
         {
-            string message = "can't delete this city because it is used by customer(s)";
+            string message = "can't delete district because it is used by customer(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
         if ((await _unitOfWork.Restaurants
-                .GetWithSpecAsync(new RestaurantByCityIdSpecification(request.Id), true)) != null)
+                .GetWithSpecAsync(new RestaurantByDistrictIdSpecification(request.Id))) != null)
         {
-            string message = "can't delete this city because it is used by restaurant(s)";
+            string message = "can't delete district because it is used by restaurant(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
         if ((await _unitOfWork.Orders
-                .GetWithSpecAsync(new OrderByCityIdSpecification(request.Id), true)) != null)
+                .GetWithSpecAsync(new OrderByDistrictIdSpecification(request.Id))) != null)
         {
-            string message = "can't delete this city because it is used by order(s)";
+            string message = "can't delete district because it is used by order(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
-        _unitOfWork.Cities.Delete(city);
+        _unitOfWork.Districts.Delete(district);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

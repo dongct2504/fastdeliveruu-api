@@ -7,6 +7,5 @@ public class PrimaryAddressesCustomersByUserIdSpecification : Specification<Addr
     public PrimaryAddressesCustomersByUserIdSpecification(Guid userId)
         : base(ac => ac.AppUserId == userId && ac.IsPrimary)
     {
-        
     }
 }
