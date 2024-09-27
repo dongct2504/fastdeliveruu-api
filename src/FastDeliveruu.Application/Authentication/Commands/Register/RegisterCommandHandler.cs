@@ -82,8 +82,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
             }
         }
 
-        if (!string.IsNullOrEmpty(request.Address) || 
-            request.CityId.HasValue || 
+        if (!string.IsNullOrEmpty(request.Address) ||
+            request.CityId.HasValue ||
             request.DistrictId.HasValue ||
             request.WardId.HasValue)
         {
@@ -101,18 +101,39 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
             }
             if (request.CityId.HasValue)
             {
+                City? city = await _unitOfWork.Cities.GetAsync(request.CityId.Value);
+                if (city == null)
+                {
+                    string message = "city does not exist.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new NotFoundError(message));
+                }
                 addressesCustomer.CityId = request.CityId.Value;
             }
             if (request.DistrictId.HasValue)
             {
+                District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId.Value);
+                if (district == null)
+                {
+                    string message = "district does not exist.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new NotFoundError(message));
+                }
                 addressesCustomer.DistrictId = request.DistrictId.Value;
             }
             if (request.WardId.HasValue)
             {
+                Ward? ward = await _unitOfWork.Wards.GetAsync(request.WardId.Value);
+                if (ward == null)
+                {
+                    string message = "ward does not exist.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new NotFoundError(message));
+                }
                 addressesCustomer.WardId = request.WardId.Value;
             }
 
-            user.AddressesCustomers.Add(addressesCustomer);
+            _unitOfWork.AddressesCustomers.Add(addressesCustomer);
             await _unitOfWork.SaveChangesAsync();
         }
 
