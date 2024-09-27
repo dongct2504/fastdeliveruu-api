@@ -75,7 +75,7 @@ public class VnpayServices : IVnpayServices
         vnpayResponse.OrderId = vnp_orderId;
         vnpayResponse.TotalAmount = vnp_Amount;
         vnpayResponse.TransactionId = vnp_transactionId;
-        vnpayResponse.PaymentMethod = PaymentMethods.Vnpay;
+        vnpayResponse.PaymentMethod = PaymentMethodsEnum.Vnpay;
         vnpayResponse.OrderDescription = vnp_OrderInfo;
         vnpayResponse.Token = vnp_SecureHash;
         vnpayResponse.VnpayResponseCode = vnp_ResponseCode;

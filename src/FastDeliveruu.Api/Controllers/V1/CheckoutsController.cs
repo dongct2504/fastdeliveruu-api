@@ -51,7 +51,7 @@ public class CheckoutsController : ApiController
             IsSuccess = true,
             OrderId = createOrderResult.Value.Id,
             OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
-            PaymentMethod = (PaymentMethods)(createOrderResult.Value.PaymentMethod ?? 0), // cash
+            PaymentMethod = (PaymentMethodsEnum)(createOrderResult.Value.PaymentMethod ?? 0), // cash
             TotalAmount = createOrderResult.Value.TotalAmount,
             TransactionId = createOrderResult.Value.TransactionId ?? "0"
         };

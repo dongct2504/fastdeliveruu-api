@@ -17,7 +17,7 @@ public class CreateOrderCommand : IRequest<Result<Order>>
 
     public string PhoneNumber { get; set; } = null!;
 
-    public PaymentMethods PaymentMethod { get; set; }
+    public PaymentMethodsEnum PaymentMethod { get; set; }
 
     public string Address { get; set; } = null!;
 

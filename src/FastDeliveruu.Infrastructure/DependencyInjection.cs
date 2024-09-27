@@ -12,6 +12,7 @@ using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.UnitOfWork;
+using FastDeliveruu.Application.Common.Constants;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -100,6 +101,14 @@ public static class DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
                 };
             });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(PolicyConstants.ManageResources, policy =>
+                policy.RequireRole(RoleConstants.Admin, RoleConstants.Staff));
+            options.AddPolicy(PolicyConstants.RequiredAdmin, policy =>
+                policy.RequireRole(RoleConstants.Admin));
+        });
 
         return services;
     }

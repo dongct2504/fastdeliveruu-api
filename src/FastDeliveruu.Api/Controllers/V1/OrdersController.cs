@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Orders.Commands.DeleteOrder;
@@ -53,6 +54,7 @@ public class OrdersController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = PolicyConstants.RequiredAdmin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteOrder(Guid id)

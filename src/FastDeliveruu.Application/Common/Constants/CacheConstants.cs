@@ -22,4 +22,9 @@ public static class CacheConstants
 
     public const string Orders = "orders";
     public const string Order = "order";
+
+    // addresses
+    public const string Cities = "cities";
+    public const string Districts = "districts";
+    public const string Wards = "wards";
 }

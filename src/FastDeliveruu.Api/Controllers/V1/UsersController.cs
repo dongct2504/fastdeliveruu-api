@@ -70,7 +70,7 @@ public class UsersController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
+    [Authorize(Policy = PolicyConstants.RequiredAdmin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -91,7 +91,7 @@ public class UsersController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Customer + "," + RoleConstants.Admin)]
+    [Authorize(Policy = PolicyConstants.RequiredAdmin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUser(Guid id)

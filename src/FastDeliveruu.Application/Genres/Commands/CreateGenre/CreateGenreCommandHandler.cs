@@ -38,7 +38,7 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
         {
             string message = "genre is already exist.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<GenreDto>(new DuplicateError(message));
+            return Result.Fail(new DuplicateError(message));
         }
 
         genre = _mapper.Map<Genre>(request);

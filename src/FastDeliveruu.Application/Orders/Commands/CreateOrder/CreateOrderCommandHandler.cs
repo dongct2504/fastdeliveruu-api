@@ -108,8 +108,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;
         order.TransactionId = "0";
-        order.OrderStatus = (byte?)OrderStatus.Pending;
-        order.PaymentStatus = (byte?)PaymentStatus.Pending;
+        order.OrderStatus = (byte?)OrderStatusEnum.Pending;
+        order.PaymentStatus = (byte?)PaymentStatusEnum.Pending;
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         _unitOfWork.Orders.Add(order);

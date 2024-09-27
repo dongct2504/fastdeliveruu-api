@@ -1,6 +1,6 @@
 ﻿namespace FastDeliveruu.Application.Common.Enums;
 
-public enum PaymentMethods
+public enum PaymentMethodsEnum
 {
     Cash,
     Vnpay,

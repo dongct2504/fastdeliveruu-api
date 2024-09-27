@@ -50,7 +50,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(typeof(RestaurantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -69,7 +69,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -90,7 +90,7 @@ public class RestaurantsController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteRestaurant(Guid id)

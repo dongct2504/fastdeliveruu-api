@@ -49,7 +49,7 @@ public class GenresController : ApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(typeof(GenreDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -68,7 +68,7 @@ public class GenresController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -89,7 +89,7 @@ public class GenresController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Staff)]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteGenre(Guid id)

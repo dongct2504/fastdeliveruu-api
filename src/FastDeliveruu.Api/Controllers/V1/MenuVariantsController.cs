@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.MenuVariantDtos;
 using FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
 using FastDeliveruu.Application.MenuVariants.Commands.CreateMenuVariant;
@@ -7,6 +8,7 @@ using FastDeliveruu.Application.MenuVariants.Queries.GetByMenuItem;
 using FastDeliveruu.Application.MenuVariants.Queries.GetMenuVariantById;
 using FluentResults;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers.V1;
@@ -31,9 +33,9 @@ public class MenuVariantsController : ApiController
         return Ok(menuVariantDtos);
     }
 
-    [HttpGet("{id:guid}", Name = "GetById")]
+    [HttpGet("{id:guid}", Name = "GetMenuVariantById")]
     [ProducesResponseType(typeof(MenuVariantDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetMenuVariantById(Guid id)
     {
         GetMenuVariantByIdQuery query = new GetMenuVariantByIdQuery(id);
         Result<MenuVariantDto> result = await _mediator.Send(query);
@@ -45,6 +47,7 @@ public class MenuVariantsController : ApiController
     }
 
     [HttpPost]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(typeof(MenuVariantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -57,12 +60,13 @@ public class MenuVariantsController : ApiController
         }
 
         return CreatedAtRoute(
-            nameof(GetById),
+            nameof(GetMenuVariantById),
             new { id = result.Value.Id },
             result.Value);
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,6 +87,7 @@ public class MenuVariantsController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMenuVariant(Guid id)

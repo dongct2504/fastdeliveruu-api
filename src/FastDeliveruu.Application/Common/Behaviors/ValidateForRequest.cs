@@ -29,10 +29,10 @@ public static class ValidateForRequest
         return false;
     }
 
-    public static bool BeValidPaymentMethod(PaymentMethods paymentMethod)
+    public static bool BeValidPaymentMethod(PaymentMethodsEnum paymentMethod)
     {
-        return paymentMethod == PaymentMethods.Cash ||
-            paymentMethod == PaymentMethods.Vnpay ||
-            paymentMethod == PaymentMethods.Momo;
+        return paymentMethod == PaymentMethodsEnum.Cash ||
+            paymentMethod == PaymentMethodsEnum.Vnpay ||
+            paymentMethod == PaymentMethodsEnum.Momo;
     }
 }

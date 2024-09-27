@@ -1,6 +1,6 @@
 namespace FastDeliveruu.Application.Common.Enums;
 
-public enum PaymentStatus
+public enum PaymentStatusEnum
 {
     Pending,
     Processing,
