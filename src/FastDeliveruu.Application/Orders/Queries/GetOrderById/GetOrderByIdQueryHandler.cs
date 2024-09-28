@@ -35,7 +35,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
         {
             string message = "Order not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<OrderHeaderDetailDto>(new NotFoundError(message));
+            return Result.Fail(new NotFoundError(message));
         }
 
         return orderHeaderDetailDto;

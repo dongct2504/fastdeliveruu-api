@@ -1,13 +1,13 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Districts.Commands.CreateDistrict;
-using FastDeliveruu.Application.Districts.Commands.DeleteDistrict;
-using FastDeliveruu.Application.Districts.Commands.UpdateDistrict;
-using FastDeliveruu.Application.Districts.Queries.GetAllDistricts;
-using FastDeliveruu.Application.Districts.Queries.GetDistrictById;
-using FastDeliveruu.Application.Districts.Queries.GetDistrictsByCity;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.AddressDtos;
+using FastDeliveruu.Application.Wards.Commands.CreateWard;
+using FastDeliveruu.Application.Wards.Commands.DeleteWard;
+using FastDeliveruu.Application.Wards.Commands.UpdateWard;
+using FastDeliveruu.Application.Wards.Queries.GetAllWards;
+using FastDeliveruu.Application.Wards.Queries.GetWardById;
+using FastDeliveruu.Application.Wards.Queries.GetWardsByDistrict;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -16,32 +16,32 @@ using Microsoft.AspNetCore.Mvc;
 namespace FastDeliveruu.Api.Controllers.V1;
 
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/districts")]
-public class DistrictsController : ApiController
+[Route("api/v{version:apiVersion}/wards")]
+public class WardsController : ApiController
 {
     private readonly IMediator _mediator;
 
-    public DistrictsController(IMediator mediator)
+    public WardsController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(PagedList<DistrictDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllDistricts([FromQuery] DefaultParams defaultParams)
+    [ProducesResponseType(typeof(PagedList<WardDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllWards([FromQuery] DefaultParams defaultParams)
     {
-        GetAllDistrictsQuery query = new GetAllDistrictsQuery(defaultParams);
-        PagedList<DistrictDto> pagedList = await _mediator.Send(query);
+        GetAllWardsQuery query = new GetAllWardsQuery(defaultParams);
+        PagedList<WardDto> pagedList = await _mediator.Send(query);
         return Ok(pagedList);
     }
 
-    [HttpGet("get-by-city")]
-    [ProducesResponseType(typeof(PagedList<DistrictDto>), StatusCodes.Status200OK)]
+    [HttpGet("get-by-district")]
+    [ProducesResponseType(typeof(PagedList<WardDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDistrictsByCity([FromQuery] DistrictParams districtParams)
+    public async Task<IActionResult> GetWardsByDistrict([FromQuery] WardParams wardParams)
     {
-        GetDistrictsByCityQuery query = new GetDistrictsByCityQuery(districtParams);
-        Result<PagedList<DistrictDto>> result = await _mediator.Send(query);
+        GetWardsByDistrictQuery query = new GetWardsByDistrictQuery(wardParams);
+        Result<PagedList<WardDto>> result = await _mediator.Send(query);
         if (result.IsFailed)
         {
             return Problem(result.Errors);
@@ -49,13 +49,13 @@ public class DistrictsController : ApiController
         return Ok(result.Value);
     }
 
-    [HttpGet("{id:int}", Name = "GetDistrictById")]
-    [ProducesResponseType(typeof(DistrictDetailDto), StatusCodes.Status200OK)]
+    [HttpGet("{id:int}", Name = "GetWardById")]
+    [ProducesResponseType(typeof(WardDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDistrictById(int id)
+    public async Task<IActionResult> GetWardById(int id)
     {
-        GetDistrictByIdQuery query = new GetDistrictByIdQuery(id);
-        Result<DistrictDetailDto> result = await _mediator.Send(query);
+        GetWardByIdQuery query = new GetWardByIdQuery(id);
+        Result<WardDto> result = await _mediator.Send(query);
         if (result.IsFailed)
         {
             return Problem(result.Errors);
@@ -65,18 +65,18 @@ public class DistrictsController : ApiController
 
     [HttpPost]
     [Authorize(Policy = PolicyConstants.ManageResources)]
-    [ProducesResponseType(typeof(DistrictDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(WardDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> CreateDistrict([FromBody] CreateDistrictCommand command)
+    public async Task<IActionResult> CreateWard([FromBody] CreateWardCommand command)
     {
-        Result<DistrictDto> result = await _mediator.Send(command);
+        Result<WardDto> result = await _mediator.Send(command);
         if (result.IsFailed)
         {
             return Problem(result.Errors);
         }
         return CreatedAtRoute(
-            nameof(GetDistrictById),
+            nameof(GetWardById),
             new { id = result.Value.Id },
             result.Value);
     }
@@ -86,7 +86,7 @@ public class DistrictsController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateDistrict(int id, [FromBody] UpdateDistrictCommand command)
+    public async Task<IActionResult> UpdateWard(int id, [FromBody] UpdateWardCommand command)
     {
         if (id != command.Id)
         {
@@ -105,9 +105,9 @@ public class DistrictsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteDistrict(int id)
+    public async Task<IActionResult> DeleteWard(int id)
     {
-        DeleteDistrictCommand command = new DeleteDistrictCommand(id);
+        DeleteWardCommand command = new DeleteWardCommand(id);
         Result result = await _mediator.Send(command);
         if (result.IsFailed)
         {

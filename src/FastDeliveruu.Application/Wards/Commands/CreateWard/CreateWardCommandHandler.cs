@@ -9,18 +9,18 @@ using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace FastDeliveruu.Application.Districts.Commands.CreateDistrict;
+namespace FastDeliveruu.Application.Wards.Commands.CreateWard;
 
-public class CreateDistrictCommandHandler : IRequestHandler<CreateDistrictCommand, Result<DistrictDto>>
+public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Result<WardDto>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
-    private readonly ILogger<CreateDistrictCommandHandler> _logger;
+    private readonly ILogger<CreateWardCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
 
-    public CreateDistrictCommandHandler(
+    public CreateWardCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<CreateDistrictCommandHandler> logger,
+        ILogger<CreateWardCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
         IMapper mapper)
     {
@@ -30,31 +30,31 @@ public class CreateDistrictCommandHandler : IRequestHandler<CreateDistrictComman
         _mapper = mapper;
     }
 
-    public async Task<Result<DistrictDto>> Handle(CreateDistrictCommand request, CancellationToken cancellationToken)
+    public async Task<Result<WardDto>> Handle(CreateWardCommand request, CancellationToken cancellationToken)
     {
-        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
-        if (city == null)
+        District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId);
+        if (district == null)
         {
-            string message = "City not found.";
+            string message = "District not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        District? district = await _unitOfWork.Districts
-            .GetWithSpecAsync(new DistrictExistInCitySpecification(request.CityId, request.Name), true);
-        if (district != null)
+        Ward? ward = await _unitOfWork.Wards
+            .GetWithSpecAsync(new WardExistInDistrictSpecification(request.DistrictId, request.Name));
+        if (ward != null)
         {
-            string message = "District is already exist in city.";
+            string message = "Ward is already exist in city.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new DuplicateError(message));
         }
 
-        district = _mapper.Map<District>(request);
-        district.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
+        ward = _mapper.Map<Ward>(request);
+        ward.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Districts.Add(district);
+        _unitOfWork.Wards.Add(ward);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<DistrictDto>(district);
+        return _mapper.Map<WardDto>(ward);
     }
 }

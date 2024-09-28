@@ -3,6 +3,8 @@ using FastDeliveruu.Application.Cities.Commands.UpdateCity;
 using FastDeliveruu.Application.Districts.Commands.CreateDistrict;
 using FastDeliveruu.Application.Districts.Commands.UpdateDistrict;
 using FastDeliveruu.Application.Dtos.AddressDtos;
+using FastDeliveruu.Application.Wards.Commands.CreateWard;
+using FastDeliveruu.Application.Wards.Commands.UpdateWard;
 using FastDeliveruu.Domain.Entities;
 using Mapster;
 
@@ -25,5 +27,7 @@ public class AddressMappingConfig : IRegister
         config.NewConfig<UpdateDistrictCommand, District>();
 
         config.NewConfig<Ward, WardDto>();
+        config.NewConfig<CreateWardCommand, Ward>();
+        config.NewConfig<UpdateWardCommand, Ward>();
     }
 }

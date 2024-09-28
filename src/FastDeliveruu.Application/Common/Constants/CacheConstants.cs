@@ -24,4 +24,5 @@ public static class CacheConstants
     public const string DistrictsByCity = "districtsByCity";
 
     public const string Wards = "wards";
+    public const string WardsByDistrict = "wardsByDistrict";
 }
