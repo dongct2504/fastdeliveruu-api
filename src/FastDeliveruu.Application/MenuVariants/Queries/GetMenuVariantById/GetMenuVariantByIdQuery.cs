@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+﻿using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FluentResults;
 using MediatR;
 

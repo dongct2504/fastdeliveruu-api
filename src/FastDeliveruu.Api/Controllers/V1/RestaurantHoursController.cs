@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.RestaurantHours.Commands.CreateRestaurantHour;
 using FastDeliveruu.Application.RestaurantHours.Commands.DeleteRestaurantHour;
 using FastDeliveruu.Application.RestaurantHours.Commands.UpdateRestaurantHour;

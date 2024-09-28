@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+﻿using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using MediatR;
 
 namespace FastDeliveruu.Application.RestaurantHours.Queries.GetByRestaurant;

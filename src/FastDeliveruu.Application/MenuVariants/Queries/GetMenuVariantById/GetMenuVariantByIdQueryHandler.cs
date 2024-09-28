@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
 using Mapster;

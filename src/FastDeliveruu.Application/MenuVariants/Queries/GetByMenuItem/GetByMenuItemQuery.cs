@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+﻿using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using MediatR;
 
 namespace FastDeliveruu.Application.MenuVariants.Queries.GetByMenuItem;

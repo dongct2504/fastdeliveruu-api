@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;

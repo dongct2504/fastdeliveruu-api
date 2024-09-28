@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
 using Mapster;

@@ -1,4 +1,4 @@
-﻿namespace FastDeliveruu.Application.Dtos.MenuVariantDtos;
+﻿namespace FastDeliveruu.Application.Dtos.MenuItemDtos;
 
 public class MenuVariantDto
 {

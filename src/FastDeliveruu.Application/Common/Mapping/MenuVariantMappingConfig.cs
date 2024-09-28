@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+﻿using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.MenuVariants.Commands.CreateMenuVariant;
 using FastDeliveruu.Application.MenuVariants.Commands.UpdateMenuVariant;
 using FastDeliveruu.Domain.Entities;

@@ -34,7 +34,7 @@ public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictComman
         }
 
         if ((await _unitOfWork.AddressesCustomers
-                .GetWithSpecAsync(new AddressesCustomerByDistrictIdSpecification(request.Id))) != null)
+                .GetWithSpecAsync(new AddressesCustomerByDistrictIdSpecification(request.Id), true)) != null)
         {
             string message = "can't delete district because it is used by customer(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
@@ -42,7 +42,7 @@ public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictComman
         }
 
         if ((await _unitOfWork.Restaurants
-                .GetWithSpecAsync(new RestaurantByDistrictIdSpecification(request.Id))) != null)
+                .GetWithSpecAsync(new RestaurantByDistrictIdSpecification(request.Id), true)) != null)
         {
             string message = "can't delete district because it is used by restaurant(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
@@ -50,7 +50,7 @@ public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictComman
         }
 
         if ((await _unitOfWork.Orders
-                .GetWithSpecAsync(new OrderByDistrictIdSpecification(request.Id))) != null)
+                .GetWithSpecAsync(new OrderByDistrictIdSpecification(request.Id), true)) != null)
         {
             string message = "can't delete district because it is used by order(s).";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");

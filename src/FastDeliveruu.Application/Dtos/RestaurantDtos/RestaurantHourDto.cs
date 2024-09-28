@@ -1,4 +1,4 @@
-﻿namespace FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+﻿namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
 
 public class RestaurantHourDto
 {

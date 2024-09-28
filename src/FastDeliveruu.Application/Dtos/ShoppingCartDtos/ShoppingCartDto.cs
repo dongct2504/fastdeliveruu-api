@@ -1,5 +1,4 @@
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
-using FastDeliveruu.Application.Dtos.MenuVariantDtos;
 
 namespace FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 

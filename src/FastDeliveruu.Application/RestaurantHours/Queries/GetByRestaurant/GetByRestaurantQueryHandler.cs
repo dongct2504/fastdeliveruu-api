@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;

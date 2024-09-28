@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Dtos.MenuVariantDtos;
+using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;

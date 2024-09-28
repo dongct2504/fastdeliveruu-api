@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Dtos.RestaurantHourDtos;
+﻿using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.RestaurantHours.Commands.CreateRestaurantHour;
 using FastDeliveruu.Application.RestaurantHours.Commands.UpdateRestaurantHour;
 using FastDeliveruu.Domain.Entities;
