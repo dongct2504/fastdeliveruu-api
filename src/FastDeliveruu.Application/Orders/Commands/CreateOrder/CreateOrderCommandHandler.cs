@@ -5,6 +5,7 @@ using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -14,7 +15,7 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Order>>
 {
-    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
@@ -52,18 +53,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail(new BadRequestError(message));
         }
 
-        District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId);
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId), true);
         if (district == null)
         {
-            string message = "District does not exist.";
+            string message = "District does not exist in city.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
-        Ward? ward = await _unitOfWork.Wards.GetAsync(request.WardId);
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId), true);
         if (ward == null)
         {
-            string message = "Ward does not exist.";
+            string message = "Ward does not exist in district.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }

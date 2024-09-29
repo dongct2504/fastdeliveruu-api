@@ -8,4 +8,9 @@ public class WardExistInDistrictSpecification : Specification<Ward>
         : base(w => w.DistrictId == districtId && w.Name == wardName)
     {
     }
+
+    public WardExistInDistrictSpecification(int districtId, int wardId)
+        : base(w => w.DistrictId == districtId && w.Id == wardId)
+    {
+    }
 }

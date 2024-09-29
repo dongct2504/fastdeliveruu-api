@@ -5,6 +5,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -47,6 +48,62 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         AppUser user = _mapper.Map<AppUser>(request);
         user.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
+        if (!string.IsNullOrEmpty(request.Address) || request.CityId.HasValue)
+        {
+            AddressesCustomer addressesCustomer = new AddressesCustomer
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = user.Id,
+                IsPrimary = true,
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+            };
+
+            if (!string.IsNullOrEmpty(request.Address))
+            {
+                addressesCustomer.Address = request.Address;
+            }
+
+            if (request.CityId.HasValue)
+            {
+                City? city = await _unitOfWork.Cities.GetAsync(request.CityId.Value);
+                if (city == null)
+                {
+                    string message = "city does not exist.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new NotFoundError(message));
+                }
+                addressesCustomer.CityId = request.CityId.Value;
+
+                if (request.DistrictId.HasValue)
+                {
+                    District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+                        new DistrictExistInCitySpecification(request.CityId.Value, request.DistrictId.Value));
+                    if (district == null)
+                    {
+                        string message = "district does not exist in city.";
+                        _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                        return Result.Fail(new NotFoundError(message));
+                    }
+                    addressesCustomer.DistrictId = request.DistrictId.Value;
+
+                    if (request.WardId.HasValue)
+                    {
+                        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+                            new WardExistInDistrictSpecification(request.DistrictId.Value, request.WardId.Value));
+                        if (ward == null)
+                        {
+                            string message = "ward does not exist in district.";
+                            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                            return Result.Fail(new NotFoundError(message));
+                        }
+                        addressesCustomer.WardId = request.WardId.Value;
+                    }
+                }
+            }
+
+            user.AddressesCustomers.Add(addressesCustomer);
+        }
+
         IdentityResult result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -80,61 +137,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
             {
                 await _userManager.AddToRoleAsync(user, request.Role);
             }
-        }
-
-        if (!string.IsNullOrEmpty(request.Address) ||
-            request.CityId.HasValue ||
-            request.DistrictId.HasValue ||
-            request.WardId.HasValue)
-        {
-            AddressesCustomer addressesCustomer = new AddressesCustomer
-            {
-                Id = Guid.NewGuid(),
-                AppUserId = user.Id,
-                IsPrimary = true,
-                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
-            };
-
-            if (!string.IsNullOrEmpty(request.Address))
-            {
-                addressesCustomer.Address = request.Address;
-            }
-            if (request.CityId.HasValue)
-            {
-                City? city = await _unitOfWork.Cities.GetAsync(request.CityId.Value);
-                if (city == null)
-                {
-                    string message = "city does not exist.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new NotFoundError(message));
-                }
-                addressesCustomer.CityId = request.CityId.Value;
-            }
-            if (request.DistrictId.HasValue)
-            {
-                District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId.Value);
-                if (district == null)
-                {
-                    string message = "district does not exist.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new NotFoundError(message));
-                }
-                addressesCustomer.DistrictId = request.DistrictId.Value;
-            }
-            if (request.WardId.HasValue)
-            {
-                Ward? ward = await _unitOfWork.Wards.GetAsync(request.WardId.Value);
-                if (ward == null)
-                {
-                    string message = "ward does not exist.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new NotFoundError(message));
-                }
-                addressesCustomer.WardId = request.WardId.Value;
-            }
-
-            _unitOfWork.AddressesCustomers.Add(addressesCustomer);
-            await _unitOfWork.SaveChangesAsync();
         }
 
         string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
