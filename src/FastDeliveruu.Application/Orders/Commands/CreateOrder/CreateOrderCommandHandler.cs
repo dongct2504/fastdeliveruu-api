@@ -15,7 +15,7 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Order>>
 {
-private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
