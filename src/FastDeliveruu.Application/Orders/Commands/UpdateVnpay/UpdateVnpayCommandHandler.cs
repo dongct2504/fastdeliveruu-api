@@ -44,6 +44,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
         }
 
         order.TransactionId = request.VnPayResponse.TransactionId;
+        payment.TransactionId = request.VnPayResponse.TransactionId;
 
         switch (vnpayResponse.VnpayResponseCode)
         {
