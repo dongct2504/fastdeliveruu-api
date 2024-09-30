@@ -41,7 +41,6 @@ public class UpdateCityCommandHandler : IRequestHandler<UpdateCityCommand, Resul
         _mapper.Map(request, city);
         city.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Cities.Update(city);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

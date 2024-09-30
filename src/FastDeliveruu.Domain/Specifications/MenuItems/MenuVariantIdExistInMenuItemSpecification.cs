@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Domain.Entities;
 
-namespace FastDeliveruu.Domain.Specifications.MenuVariants;
+namespace FastDeliveruu.Domain.Specifications.MenuItems;
 
 public class MenuVariantIdExistInMenuItemSpecification : Specification<MenuVariant>
 {

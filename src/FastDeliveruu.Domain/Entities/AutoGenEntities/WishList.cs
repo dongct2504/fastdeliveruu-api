@@ -15,6 +15,7 @@ namespace FastDeliveruu.Domain.Entities
         public Guid Id { get; set; }
         public Guid AppUserId { get; set; }
         public Guid MenuItemId { get; set; }
+        public Guid? MenuVariantId { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
@@ -27,5 +28,9 @@ namespace FastDeliveruu.Domain.Entities
         [ForeignKey("AppUserId")]
         [InverseProperty("WishLists")]
         public virtual AppUser AppUser { get; set; } = null!;
+
+        [ForeignKey("MenuVariantId")]
+        [InverseProperty("WishLists")]
+        public virtual MenuVariant? MenuVariant { get; set; }
     }
 }

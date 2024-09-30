@@ -49,7 +49,6 @@ public class UpdateWardCommandHandler : IRequestHandler<UpdateWardCommand, Resul
         _mapper.Map(request, ward);
         ward.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Wards.Update(ward);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

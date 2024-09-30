@@ -16,12 +16,17 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
         RestaurantHours = new RestaurantHourRepository(_dbContext);
         MenuItems = new MenuItemRepository(_dbContext);
         MenuVariants = new MenuVariantRepository(_dbContext);
+        MenuItemInventories = new MenuItemInventoryRepository(_dbContext);
+        MenuVariantInventories = new MenuVariantInventoryRepository(_dbContext);
         DeliveryMethods = new DeliveryMethodRepository(_dbContext);
         Orders = new OrderRepository(_dbContext);
+        Payments = new PaymentRepository(_dbContext);
+        OrderDetails = new OrderDetailRepository(_dbContext);
         Cities = new CityRepository(_dbContext);
         Districts = new DistrictRepository(_dbContext);
         Wards = new WardRepository(_dbContext);
         AddressesCustomers = new AddressesCustomerRepository(_dbContext);
+        WishLists = new WishlistRepository(_dbContext);
     }
 
     public IGenreRepository Genres { get; private set; }
@@ -34,9 +39,17 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
 
     public IMenuVariantRepository MenuVariants { get; private set; }
 
+    public IMenuItemInventoryRepository MenuItemInventories { get; private set; }
+
+    public IMenuVariantInventoryRepository MenuVariantInventories { get; private set; }
+
     public IDeliveryMethodRepository DeliveryMethods { get; private set; }
 
     public IOrderRepository Orders { get; private set; }
+
+    public IPaymentRepository Payments { get; private set; }
+
+    public IOrderDetailRepository OrderDetails { get; private set; }
 
     public ICityRepository Cities { get; private set; }
 
@@ -45,6 +58,8 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
     public IWardRepository Wards { get; private set; }
 
     public IAddressesCustomerRepository AddressesCustomers { get; private set; }
+
+    public IWishListRepository WishLists { get; private set; }
 
     public async Task SaveChangesAsync()
     {

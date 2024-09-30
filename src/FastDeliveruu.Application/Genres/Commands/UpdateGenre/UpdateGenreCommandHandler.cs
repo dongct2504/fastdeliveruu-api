@@ -42,7 +42,6 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
         _mapper.Map(request, genre);
         genre.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Genres.Update(genre);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

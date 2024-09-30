@@ -85,7 +85,6 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         }
         menuItem.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.MenuItems.Update(menuItem);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

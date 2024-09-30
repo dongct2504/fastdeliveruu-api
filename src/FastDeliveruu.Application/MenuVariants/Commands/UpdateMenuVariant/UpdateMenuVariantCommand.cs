@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace FastDeliveruu.Application.MenuVariants.Commands.UpdateMenuVariant;
 
@@ -14,4 +15,6 @@ public class UpdateMenuVariantCommand : IRequest<Result>
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }
+
+    public IFormFile? ImageFile { get; set; }
 }

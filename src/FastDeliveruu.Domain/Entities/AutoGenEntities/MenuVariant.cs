@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
@@ -13,6 +14,8 @@ namespace FastDeliveruu.Domain.Entities
         {
             OrderDetails = new HashSet<OrderDetail>();
             ShoppingCarts = new HashSet<ShoppingCart>();
+            WishLists = new HashSet<WishList>();
+            MenuVariantInventories = new HashSet<MenuVariantInventory>();
         }
 
         [Key]
@@ -42,5 +45,9 @@ namespace FastDeliveruu.Domain.Entities
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         [InverseProperty("MenuVariant")]
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
+        [InverseProperty("MenuVariant")]
+        public virtual ICollection<WishList> WishLists { get; set; }
+        [InverseProperty("MenuVariant")]
+        public virtual ICollection<MenuVariantInventory> MenuVariantInventories { get; set; }
     }
 }

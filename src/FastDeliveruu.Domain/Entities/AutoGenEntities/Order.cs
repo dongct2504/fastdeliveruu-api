@@ -42,7 +42,6 @@ namespace FastDeliveruu.Domain.Entities
         [Unicode(false)]
         public string? TrackingNumber { get; set; }
         public byte? OrderStatus { get; set; }
-        public byte? PaymentStatus { get; set; }
         public byte? PaymentMethod { get; set; }
         [StringLength(20)]
         [Unicode(false)]

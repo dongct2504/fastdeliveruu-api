@@ -2,7 +2,10 @@
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.MenuItems;
+using FastDeliveruu.Domain.Specifications.Orders;
 using FluentResults;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -24,12 +27,20 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
     {
         VnpayResponse vnpayResponse = request.VnPayResponse;
 
-        Order? order = await _unitOfWork.Orders.GetAsync(vnpayResponse.OrderId);
+        Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsById(vnpayResponse.OrderId));
         if (order == null)
         {
             string message = "Order not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<VnpayResponse>(new NotFoundError(message));
+            return Result.Fail(new NotFoundError(message));
+        }
+
+        Payment? payment = order.Payments.FirstOrDefault();
+        if (payment == null)
+        {
+            string message = "Payment not found for the order.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
         }
 
         order.TransactionId = request.VnPayResponse.TransactionId;
@@ -39,26 +50,69 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
             case "00":
                 vnpayResponse.IsSuccess = true;
                 order.OrderStatus = (byte?)OrderStatusEnum.Success;
-                order.PaymentStatus = (byte?)PaymentStatusEnum.Approved;
-                _unitOfWork.Orders.Update(order);
+                payment.PaymentStatus = (byte?)PaymentStatusEnum.Approved;
                 break;
 
             case "24":
                 vnpayResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatusEnum.Cancelled;
-                order.PaymentStatus = (byte?)PaymentStatusEnum.Cancelled;
-                _unitOfWork.Orders.Update(order);
+                payment.PaymentStatus = (byte?)PaymentStatusEnum.Cancelled;
                 break;
 
             default:
                 vnpayResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatusEnum.Failed;
-                order.PaymentStatus = (byte?)PaymentStatusEnum.Failed;
-                _unitOfWork.Orders.Update(order);
+                payment.PaymentStatus = (byte?)PaymentStatusEnum.Failed;
                 await _unitOfWork.SaveChangesAsync();
                 string unknownMessage = $"Payment failed with response code {request.VnPayResponse.VnpayResponseCode}.";
                 _logger.LogWarning($"{request.GetType().Name} - {unknownMessage} - {request}");
                 return Result.Fail(new BadRequestError(unknownMessage));
+        }
+
+        foreach (OrderDetail orderDetail in order.OrderDetails)
+        {
+            if (!orderDetail.MenuVariantId.HasValue) // menu item
+            {
+                MenuItemInventory? menuItemInventory = await _unitOfWork.MenuItemInventories
+                    .GetWithSpecAsync(new MenuItemInventoryByIdSpecification(orderDetail.MenuItemId));
+                if (menuItemInventory == null)
+                {
+                    string message = "MenuItem Inventory not found.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+
+                if (vnpayResponse.IsSuccess)
+                {
+                    menuItemInventory.QuantityReserved -= orderDetail.Quantity;
+                }
+                else
+                {
+                    menuItemInventory.QuantityAvailable += orderDetail.Quantity;
+                    menuItemInventory.QuantityReserved -= orderDetail.Quantity;
+                }
+            }
+            else // menu variant
+            {
+                MenuVariantInventory? menuVariantInventory = await _unitOfWork.MenuVariantInventories
+                    .GetWithSpecAsync(new MenuVariantInventoryByIdSpecification(orderDetail.MenuVariantId.Value));
+                if (menuVariantInventory == null)
+                {
+                    string message = "MenuVariant Inventory not found.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+
+                if (vnpayResponse.IsSuccess)
+                {
+                    menuVariantInventory.QuantityReserved -= orderDetail.Quantity;
+                }
+                else
+                {
+                    menuVariantInventory.QuantityAvailable += orderDetail.Quantity;
+                    menuVariantInventory.QuantityReserved -= orderDetail.Quantity;
+                }
+            }
         }
 
         await _unitOfWork.SaveChangesAsync();

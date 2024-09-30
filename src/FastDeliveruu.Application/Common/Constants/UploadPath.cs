@@ -21,4 +21,9 @@ public static class UploadPath
     public const string MenuItemExcelUploadPath = "menu-items/excel/";
     public const string MenuItemWordUploadPath = "menu-items/word/";
     public const string MenuItemPdfUploadPath = "menu-items/pdf/";
+
+    public const string MenuVariantImageUploadPath = "menu-variants/images/";
+    public const string MenuVariantExcelUploadPath = "menu-variants/excel/";
+    public const string MenuVariantWordUploadPath = "menu-variants/word/";
+    public const string MenuVariantPdfUploadPath = "menu-variants/pdf/";
 }

@@ -3,9 +3,11 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.MenuItems.Commands.DeleteMenuItem;
 using FastDeliveruu.Application.MenuVariants.Commands.CreateMenuVariant;
+using FastDeliveruu.Application.MenuVariants.Commands.DeleteMenuVariant;
 using FastDeliveruu.Application.MenuVariants.Commands.UpdateMenuVariant;
 using FastDeliveruu.Application.MenuVariants.Queries.GetByMenuItem;
 using FastDeliveruu.Application.MenuVariants.Queries.GetMenuVariantById;
+using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +53,7 @@ public class MenuVariantsController : ApiController
     [ProducesResponseType(typeof(MenuVariantDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateMenuVariant([FromBody] CreateMenuVariantCommand command)
+    public async Task<IActionResult> CreateMenuVariant([FromForm] CreateMenuVariantCommand command)
     {
         Result<MenuVariantDto> result = await _mediator.Send(command);
         if (result.IsFailed)
@@ -70,7 +72,7 @@ public class MenuVariantsController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateMenuVariant(Guid id, [FromBody] UpdateMenuVariantCommand command)
+    public async Task<IActionResult> UpdateMenuVariant(Guid id, [FromForm] UpdateMenuVariantCommand command)
     {
         if (id != command.Id)
         {
@@ -92,7 +94,7 @@ public class MenuVariantsController : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMenuVariant(Guid id)
     {
-        DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);
+        DeleteMenuVariantCommand command = new DeleteMenuVariantCommand(id, User.GetCurrentUserId());
         Result result = await _mediator.Send(command);
         if (result.IsFailed)
         {

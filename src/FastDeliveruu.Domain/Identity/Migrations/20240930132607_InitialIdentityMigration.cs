@@ -319,17 +319,17 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     table.PrimaryKey("PK_AddressesCustomers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AddressCustomers_Cities",
+                        name: "FK_AddressCustomers_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_AddressCustomers_Districts",
+                        name: "FK_AddressCustomers_Districts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_AddressCustomers_Wards",
+                        name: "FK_AddressCustomers_Wards_WardId",
                         column: x => x.WardId,
                         principalTable: "Wards",
                         principalColumn: "Id");
@@ -355,8 +355,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     PhoneNumber = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
                     TrackingNumber = table.Column<string>(type: "varchar(128)", unicode: false, maxLength: 128, nullable: true),
-                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
-                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true, defaultValueSql: "((0))"),
+                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true),
                     PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
                     TransactionId = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
@@ -378,22 +377,22 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Orders_Cities",
+                        name: "FK_Orders_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Orders_DeliveryMethods",
+                        name: "FK_Orders_DeliveryMethods_DeliveryMethodId",
                         column: x => x.DeliveryMethodId,
                         principalTable: "DeliveryMethods",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Orders_Districts",
+                        name: "FK_Orders_Districts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Orders_Wards",
+                        name: "FK_Orders_Wards_WardId",
                         column: x => x.WardId,
                         principalTable: "Wards",
                         principalColumn: "Id");
@@ -423,17 +422,17 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     table.PrimaryKey("PK_Restaurants", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Restaurants_Cities",
+                        name: "FK_Restaurants_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Restaurants_Districts",
+                        name: "FK_Restaurants_Districts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Restaurants_Wards",
+                        name: "FK_Restaurants_Wards_WardId",
                         column: x => x.WardId,
                         principalTable: "Wards",
                         principalColumn: "Id");
@@ -573,6 +572,28 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MenuItemInventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuantityAvailable = table.Column<int>(type: "int", nullable: false),
+                    QuantityReserved = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuItemInventories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MenuItemInventories_MenuItems_MenuItemId",
+                        column: x => x.MenuItemId,
+                        principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MenuItemReviews",
                 columns: table => new
                 {
@@ -627,28 +648,23 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WishLists",
+                name: "MenuVariantInventories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuVariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuantityAvailable = table.Column<int>(type: "int", nullable: false),
+                    QuantityReserved = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WishLists", x => x.Id);
+                    table.PrimaryKey("PK_MenuVariantInventories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WishLists_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_WishLists_MenuItems_MenuItemId",
-                        column: x => x.MenuItemId,
-                        principalTable: "MenuItems",
+                        name: "FK_MenuVariantInventories_MenuVariants_MenuVariantId",
+                        column: x => x.MenuVariantId,
+                        principalTable: "MenuVariants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -717,6 +733,39 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ShoppingCarts_MenuVariants_MenuVariantId",
+                        column: x => x.MenuVariantId,
+                        principalTable: "MenuVariants",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WishLists",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MenuVariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WishLists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WishLists_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_WishLists_MenuItems_MenuItemId",
+                        column: x => x.MenuItemId,
+                        principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_WishLists_MenuVariants_MenuVariantId",
                         column: x => x.MenuVariantId,
                         principalTable: "MenuVariants",
                         principalColumn: "Id");
@@ -818,6 +867,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MenuItemInventory_MenuItemId",
+                table: "MenuItemInventories",
+                column: "MenuItemId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MenuItemReviews_AppUserId",
                 table: "MenuItemReviews",
                 column: "AppUserId");
@@ -836,6 +890,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "IX_MenuItems_RestaurantId",
                 table: "MenuItems",
                 column: "RestaurantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuVariantInventory_MenuVariantId",
+                table: "MenuVariantInventories",
+                column: "MenuVariantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MenuVariants_MenuItemId",
@@ -966,6 +1025,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "IX_WishLists_MenuItemId",
                 table: "WishLists",
                 column: "MenuItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WishLists_MenuVariantId",
+                table: "WishLists",
+                column: "MenuVariantId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -992,7 +1056,13 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "Coupons");
 
             migrationBuilder.DropTable(
+                name: "MenuItemInventories");
+
+            migrationBuilder.DropTable(
                 name: "MenuItemReviews");
+
+            migrationBuilder.DropTable(
+                name: "MenuVariantInventories");
 
             migrationBuilder.DropTable(
                 name: "Notifications");

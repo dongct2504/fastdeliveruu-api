@@ -49,7 +49,6 @@ public class UpdateRestaurantHourCommandHandler : IRequestHandler<UpdateRestaura
         _mapper.Map(request, restaurantHour);
         restaurantHour.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.RestaurantHours.Update(restaurantHour);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

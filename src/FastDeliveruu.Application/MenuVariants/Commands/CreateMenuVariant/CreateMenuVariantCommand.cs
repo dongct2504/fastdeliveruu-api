@@ -1,6 +1,7 @@
 ﻿using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FluentResults;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace FastDeliveruu.Application.MenuVariants.Commands.CreateMenuVariant;
 
@@ -13,4 +14,6 @@ public class CreateMenuVariantCommand : IRequest<Result<MenuVariantDto>>
     public decimal Price { get; set; }
 
     public decimal DiscountPercent { get; set; }
+
+    public IFormFile ImageFile { get; set; } = null!;
 }

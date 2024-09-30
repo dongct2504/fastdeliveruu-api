@@ -69,7 +69,6 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
         }
         restaurant.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Restaurants.Update(restaurant);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

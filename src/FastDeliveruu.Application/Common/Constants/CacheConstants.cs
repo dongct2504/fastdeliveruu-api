@@ -9,6 +9,8 @@ public static class CacheConstants
 
     public const string MenuItems = "menuitems";
     public const string MenuVariants = "menuVariants";
+    public const string MenuItemInventories = "menuItemInventories";
+    public const string MenuVariantInventories = "menuVariantInventories";
 
     public const string AppUsers = "appUsers";
 

@@ -1,9 +1,11 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Infrastructure.Specifications.MenuVariants;
+using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -15,6 +17,7 @@ public class CreateMenuVariantCommandHandler : IRequestHandler<CreateMenuVariant
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IFileStorageServices _fileStorageServices;
     private readonly ILogger<CreateMenuVariantCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
 
@@ -22,12 +25,14 @@ public class CreateMenuVariantCommandHandler : IRequestHandler<CreateMenuVariant
         IMapper mapper,
         ILogger<CreateMenuVariantCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        IFileStorageServices fileStorageServices)
     {
         _mapper = mapper;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
+        _fileStorageServices = fileStorageServices;
     }
 
     public async Task<Result<MenuVariantDto>> Handle(CreateMenuVariantCommand request, CancellationToken cancellationToken)
@@ -53,6 +58,18 @@ public class CreateMenuVariantCommandHandler : IRequestHandler<CreateMenuVariant
         menuVariant = _mapper.Map<MenuVariant>(request);
         menuVariant.Id = Guid.NewGuid();
         menuVariant.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
+
+        UploadResult uploadResult = await _fileStorageServices
+            .UploadImageAsync(request.ImageFile, UploadPath.MenuVariantImageUploadPath);
+        if (uploadResult.Error != null)
+        {
+            string message = uploadResult.Error.Message;
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        menuVariant.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+        menuVariant.PublicId = uploadResult.PublicId;
 
         _unitOfWork.MenuVariants.Add(menuVariant);
         await _unitOfWork.SaveChangesAsync();

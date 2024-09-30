@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20240927014903_InitialIdentityMigration")]
+    [Migration("20240930132607_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,6 +78,62 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasIndex(new[] { "WardId" }, "IX_DeliveryAddresses_WardId");
 
                     b.ToTable("AddressesCustomers");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuItemInventory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuantityAvailable")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityReserved")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "MenuItemId" }, "IX_MenuItemInventory_MenuItemId");
+
+                    b.ToTable("MenuItemInventories");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuVariantInventory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid>("MenuVariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuantityAvailable")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityReserved")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "MenuVariantId" }, "IX_MenuVariantInventory_MenuVariantId");
+
+                    b.ToTable("MenuVariantInventories");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.City", b =>
@@ -540,17 +596,10 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<byte?>("OrderStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint")
-                        .HasDefaultValueSql("((0))");
+                        .HasColumnType("tinyint");
 
                     b.Property<byte?>("PaymentMethod")
                         .HasColumnType("tinyint");
-
-                    b.Property<byte?>("PaymentStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint")
-                        .HasDefaultValueSql("((0))");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -631,7 +680,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.OrderDetail", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -920,10 +968,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("MenuItemId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("MenuVariantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MenuVariantId");
 
                     b.HasIndex(new[] { "AppUserId" }, "IX_WishLists_AppUserId");
 
@@ -1076,21 +1129,21 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_AddressCustomers_Cities");
+                        .HasConstraintName("FK_AddressCustomers_Cities_CityId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
                         .WithMany("AddressesCustomers")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_AddressCustomers_Districts");
+                        .HasConstraintName("FK_AddressCustomers_Districts_DistrictId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
                         .WithMany("AddressesCustomers")
                         .HasForeignKey("WardId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_AddressCustomers_Wards");
+                        .HasConstraintName("FK_AddressCustomers_Wards_WardId");
 
                     b.Navigation("AppUser");
 
@@ -1099,6 +1152,28 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("District");
 
                     b.Navigation("Ward");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuItemInventory", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.MenuItem", "MenuItem")
+                        .WithMany("MenuItemInventories")
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuItem");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuVariantInventory", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.MenuVariant", "MenuVariant")
+                        .WithMany("MenuVariantInventories")
+                        .HasForeignKey("MenuVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuVariant");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Coupon", b =>
@@ -1196,27 +1271,27 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Orders_Cities");
+                        .HasConstraintName("FK_Orders_Cities_CityId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.DeliveryMethod", "DeliveryMethod")
                         .WithMany("Orders")
                         .HasForeignKey("DeliveryMethodId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Orders_DeliveryMethods");
+                        .HasConstraintName("FK_Orders_DeliveryMethods_DeliveryMethodId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
                         .WithMany("Orders")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Orders_Districts");
+                        .HasConstraintName("FK_Orders_Districts_DistrictId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
                         .WithMany("Orders")
                         .HasForeignKey("WardId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Orders_Wards");
+                        .HasConstraintName("FK_Orders_Wards_WardId");
 
                     b.Navigation("AppUser");
 
@@ -1250,7 +1325,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.HasOne("FastDeliveruu.Domain.Entities.MenuVariant", "MenuVariant")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("MenuVariantId");
+                        .HasForeignKey("MenuVariantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_OrderDetails_MenuVariants_MenuVariantId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.Order", "Order")
                         .WithMany("OrderDetails")
@@ -1283,21 +1360,21 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Restaurants_Cities");
+                        .HasConstraintName("FK_Restaurants_Cities_CityId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
                         .WithMany("Restaurants")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Restaurants_Districts");
+                        .HasConstraintName("FK_Restaurants_Districts_DistrictId");
 
                     b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
                         .WithMany("Restaurants")
                         .HasForeignKey("WardId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_Restaurants_Wards");
+                        .HasConstraintName("FK_Restaurants_Wards_WardId");
 
                     b.Navigation("City");
 
@@ -1386,9 +1463,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FastDeliveruu.Domain.Entities.MenuVariant", "MenuVariant")
+                        .WithMany("WishLists")
+                        .HasForeignKey("MenuVariantId");
+
                     b.Navigation("AppUser");
 
                     b.Navigation("MenuItem");
+
+                    b.Navigation("MenuVariant");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1495,6 +1578,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuItem", b =>
                 {
+                    b.Navigation("MenuItemInventories");
+
                     b.Navigation("MenuItemReviews");
 
                     b.Navigation("MenuVariants");
@@ -1508,9 +1593,13 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuVariant", b =>
                 {
+                    b.Navigation("MenuVariantInventories");
+
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ShoppingCarts");
+
+                    b.Navigation("WishLists");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Order", b =>

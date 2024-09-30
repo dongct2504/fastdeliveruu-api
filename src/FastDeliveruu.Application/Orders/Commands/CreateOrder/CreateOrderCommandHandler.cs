@@ -4,11 +4,15 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
+using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.Addresses;
+using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
@@ -16,6 +20,7 @@ namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Order>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
@@ -26,17 +31,27 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         ICacheService cacheService,
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<CreateOrderCommandHandler> logger,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        UserManager<AppUser> userManager)
     {
         _mapper = mapper;
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
+        _userManager = userManager;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
+        AppUser? appUser = await _userManager.FindByIdAsync(request.AppUserId.ToString());
+        if (appUser == null)
+        {
+            string message = "The user currently does not login or not found.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
         DeliveryMethod? deliveryMethod = await _unitOfWork.DeliveryMethods.GetAsync(request.DeliveryMethodId);
         if (deliveryMethod == null)
         {
@@ -54,7 +69,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         }
 
         District? district = await _unitOfWork.Districts.GetWithSpecAsync(
-            new DistrictExistInCitySpecification(request.CityId, request.DistrictId), true);
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
         if (district == null)
         {
             string message = "District does not exist in city.";
@@ -63,7 +78,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         }
 
         Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
-            new WardExistInDistrictSpecification(request.DistrictId, request.WardId), true);
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
         if (ward == null)
         {
             string message = "Ward does not exist in district.";
@@ -94,6 +109,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
             orderDetails.Add(new OrderDetail
             {
+                Id = Guid.NewGuid(),
                 OrderId = order.Id,
                 MenuItemId = cartItemDto.MenuItemId,
                 MenuVariantId = cartItemDto.MenuVariantId,
@@ -103,19 +119,69 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             });
 
             totalAmount += itemPrice * cartItemDto.Quantity;
+
+            // if it's a menu item
+            if (!cartItemDto.MenuVariantId.HasValue)
+            {
+                MenuItemInventory? menuItemInventory = await _unitOfWork.MenuItemInventories
+                    .GetWithSpecAsync(new MenuItemInventoryByIdSpecification(cartItemDto.MenuItemId));
+
+                if (menuItemInventory == null || menuItemInventory.QuantityAvailable < cartItemDto.Quantity)
+                {
+                    string message = "Insufficient inventory for the menu item.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+
+                menuItemInventory.QuantityAvailable -= cartItemDto.Quantity;
+                menuItemInventory.QuantityReserved += cartItemDto.Quantity;
+            }
+            else // if it's a menu variant
+            {
+                MenuVariantInventory? menuVariantInventory = await _unitOfWork.MenuVariantInventories
+                    .GetWithSpecAsync(new MenuVariantInventoryByIdSpecification(cartItemDto.MenuVariantId.Value));
+
+                if (menuVariantInventory == null || menuVariantInventory.QuantityAvailable < cartItemDto.Quantity)
+                {
+                    string message = "Insufficient inventory for the menu variant.";
+                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                    return Result.Fail(new BadRequestError(message));
+                }
+
+                menuVariantInventory.QuantityAvailable -= cartItemDto.Quantity;
+                menuVariantInventory.QuantityReserved += cartItemDto.Quantity;
+            }
         }
 
         order.TotalAmount = totalAmount;
         order.OrderDetails = orderDetails;
 
+        order.AppUserId = appUser.Id;
+        order.CityId = city.Id;
+        order.DistrictId = district.Id;
+        order.WardId = ward.Id;
         order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;
         order.TransactionId = "0";
         order.OrderStatus = (byte?)OrderStatusEnum.Pending;
-        order.PaymentStatus = (byte?)PaymentStatusEnum.Pending;
+        order.PaymentMethod = (byte?)request.PaymentMethod;
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         _unitOfWork.Orders.Add(order);
+
+        Payment payment = new Payment
+        {
+            Id = Guid.NewGuid(),
+            OrderId = order.Id,
+            Amount = order.TotalAmount,
+            PaymentStatus = (byte?)PaymentStatusEnum.Pending,
+            PaymentMethod = (byte?)request.PaymentMethod,
+            TransactionId = "0",
+            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+        };
+
+        _unitOfWork.Payments.Add(payment);
+
         await _unitOfWork.SaveChangesAsync();
 
         await _cacheService.RemoveAsync(key, cancellationToken);

@@ -3,7 +3,7 @@ using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Domain.Specifications.RestaurantHours;
+using FastDeliveruu.Domain.Specifications.Restaurants;
 using FluentResults;
 using MapsterMapper;
 using MediatR;

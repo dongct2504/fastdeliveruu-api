@@ -4,11 +4,13 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
-using FastDeliveruu.Domain.Specifications.MenuVariants;
+using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
@@ -17,6 +19,7 @@ namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemCommand, Result<int>>
 {
     private readonly ICacheService _cacheService;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateCartItemCommandHandler> _logger;
     private readonly IMapper _mapper;
@@ -25,18 +28,28 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         IMapper mapper,
         ICacheService cacheService,
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<UpdateCartItemCommandHandler> logger)
+        ILogger<UpdateCartItemCommandHandler> logger,
+        UserManager<AppUser> userManager)
     {
         _mapper = mapper;
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _userManager = userManager;
     }
 
     public async Task<Result<int>> Handle(
         UpdateCartItemCommand request,
         CancellationToken cancellationToken)
     {
+        AppUser? appUser = await _userManager.FindByIdAsync(request.AppUserId.ToString());
+        if (appUser == null)
+        {
+            string message = "The user currently does not login or not found.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {

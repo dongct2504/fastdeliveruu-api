@@ -49,7 +49,6 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
         _mapper.Map(request, district);
         district.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        _unitOfWork.Districts.Update(district);
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

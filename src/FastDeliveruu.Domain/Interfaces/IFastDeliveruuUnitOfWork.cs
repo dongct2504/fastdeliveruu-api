@@ -7,12 +7,17 @@ public interface IFastDeliveruuUnitOfWork : IDisposable
     IRestaurantHourRepository RestaurantHours { get; }
     IMenuItemRepository MenuItems { get; }
     IMenuVariantRepository MenuVariants { get; }
+    IMenuItemInventoryRepository MenuItemInventories { get; }
+    IMenuVariantInventoryRepository MenuVariantInventories { get; }
     IDeliveryMethodRepository DeliveryMethods { get; }
     IOrderRepository Orders { get; }
+    IPaymentRepository Payments { get; }
+    IOrderDetailRepository OrderDetails { get; }
     ICityRepository Cities { get; }
     IDistrictRepository Districts { get; }
     IWardRepository Wards { get; }
     IAddressesCustomerRepository AddressesCustomers { get; }
+    IWishListRepository WishLists { get; }
 
     Task SaveChangesAsync();
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -25,6 +26,8 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<MenuItem> MenuItems { get; set; } = null!;
         public virtual DbSet<MenuItemReview> MenuItemReviews { get; set; } = null!;
         public virtual DbSet<MenuVariant> MenuVariants { get; set; } = null!;
+        public virtual DbSet<MenuItemInventory> MenuItemInventories { get; set; } = null!;
+        public virtual DbSet<MenuVariantInventory> MenuVariantInventories { get; set; } = null!;
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
@@ -46,6 +49,7 @@ namespace FastDeliveruu.Domain.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // addresses configuration
             modelBuilder.Entity<AddressesCustomer>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -54,52 +58,48 @@ namespace FastDeliveruu.Domain.Data
                     .WithMany(p => p.AddressesCustomers)
                     .HasForeignKey(d => d.CityId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_AddressCustomers_Cities");
+                    .HasConstraintName("FK_AddressCustomers_Cities_CityId");
 
                 entity.HasOne(d => d.District)
                     .WithMany(p => p.AddressesCustomers)
                     .HasForeignKey(d => d.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_AddressCustomers_Districts");
+                    .HasConstraintName("FK_AddressCustomers_Districts_DistrictId");
 
                 entity.HasOne(d => d.Ward)
                     .WithMany(p => p.AddressesCustomers)
                     .HasForeignKey(d => d.WardId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_AddressCustomers_Wards");
+                    .HasConstraintName("FK_AddressCustomers_Wards_WardId");
             });
 
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.OrderStatus).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.PaymentStatus).HasDefaultValueSql("((0))");
-
                 entity.HasOne(d => d.DeliveryMethod)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.DeliveryMethodId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Orders_DeliveryMethods");
+                    .OnDelete(DeleteBehavior.NoAction) // manually handle null 
+                    .HasConstraintName("FK_Orders_DeliveryMethods_DeliveryMethodId");
 
                 entity.HasOne(d => d.City)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CityId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Orders_Cities");
+                    .HasConstraintName("FK_Orders_Cities_CityId");
 
                 entity.HasOne(d => d.District)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Orders_Districts");
+                    .HasConstraintName("FK_Orders_Districts_DistrictId");
 
                 entity.HasOne(d => d.Ward)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.WardId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Orders_Wards");
+                    .HasConstraintName("FK_Orders_Wards_WardId");
             });
 
             modelBuilder.Entity<Restaurant>(entity =>
@@ -110,19 +110,31 @@ namespace FastDeliveruu.Domain.Data
                     .WithMany(p => p.Restaurants)
                     .HasForeignKey(d => d.CityId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Restaurants_Cities");
+                    .HasConstraintName("FK_Restaurants_Cities_CityId");
 
                 entity.HasOne(d => d.District)
                     .WithMany(p => p.Restaurants)
                     .HasForeignKey(d => d.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Restaurants_Districts");
+                    .HasConstraintName("FK_Restaurants_Districts_DistrictId");
 
                 entity.HasOne(d => d.Ward)
                     .WithMany(p => p.Restaurants)
                     .HasForeignKey(d => d.WardId)
                     .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_Restaurants_Wards");
+                    .HasConstraintName("FK_Restaurants_Wards_WardId");
+            });
+
+            // order detail configuration for menu variant
+            modelBuilder.Entity<OrderDetail>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.MenuVariant)
+                    .WithMany(p => p.OrderDetails)
+                    .HasForeignKey(d => d.MenuVariantId)
+                    .OnDelete(DeleteBehavior.NoAction) // manually handle null 
+                    .HasConstraintName("FK_OrderDetails_MenuVariants_MenuVariantId");
             });
         }
 
@@ -370,6 +382,6 @@ namespace FastDeliveruu.Domain.Data
         //    OnModelCreatingPartial(modelBuilder);
         //}
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        //partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
