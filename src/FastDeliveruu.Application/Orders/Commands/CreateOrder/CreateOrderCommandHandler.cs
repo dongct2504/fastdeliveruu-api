@@ -156,10 +156,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.TotalAmount = totalAmount;
         order.OrderDetails = orderDetails;
 
-        order.AppUserId = appUser.Id;
-        order.CityId = city.Id;
-        order.DistrictId = district.Id;
-        order.WardId = ward.Id;
         order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;
         order.TransactionId = "0";
