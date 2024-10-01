@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FastDeliveruu.Domain.Entities.AutoGenEntities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -38,11 +39,20 @@ public class AppUser : IdentityUser<Guid>
     [InverseProperty("AppUser")]
     public virtual ICollection<MenuItemReview> MenuItemReviews { get; set; } = new HashSet<MenuItemReview>();
     [InverseProperty("AppUser")]
-    public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
+    public virtual ICollection<AppUserNotification> AppUserNotifications { get; set; } = new HashSet<AppUserNotification>();
 
     [InverseProperty("AppUser")]
     public virtual ICollection<Coupon> Coupons { get; set; } = new HashSet<Coupon>();
 
     [InverseProperty("AppUser")]
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new HashSet<ShoppingCart>();
+
+    [InverseProperty("SenderAppUser")]
+    public ICollection<Chat> SentChats { get; set; } = new HashSet<Chat>();
+
+    [InverseProperty("RecipientAppUser")]
+    public ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
+
+    // identity
+    public ICollection<AppUserRoles> AppUserRoles { get; set; } = new List<AppUserRoles>();
 }

@@ -6,13 +6,10 @@ namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
 
 public class GetAllUsersQuery : IRequest<PagedList<AppUserDto>>
 {
-    public GetAllUsersQuery(int pageNumber, int pageSize)
+    public GetAllUsersQuery(AppUserParams appUserParams)
     {
-        PageNumber = pageNumber;
-        PageSize = pageSize;
+        AppUserParams = appUserParams;
     }
 
-    public int PageNumber { get; }
-
-    public int PageSize { get; }
+    public AppUserParams AppUserParams { get; }
 }

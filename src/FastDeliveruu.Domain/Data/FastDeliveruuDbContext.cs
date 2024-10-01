@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FastDeliveruu.Domain.Data
 {
-    public partial class FastDeliveruuDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
+    public partial class FastDeliveruuDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         public FastDeliveruuDbContext(DbContextOptions<FastDeliveruuDbContext> options)
             : base(options)
@@ -29,7 +29,8 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<MenuItemInventory> MenuItemInventories { get; set; } = null!;
         public virtual DbSet<MenuVariantInventory> MenuVariantInventories { get; set; } = null!;
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
-        public virtual DbSet<Notification> Notifications { get; set; } = null!;
+        public virtual DbSet<AppUserNotification> AppUserNotifications { get; set; } = null!;
+        public virtual DbSet<ShipperNotification> ShipperNotifications { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderDelivery> OrderDeliveries { get; set; } = null!;
         public virtual DbSet<OrderDetail> OrderDetails { get; set; } = null!;
@@ -39,7 +40,10 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<RestaurantReview> RestaurantReviews { get; set; } = null!;
         public virtual DbSet<Ward> Wards { get; set; } = null!;
         public virtual DbSet<WishList> WishLists { get; set; } = null!;
-        public virtual DbSet<AppUser> AppUsers { get; set; } = null!;
+        public virtual DbSet<Chat> Chats { get; set; } = null!;
+
+        // identity related
+        public virtual DbSet<Shipper> Shippers { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -125,7 +129,7 @@ namespace FastDeliveruu.Domain.Data
                     .HasConstraintName("FK_Restaurants_Wards_WardId");
             });
 
-            // order detail configuration for menu variant
+            // order detail configuration for menu variant (delete menu variant affect order detail)
             modelBuilder.Entity<OrderDetail>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -136,6 +140,54 @@ namespace FastDeliveruu.Domain.Data
                     .OnDelete(DeleteBehavior.NoAction) // manually handle null 
                     .HasConstraintName("FK_OrderDetails_MenuVariants_MenuVariantId");
             });
+
+            // order configuration for shipper (delete shipper affect order)
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.Shipper)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.ShipperId)
+                    .OnDelete(DeleteBehavior.NoAction) // manually handle null
+                    .HasConstraintName("FK_Orders_Shippers_ShipperId");
+            });
+
+            // config deletion behavior for sender and receipient in Chat table
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.SenderAppUser)
+                .WithMany(u => u.SentChats)
+                .HasForeignKey(c => c.SenderId)
+                .OnDelete(DeleteBehavior.Cascade); // delete cascade for user sender
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.RecipientAppUser)
+                .WithMany(u => u.ReceivedChats)
+                .HasForeignKey(c => c.RecipientId)
+                .OnDelete(DeleteBehavior.NoAction); // can't delete for recipient
+
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.SenderShipper)
+                .WithMany(s => s.SentChats)
+                .HasForeignKey(c => c.SenderId)
+                .OnDelete(DeleteBehavior.Cascade); // delete cascade for shiper sender
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.RecipientShipper)
+                .WithMany(s => s.ReceivedChats)
+                .HasForeignKey(c => c.RecipientId)
+                .OnDelete(DeleteBehavior.NoAction); // can't delete for recipient
+
+            // fix asp.net auto generate FK for AppUserRoles
+            modelBuilder.Entity<AppUser>()
+                .HasMany(ur => ur.AppUserRoles)
+                .WithOne(u => u.AppUser)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<AppRole>()
+                .HasMany(ur => ur.AppUserRoles)
+                .WithOne(u => u.AppRoles)
+                .HasForeignKey(ur => ur.RoleId)
+                .IsRequired();
         }
 
         //protected override void OnModelCreating(ModelBuilder modelBuilder)

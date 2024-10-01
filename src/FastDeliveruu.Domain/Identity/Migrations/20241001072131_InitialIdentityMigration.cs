@@ -102,6 +102,39 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Shippers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CitizenIdentification = table.Column<string>(type: "varchar(12)", unicode: false, maxLength: 12, nullable: false),
+                    ImageUrl = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
+                    PublicId = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
+                    ModelType = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shippers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -118,6 +151,29 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppUserNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    NotificationType = table.Column<byte>(type: "tinyint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppUserNotifications_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -168,7 +224,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -233,29 +290,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Notifications",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    NotificationType = table.Column<byte>(type: "tinyint", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Notifications_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Districts",
                 columns: table => new
                 {
@@ -273,6 +307,73 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_Districts_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderUserUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    SenderType = table.Column<byte>(type: "tinyint", nullable: false),
+                    RecipientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RecipientUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    RecipientType = table.Column<byte>(type: "tinyint", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    DateSent = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DateRead = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Chats_AspNetUsers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Chats_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Chats_Shippers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Chats_Shippers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShipperNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    NotificationType = table.Column<byte>(type: "tinyint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShipperNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShipperNotifications_Shippers_ShipperId",
+                        column: x => x.ShipperId,
+                        principalTable: "Shippers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -347,6 +448,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DeliveryMethodId = table.Column<int>(type: "int", nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -390,6 +492,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_Orders_Districts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "Districts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_Shippers_ShipperId",
+                        column: x => x.ShipperId,
+                        principalTable: "Shippers",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Orders_Wards_WardId",
@@ -807,6 +914,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "WardId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUserNotifications_AppUserId",
+                table: "AppUserNotifications",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -844,6 +956,16 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chats_RecipientId",
+                table: "Chats",
+                column: "RecipientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chats_SenderId",
+                table: "Chats",
+                column: "SenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Coupons_AppUserId",
@@ -902,11 +1024,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "MenuItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Notifications_AppUserId",
-                table: "Notifications",
-                column: "AppUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_OrderDeliveries_OrderId",
                 table: "OrderDeliveries",
                 column: "OrderId");
@@ -950,6 +1067,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "IX_Orders_DistrictId",
                 table: "Orders",
                 column: "DistrictId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_ShipperId",
+                table: "Orders",
+                column: "ShipperId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_WardId",
@@ -997,6 +1119,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 column: "WardId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShipperNotifications_ShipperId",
+                table: "ShipperNotifications",
+                column: "ShipperId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ShoppingCart_AppUserId",
                 table: "ShoppingCarts",
                 column: "AppUserId");
@@ -1038,6 +1165,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "AddressesCustomers");
 
             migrationBuilder.DropTable(
+                name: "AppUserNotifications");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -1053,6 +1183,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Chats");
+
+            migrationBuilder.DropTable(
                 name: "Coupons");
 
             migrationBuilder.DropTable(
@@ -1063,9 +1196,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "MenuVariantInventories");
-
-            migrationBuilder.DropTable(
-                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "OrderDeliveries");
@@ -1081,6 +1211,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "RestaurantReviews");
+
+            migrationBuilder.DropTable(
+                name: "ShipperNotifications");
 
             migrationBuilder.DropTable(
                 name: "ShoppingCarts");
@@ -1102,6 +1235,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "DeliveryMethods");
+
+            migrationBuilder.DropTable(
+                name: "Shippers");
 
             migrationBuilder.DropTable(
                 name: "MenuItems");

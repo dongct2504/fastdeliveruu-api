@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
 {
-    [Index("AppUserId", Name = "IX_Notifications_AppUserId")]
-    public partial class Notification
+    [Index("ShipperId", Name = "IX_ShipperNotifications_ShipperId")]
+    public partial class ShipperNotification
     {
         [Key]
         public Guid Id { get; set; }
-        public Guid AppUserId { get; set; }
+        public Guid ShipperId { get; set; }
         [StringLength(500)]
         public string? Message { get; set; }
         public bool IsRead { get; set; }
@@ -22,8 +22,8 @@ namespace FastDeliveruu.Domain.Entities
         [Column(TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
 
-        [ForeignKey("AppUserId")]
-        [InverseProperty("Notifications")]
-        public virtual AppUser AppUser { get; set; } = null!;
+        [ForeignKey("ShipperId")]
+        [InverseProperty("ShipperNotifications")]
+        public virtual Shipper Shipper { get; set; } = null!;
     }
 }

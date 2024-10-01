@@ -34,6 +34,35 @@ public class GetAllCitiesQueryHandler : IRequestHandler<GetAllCitiesQuery, Paged
 
         IQueryable<City> citiesQuery = _dbContext.Cities.AsQueryable();
 
+        if (!string.IsNullOrEmpty(request.DefaultParams.Search))
+        {
+            citiesQuery = citiesQuery
+                .Where(c => c.Name.ToLower().Contains(request.DefaultParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(request.DefaultParams.Sort))
+        {
+            switch (request.DefaultParams.Sort)
+            {
+                case SortConstants.OldestUpdateAsc:
+                    citiesQuery = citiesQuery.OrderBy(c => c.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
+                    citiesQuery = citiesQuery.OrderByDescending(c => c.UpdatedAt);
+                    break;
+                case SortConstants.NameAsc:
+                    citiesQuery = citiesQuery.OrderBy(c => c.Name);
+                    break;
+                case SortConstants.NameDesc:
+                    citiesQuery = citiesQuery.OrderByDescending(c => c.Name);
+                    break;
+            }
+        }
+        else
+        {
+            citiesQuery = citiesQuery.OrderBy(c => c.Name);
+        }
+
         PagedList<CityDto> pagedList = new PagedList<CityDto>
         {
             PageNumber = request.DefaultParams.PageNumber,

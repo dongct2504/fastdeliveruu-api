@@ -8,7 +8,7 @@ public class MenuItemParams : DefaultParams
 
     public Guid? RestaurantId { get; set; }
 
-    public new string Sort { get; set; } = MenuItemSortConstants.LatestUpdateDesc;
+    public new string Sort { get; set; } = SortConstants.LatestUpdateDesc;
 
     public override string? ToString()
     {

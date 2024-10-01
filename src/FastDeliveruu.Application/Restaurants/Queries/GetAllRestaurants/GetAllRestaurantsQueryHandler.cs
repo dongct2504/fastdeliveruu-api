@@ -41,22 +41,31 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
 
         if (!string.IsNullOrEmpty(request.RestaurantParams.Search))
         {
-            string lowerCaseSearch = request.RestaurantParams.Search.ToLower();
             restaurantsQuery = restaurantsQuery
-                .Where(r => EF.Functions.Like(r.Name.ToLower(), $"%{lowerCaseSearch}%"));
+                .Where(c => c.Name.ToLower().Contains(request.RestaurantParams.Search.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(request.RestaurantParams.Sort))
         {
             switch (request.RestaurantParams.Sort)
             {
-                case RestaurantSortConstants.LatestUpdateDesc:
+                case SortConstants.OldestUpdateAsc:
+                    restaurantsQuery = restaurantsQuery.OrderBy(r => r.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
                     restaurantsQuery = restaurantsQuery.OrderByDescending(r => r.UpdatedAt);
                     break;
-                case RestaurantSortConstants.Name:
+                case SortConstants.NameAsc:
                     restaurantsQuery = restaurantsQuery.OrderBy(r => r.Name);
                     break;
+                case SortConstants.NameDesc:
+                    restaurantsQuery = restaurantsQuery.OrderByDescending(r => r.Name);
+                    break;
             }
+        }
+        else
+        {
+            restaurantsQuery = restaurantsQuery.OrderBy(r => r.Name);
         }
 
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20240930132607_InitialIdentityMigration")]
+    [Migration("20241001072131_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,6 +78,94 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasIndex(new[] { "WardId" }, "IX_DeliveryAddresses_WardId");
 
                     b.ToTable("AddressesCustomers");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AppUserNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte>("NotificationType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "AppUserId" }, "IX_AppUserNotifications_AppUserId");
+
+                    b.ToTable("AppUserNotifications");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime?>("DateRead")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime?>("DateSent")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("RecipientType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("RecipientUserName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("SenderType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("SenderUserUserName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "RecipientId" }, "IX_Chats_RecipientId");
+
+                    b.HasIndex(new[] { "SenderId" }, "IX_Chats_SenderId");
+
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuItemInventory", b =>
@@ -291,6 +379,34 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("Genres");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -379,6 +495,95 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CitizenIdentification")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(12)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModelType")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PublicId")
+                        .HasMaxLength(256)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Shippers");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuItem", b =>
@@ -515,38 +720,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("MenuVariants");
                 });
 
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Notification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AppUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<byte>("NotificationType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex(new[] { "AppUserId" }, "IX_Notifications_AppUserId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -607,6 +780,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(15)");
 
+                    b.Property<Guid>("ShipperId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(19,4)");
 
@@ -627,6 +803,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ShipperId");
 
                     b.HasIndex(new[] { "AppUserId" }, "IX_Orders_AppUserId");
 
@@ -889,6 +1067,38 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("RestaurantReviews");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShipperNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte>("NotificationType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("ShipperId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "ShipperId" }, "IX_ShipperNotifications_ShipperId");
+
+                    b.ToTable("ShipperNotifications");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShoppingCart", b =>
                 {
                     b.Property<Guid>("Id")
@@ -985,34 +1195,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("WishLists");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -1090,11 +1272,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("UserId", "RoleId");
 
-                    b.HasIndex("RoleId");
-
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserRole<Guid>");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -1114,6 +1300,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRoles", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasDiscriminator().HasValue("AppUserRoles");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AddressesCustomer", b =>
@@ -1152,6 +1347,52 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("District");
 
                     b.Navigation("Ward");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AppUserNotification", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
+                        .WithMany("AppUserNotifications")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.Chat", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "RecipientAppUser")
+                        .WithMany("ReceivedChats")
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "RecipientShipper")
+                        .WithMany("ReceivedChats")
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "SenderAppUser")
+                        .WithMany("SentChats")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "SenderShipper")
+                        .WithMany("SentChats")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RecipientAppUser");
+
+                    b.Navigation("RecipientShipper");
+
+                    b.Navigation("SenderAppUser");
+
+                    b.Navigation("SenderShipper");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuItemInventory", b =>
@@ -1247,17 +1488,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("MenuItem");
                 });
 
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
-                        .WithMany("Notifications")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Order", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
@@ -1286,6 +1516,13 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Orders_Districts_DistrictId");
 
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "Shipper")
+                        .WithMany("Orders")
+                        .HasForeignKey("ShipperId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_Shippers_ShipperId");
+
                     b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
                         .WithMany("Orders")
                         .HasForeignKey("WardId")
@@ -1300,6 +1537,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("DeliveryMethod");
 
                     b.Navigation("District");
+
+                    b.Navigation("Shipper");
 
                     b.Navigation("Ward");
                 });
@@ -1413,6 +1652,17 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShipperNotification", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "Shipper")
+                        .WithMany("ShipperNotifications")
+                        .HasForeignKey("ShipperId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Shipper");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.ShoppingCart", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
@@ -1476,7 +1726,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1501,21 +1751,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", null)
@@ -1523,6 +1758,25 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRoles", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppRole", "AppRoles")
+                        .WithMany("AppUserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
+                        .WithMany("AppUserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppRoles");
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.City", b =>
@@ -1557,23 +1811,45 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("MenuItems");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppRole", b =>
+                {
+                    b.Navigation("AppUserRoles");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUser", b =>
                 {
                     b.Navigation("AddressesCustomers");
+
+                    b.Navigation("AppUserNotifications");
+
+                    b.Navigation("AppUserRoles");
 
                     b.Navigation("Coupons");
 
                     b.Navigation("MenuItemReviews");
 
-                    b.Navigation("Notifications");
-
                     b.Navigation("Orders");
 
+                    b.Navigation("ReceivedChats");
+
                     b.Navigation("RestaurantReviews");
+
+                    b.Navigation("SentChats");
 
                     b.Navigation("ShoppingCarts");
 
                     b.Navigation("WishLists");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
+                {
+                    b.Navigation("Orders");
+
+                    b.Navigation("ReceivedChats");
+
+                    b.Navigation("SentChats");
+
+                    b.Navigation("ShipperNotifications");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuItem", b =>

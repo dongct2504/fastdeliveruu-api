@@ -34,6 +34,35 @@ public class GetAllWardsQueryHandler : IRequestHandler<GetAllWardsQuery, PagedLi
 
         IQueryable<Ward> wardsQuery = _dbContext.Wards.AsQueryable();
 
+        if (!string.IsNullOrEmpty(request.DefaultParams.Search))
+        {
+            wardsQuery = wardsQuery
+                .Where(c => c.Name.ToLower().Contains(request.DefaultParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(request.DefaultParams.Sort))
+        {
+            switch (request.DefaultParams.Sort)
+            {
+                case SortConstants.OldestUpdateAsc:
+                    wardsQuery = wardsQuery.OrderBy(c => c.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
+                    wardsQuery = wardsQuery.OrderByDescending(c => c.UpdatedAt);
+                    break;
+                case SortConstants.NameAsc:
+                    wardsQuery = wardsQuery.OrderBy(c => c.Name);
+                    break;
+                case SortConstants.NameDesc:
+                    wardsQuery = wardsQuery.OrderByDescending(c => c.Name);
+                    break;
+            }
+        }
+        else
+        {
+            wardsQuery = wardsQuery.OrderBy(c => c.Name);
+        }
+
         PagedList<WardDto> pagedList = new PagedList<WardDto>
         {
             PageNumber = request.DefaultParams.PageNumber,

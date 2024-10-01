@@ -32,7 +32,38 @@ public class GetAllMenuVariantInventoriesQueryHandler : IRequestHandler<GetAllMe
             return pagedListCache;
         }
 
-        IQueryable<MenuVariantInventory> menuVariantInventoriesQuery = _dbContext.MenuVariantInventories.AsQueryable();
+        IQueryable<MenuVariantInventory> menuVariantInventoriesQuery = _dbContext.MenuVariantInventories
+            .Include(mi => mi.MenuVariant)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(request.DefaultParams.Search))
+        {
+            menuVariantInventoriesQuery = menuVariantInventoriesQuery
+                .Where(c => c.MenuVariant.VarietyName.ToLower().Contains(request.DefaultParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(request.DefaultParams.Sort))
+        {
+            switch (request.DefaultParams.Sort)
+            {
+                case SortConstants.OldestUpdateAsc:
+                    menuVariantInventoriesQuery = menuVariantInventoriesQuery.OrderBy(c => c.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
+                    menuVariantInventoriesQuery = menuVariantInventoriesQuery.OrderByDescending(c => c.UpdatedAt);
+                    break;
+                case SortConstants.NameAsc:
+                    menuVariantInventoriesQuery = menuVariantInventoriesQuery.OrderBy(c => c.MenuVariant.VarietyName);
+                    break;
+                case SortConstants.NameDesc:
+                    menuVariantInventoriesQuery = menuVariantInventoriesQuery.OrderByDescending(c => c.MenuVariant.VarietyName);
+                    break;
+            }
+        }
+        else
+        {
+            menuVariantInventoriesQuery = menuVariantInventoriesQuery.OrderBy(c => c.MenuVariant.VarietyName);
+        }
 
         PagedList<MenuVariantInventoryDto> pagedList = new PagedList<MenuVariantInventoryDto>
         {

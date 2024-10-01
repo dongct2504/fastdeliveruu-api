@@ -34,6 +34,35 @@ public class GetAllDistrictsQueryHandler : IRequestHandler<GetAllDistrictsQuery,
 
         IQueryable<District> districtsQuery = _dbContext.Districts.AsQueryable();
 
+        if (!string.IsNullOrEmpty(request.DefaultParams.Search))
+        {
+            districtsQuery = districtsQuery
+                .Where(c => c.Name.ToLower().Contains(request.DefaultParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(request.DefaultParams.Sort))
+        {
+            switch (request.DefaultParams.Sort)
+            {
+                case SortConstants.OldestUpdateAsc:
+                    districtsQuery = districtsQuery.OrderBy(c => c.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
+                    districtsQuery = districtsQuery.OrderByDescending(c => c.UpdatedAt);
+                    break;
+                case SortConstants.NameAsc:
+                    districtsQuery = districtsQuery.OrderBy(c => c.Name);
+                    break;
+                case SortConstants.NameDesc:
+                    districtsQuery = districtsQuery.OrderByDescending(c => c.Name);
+                    break;
+            }
+        }
+        else
+        {
+            districtsQuery = districtsQuery.OrderBy(c => c.Name);
+        }
+
         PagedList<DistrictDto> pagedList = new PagedList<DistrictDto>
         {
             PageNumber = request.DefaultParams.PageNumber,

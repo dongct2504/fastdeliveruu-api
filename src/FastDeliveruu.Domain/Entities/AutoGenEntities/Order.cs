@@ -24,6 +24,7 @@ namespace FastDeliveruu.Domain.Entities
         [Key]
         public Guid Id { get; set; }
         public Guid AppUserId { get; set; }
+        public Guid ShipperId { get; set; }
         public int? DeliveryMethodId { get; set; }
         [StringLength(50)]
         public string FirstName { get; set; } = null!;
@@ -81,8 +82,13 @@ namespace FastDeliveruu.Domain.Entities
         [InverseProperty("Order")]
         public virtual ICollection<Payment> Payments { get; set; }
 
+        // identity
         [ForeignKey("AppUserId")]
         [InverseProperty("Orders")]
         public virtual AppUser AppUser { get; set; } = null!;
+
+        [ForeignKey("ShipperId")]
+        [InverseProperty("Orders")]
+        public virtual Shipper Shipper { get; set; } = null!;
     }
 }

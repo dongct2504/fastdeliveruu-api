@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common;
+﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
@@ -9,28 +9,25 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace FastDeliveruu.Application.Users.Queries.GetAllUsers;
+namespace FastDeliveruu.Application.Users.Queries.GetAllUsersWithRoles;
 
-public class GetAllUsersQueryHandler :
-    IRequestHandler<GetAllUsersQuery, PagedList<AppUserDto>>
+public class GetAllUsersWithRolesQueryHandler : IRequestHandler<GetAllUsersWithRolesQuery, PagedList<AppUserWithRolesDto>>
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly ICacheService _cacheService;
 
-    public GetAllUsersQueryHandler(ICacheService cacheService, UserManager<AppUser> userManager)
+    public GetAllUsersWithRolesQueryHandler(UserManager<AppUser> userManager, ICacheService cacheService)
     {
-        _cacheService = cacheService;
         _userManager = userManager;
+        _cacheService = cacheService;
     }
 
-    public async Task<PagedList<AppUserDto>> Handle(
-        GetAllUsersQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PagedList<AppUserWithRolesDto>> Handle(GetAllUsersWithRolesQuery request, CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.AppUsers}-{request.AppUserParams}";
+        string key = $"{CacheConstants.AppUsersWithRoles}-{request.DefaultParams}";
 
-        PagedList<AppUserDto>? pagedListCache = await _cacheService
-            .GetAsync<PagedList<AppUserDto>>(key, cancellationToken);
+        PagedList<AppUserWithRolesDto>? pagedListCache = await _cacheService
+            .GetAsync<PagedList<AppUserWithRolesDto>>(key, cancellationToken);
         if (pagedListCache != null)
         {
             return pagedListCache;
@@ -38,15 +35,15 @@ public class GetAllUsersQueryHandler :
 
         IQueryable<AppUser> appUsersQuery = _userManager.Users.AsQueryable();
 
-        if (!string.IsNullOrEmpty(request.AppUserParams.Search))
+        if (!string.IsNullOrEmpty(request.DefaultParams.Search))
         {
             appUsersQuery = appUsersQuery
-                .Where(c => c.UserName.ToLower().Contains(request.AppUserParams.Search.ToLower()));
+                .Where(c => c.UserName.ToLower().Contains(request.DefaultParams.Search.ToLower()));
         }
 
-        if (!string.IsNullOrEmpty(request.AppUserParams.Sort))
+        if (!string.IsNullOrEmpty(request.DefaultParams.Sort))
         {
-            switch (request.AppUserParams.Sort)
+            switch (request.DefaultParams.Sort)
             {
                 case SortConstants.OldestUpdateAsc:
                     appUsersQuery = appUsersQuery.OrderBy(c => c.UpdatedAt);
@@ -67,16 +64,16 @@ public class GetAllUsersQueryHandler :
             appUsersQuery = appUsersQuery.OrderBy(c => c.UserName);
         }
 
-        PagedList<AppUserDto> pagedList = new PagedList<AppUserDto>
+        PagedList<AppUserWithRolesDto> pagedList = new PagedList<AppUserWithRolesDto>
         {
-            PageNumber = request.AppUserParams.PageNumber,
-            PageSize = request.AppUserParams.PageSize,
+            PageNumber = request.DefaultParams.PageNumber,
+            PageSize = request.DefaultParams.PageSize,
             TotalRecords = await appUsersQuery.CountAsync(cancellationToken),
             Items = await appUsersQuery
                 .AsNoTracking()
-                .ProjectToType<AppUserDto>()
-                .Skip((request.AppUserParams.PageNumber - 1) * request.AppUserParams.PageSize)
-                .Take(request.AppUserParams.PageSize)
+                .ProjectToType<AppUserWithRolesDto>()
+                .Skip((request.DefaultParams.PageNumber - 1) * request.DefaultParams.PageSize)
+                .Take(request.DefaultParams.PageSize)
                 .ToListAsync(cancellationToken)
         };
 

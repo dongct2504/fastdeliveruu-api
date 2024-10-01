@@ -48,7 +48,7 @@ public static class DependencyInjection
 
     private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
+        services.AddIdentity<AppUser, AppRole>(options =>
         {
             // Password settings
             options.Password.RequireDigit = true;
@@ -64,8 +64,9 @@ public static class DependencyInjection
             options.SignIn.RequireConfirmedEmail = true;
         })
         .AddEntityFrameworkStores<FastDeliveruuDbContext>()
-        .AddRoleManager<RoleManager<IdentityRole<Guid>>>()
         .AddSignInManager<SignInManager<AppUser>>()
+        .AddRoleManager<RoleManager<AppRole>>() //.AddRoleManager<RoleManager<IdentityRole<Guid>>>()
+        .AddRoleValidator<RoleValidator<AppRole>>()
         .AddDefaultTokenProviders();
 
         return services;
@@ -106,8 +107,15 @@ public static class DependencyInjection
         {
             options.AddPolicy(PolicyConstants.ManageResources, policy =>
                 policy.RequireRole(RoleConstants.Admin, RoleConstants.Staff));
+            options.AddPolicy(PolicyConstants.RequiredCustomerShipper, policy =>
+                policy.RequireRole(RoleConstants.Customer, RoleConstants.Shipper));
+
             options.AddPolicy(PolicyConstants.RequiredAdmin, policy =>
                 policy.RequireRole(RoleConstants.Admin));
+            options.AddPolicy(PolicyConstants.RequiredStaff, policy =>
+                policy.RequireRole(RoleConstants.Staff));
+            options.AddPolicy(PolicyConstants.RequiredShipper, policy =>
+                policy.RequireRole(RoleConstants.Shipper));
         });
 
         return services;

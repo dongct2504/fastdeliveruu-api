@@ -21,14 +21,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
     private readonly UserManager<AppUser> _userManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<RegisterCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public RegisterCommandHandler(
         IMapper mapper,
         UserManager<AppUser> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager,
+        RoleManager<AppRole> roleManager,
         IDateTimeProvider dateTimeProvider,
         ILogger<RegisterCommandHandler> logger,
         IFastDeliveruuUnitOfWork unitOfWork)
@@ -119,7 +119,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+                //await _roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+                await _roleManager.CreateAsync(new AppRole(roleName));
             }
         }
 

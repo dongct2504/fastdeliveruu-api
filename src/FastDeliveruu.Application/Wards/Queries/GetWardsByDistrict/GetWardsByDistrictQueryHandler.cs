@@ -37,6 +37,35 @@ public class GetWardsByDistrictQueryHandler : IRequestHandler<GetWardsByDistrict
 
         wardsQuery = wardsQuery.Where(w => w.DistrictId == request.WardParams.DistrictId);
 
+        if (!string.IsNullOrEmpty(request.WardParams.Search))
+        {
+            wardsQuery = wardsQuery
+                .Where(c => c.Name.ToLower().Contains(request.WardParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(request.WardParams.Sort))
+        {
+            switch (request.WardParams.Sort)
+            {
+                case SortConstants.OldestUpdateAsc:
+                    wardsQuery = wardsQuery.OrderBy(c => c.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
+                    wardsQuery = wardsQuery.OrderByDescending(c => c.UpdatedAt);
+                    break;
+                case SortConstants.NameAsc:
+                    wardsQuery = wardsQuery.OrderBy(c => c.Name);
+                    break;
+                case SortConstants.NameDesc:
+                    wardsQuery = wardsQuery.OrderByDescending(c => c.Name);
+                    break;
+            }
+        }
+        else
+        {
+            wardsQuery = wardsQuery.OrderBy(c => c.Name);
+        }
+
         PagedList<WardDto> pagedList = new PagedList<WardDto>
         {
             PageNumber = request.WardParams.PageNumber,

@@ -53,6 +53,9 @@ public class AppUserMappingConfig : IRegister
                     .Select(ac => ac.Ward.Name)
                     .FirstOrDefault());
 
+        config.NewConfig<AppUser, AppUserWithRolesDto>()
+            .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRoles.Name).ToList());
+
         config.NewConfig<RegisterCommand, AppUser>();
     }
 }

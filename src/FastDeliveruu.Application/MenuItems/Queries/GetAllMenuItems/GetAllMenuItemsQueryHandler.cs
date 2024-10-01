@@ -56,28 +56,37 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
 
         if (!string.IsNullOrEmpty(request.MenuItemParams.Search))
         {
-            string lowerCaseSearch = request.MenuItemParams.Search.ToLower();
             menuItemsQuery = menuItemsQuery
-                .Where(mi => EF.Functions.Like(mi.Name.ToLower(), $"%{lowerCaseSearch}%"));
+                .Where(mi => mi.Name.ToLower().Contains(request.MenuItemParams.Search.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(request.MenuItemParams.Sort))
         {
             switch (request.MenuItemParams.Sort)
             {
-                case MenuItemSortConstants.LatestUpdateDesc:
+                case SortConstants.OldestUpdateAsc:
+                    menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.UpdatedAt);
+                    break;
+                case SortConstants.LatestUpdateDesc:
                     menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.UpdatedAt);
                     break;
-                case MenuItemSortConstants.PriceAsc:
+                case SortConstants.PriceAsc:
                     menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Price);
                     break;
-                case MenuItemSortConstants.PriceDesc:
+                case SortConstants.PriceDesc:
                     menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.Price);
                     break;
-                case MenuItemSortConstants.Name:
+                case SortConstants.NameAsc:
                     menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Name);
                     break;
+                case SortConstants.NameDesc:
+                    menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.Name);
+                    break;
             }
+        }
+        else
+        {
+            menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.UpdatedAt);
         }
 
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>

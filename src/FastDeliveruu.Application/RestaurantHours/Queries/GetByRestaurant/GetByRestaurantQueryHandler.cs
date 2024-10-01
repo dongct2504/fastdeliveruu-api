@@ -15,14 +15,11 @@ public class GetByRestaurantQueryHandler : IRequestHandler<GetByRestaurantQuery,
 {
     private readonly FastDeliveruuDbContext _dbContext;
     private readonly ICacheService _cacheService;
-    private readonly ILogger<GetByRestaurantQueryHandler> _logger;
 
     public GetByRestaurantQueryHandler(
-        ILogger<GetByRestaurantQueryHandler> logger,
         ICacheService cacheService,
         FastDeliveruuDbContext dbContext)
     {
-        _logger = logger;
         _cacheService = cacheService;
         _dbContext = dbContext;
     }
@@ -31,7 +28,7 @@ public class GetByRestaurantQueryHandler : IRequestHandler<GetByRestaurantQuery,
     {
         string key = $"{CacheConstants.RestaurantHours}-{request.RestaurantId}";
         List<RestaurantHourDto>? restaurantHourDtosCache = await _cacheService
-            .GetAsync<List<RestaurantHourDto>>(key);
+            .GetAsync<List<RestaurantHourDto>>(key, cancellationToken);
 
         if (restaurantHourDtosCache != null)
         {
@@ -46,7 +43,7 @@ public class GetByRestaurantQueryHandler : IRequestHandler<GetByRestaurantQuery,
         List<RestaurantHourDto> restaurantHourDtos = await restaurantHoursQuery
             .AsNoTracking()
             .ProjectToType<RestaurantHourDto>()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         await _cacheService.SetAsync(key, restaurantHourDtos, CacheOptions.DefaultExpiration, cancellationToken);
 
