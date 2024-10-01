@@ -1,5 +1,4 @@
 using FastDeliveruu.Application;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using FastDeliveruu.Api.Middleware;
@@ -7,6 +6,8 @@ using Asp.Versioning;
 using FastDeliveruu.Infrastructure;
 using FastDeliveruu.Api.Extensions;
 using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Infrastructure.Services;
+using FastDeliveruu.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -17,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddEndpointsApiExplorer();
 
     builder.Services.AddSwaggerDocument();
-    
+
     // setting connection string and register DbContext
     //var defaultSqlConnectionStringBuilder = new SqlConnectionStringBuilder
     //{
@@ -43,12 +44,13 @@ var builder = WebApplication.CreateBuilder(args);
         .AddApplication()
         .AddInfrastructure(builder.Configuration);
 
-    Log.Logger = new LoggerConfiguration()
-        .ReadFrom
-        .Configuration(builder.Configuration)
-        .CreateLogger();
-
-    builder.Host.UseSerilog();
+    // configure Serilog
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .Enrich.With(new VietnamDateTimeEnricher(services.GetRequiredService<IDateTimeProvider>()));
+    });
 
     builder.Services.AddApiVersioning(options =>
     {
@@ -75,11 +77,12 @@ var app = builder.Build();
 
     //app.UseHttpsRedirection();
 
-    using IServiceScope serviceScope = app.Services.CreateScope();
-
-    using FastDeliveruuDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<FastDeliveruuDbContext>();
-
-    dbContext.Database.Migrate();
+    using (IServiceScope serviceScope = app.Services.CreateScope())
+    {
+        var services = serviceScope.ServiceProvider;
+        using FastDeliveruuDbContext dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
+        dbContext.Database.Migrate();
+    }
 
     app.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -87,7 +90,8 @@ var app = builder.Build();
 
     app.UseResponseCaching();
 
-    app.UseCors(policy => policy.AllowAnyHeader()
+    app.UseCors(policy => policy
+        .AllowAnyHeader()
         .AllowAnyMethod()
         .WithOrigins("http://localhost:4200"));
 
