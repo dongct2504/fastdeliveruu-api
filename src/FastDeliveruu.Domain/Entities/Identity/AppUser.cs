@@ -48,11 +48,11 @@ public class AppUser : IdentityUser<Guid>
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new HashSet<ShoppingCart>();
 
     [InverseProperty("SenderAppUser")]
-    public ICollection<Chat> SentChats { get; set; } = new HashSet<Chat>();
+    public virtual ICollection<Chat> SentChats { get; set; } = new HashSet<Chat>();
 
     [InverseProperty("RecipientAppUser")]
-    public ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
+    public virtual ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
 
     // identity
-    public ICollection<AppUserRoles> AppUserRoles { get; set; } = new List<AppUserRoles>();
+    public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();
 }

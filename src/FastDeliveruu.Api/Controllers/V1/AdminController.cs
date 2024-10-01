@@ -37,7 +37,7 @@ public class AdminController : ApiController
     }
 
     [HttpGet("get-users-with-roles")]
-    [ProducesResponseType(typeof(PagedList<AppUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<AppUserWithRolesDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsersWithRoles([FromQuery] DefaultParams defaultParams)
     {
         GetAllUsersWithRolesQuery query = new GetAllUsersWithRolesQuery(defaultParams);

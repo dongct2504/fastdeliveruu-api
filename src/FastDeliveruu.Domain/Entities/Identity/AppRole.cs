@@ -12,5 +12,5 @@ public class AppRole : IdentityRole<Guid>
     {
     }
 
-    public ICollection<AppUserRoles> AppUserRoles { get; set; } = new List<AppUserRoles>();
+    public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();
 }

@@ -224,8 +224,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {

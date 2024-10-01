@@ -17,16 +17,13 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
 {
     private readonly ICacheService _cacheService;
     private readonly FastDeliveruuDbContext _dbContext;
-    private readonly ILogger<GetAllMenuItemsQueryHandler> _logger;
 
     public GetAllMenuItemsQueryHandler(
         ICacheService cacheService,
-        FastDeliveruuDbContext dbContext,
-        ILogger<GetAllMenuItemsQueryHandler> logger)
+        FastDeliveruuDbContext dbContext)
     {
         _cacheService = cacheService;
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public async Task<PagedList<MenuItemDto>> Handle(

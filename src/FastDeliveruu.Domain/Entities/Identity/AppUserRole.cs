@@ -2,8 +2,8 @@
 
 namespace FastDeliveruu.Domain.Entities.Identity;
 
-public class AppUserRoles : IdentityUserRole<Guid>
+public class AppUserRole : IdentityUserRole<Guid>
 {
-    public AppUser AppUser { get; set; } = null!;
-    public AppRole AppRoles { get; set; } = null!;
+    public virtual AppUser AppUser { get; set; } = null!;
+    public virtual AppRole AppRole { get; set; } = null!;
 }

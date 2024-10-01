@@ -54,7 +54,7 @@ public class AppUserMappingConfig : IRegister
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserWithRolesDto>()
-            .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRoles.Name).ToList());
+            .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRole.Name).ToList());
 
         config.NewConfig<RegisterCommand, AppUser>();
     }

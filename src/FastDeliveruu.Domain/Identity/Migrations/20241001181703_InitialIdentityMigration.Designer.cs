@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20241001072131_InitialIdentityMigration")]
+    [Migration("20241001181703_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -495,6 +495,21 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRole", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
@@ -1264,25 +1279,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserRole<Guid>");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -1300,15 +1296,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRoles", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasDiscriminator().HasValue("AppUserRoles");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AddressesCustomer", b =>
@@ -1437,6 +1424,25 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRole", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppRole", "AppRole")
+                        .WithMany("AppUserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
+                        .WithMany("AppUserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppRole");
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuItem", b =>
@@ -1758,25 +1764,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.AppUserRoles", b =>
-                {
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppRole", "AppRoles")
-                        .WithMany("AppUserRoles")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "AppUser")
-                        .WithMany("AppUserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppRoles");
-
-                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.City", b =>

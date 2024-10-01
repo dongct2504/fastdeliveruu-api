@@ -10,7 +10,10 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FastDeliveruu.Domain.Data
 {
-    public partial class FastDeliveruuDbContext : IdentityDbContext<AppUser, AppRole, Guid>
+    //public partial class FastDeliveruuDbContext : IdentityDbContext<AppUser, AppRole, Guid> // for not dealing with roles
+    public partial class FastDeliveruuDbContext : IdentityDbContext<AppUser, AppRole, Guid,
+        IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>,
+        IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
         public FastDeliveruuDbContext(DbContextOptions<FastDeliveruuDbContext> options)
             : base(options)
@@ -185,7 +188,7 @@ namespace FastDeliveruu.Domain.Data
 
             modelBuilder.Entity<AppRole>()
                 .HasMany(ur => ur.AppUserRoles)
-                .WithOne(u => u.AppRoles)
+                .WithOne(u => u.AppRole)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
         }

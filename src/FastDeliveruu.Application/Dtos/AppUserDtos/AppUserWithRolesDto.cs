@@ -10,5 +10,5 @@ public class AppUserWithRolesDto
 
     public string? ImageUrl { get; set; }
 
-    public string Roles { get; set; } = null!;
+    public List<string> Roles { get; set; } = new List<string>();
 }
