@@ -148,7 +148,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<byte>("SenderType")
                         .HasColumnType("tinyint");
 
-                    b.Property<string>("SenderUserUserName")
+                    b.Property<string>("SenderUserName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .IsUnicode(false)

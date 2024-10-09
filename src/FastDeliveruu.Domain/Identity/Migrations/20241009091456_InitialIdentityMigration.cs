@@ -526,7 +526,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderUserUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    SenderUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
                     SenderType = table.Column<byte>(type: "tinyint", nullable: false),
                     RecipientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RecipientUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),

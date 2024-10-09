@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20241009025352_InitialIdentityMigration")]
+    [Migration("20241009091456_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -150,7 +150,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<byte>("SenderType")
                         .HasColumnType("tinyint");
 
-                    b.Property<string>("SenderUserUserName")
+                    b.Property<string>("SenderUserName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .IsUnicode(false)
