@@ -102,39 +102,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Shippers",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CitizenIdentification = table.Column<string>(type: "varchar(12)", unicode: false, maxLength: 12, nullable: false),
-                    ImageUrl = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
-                    PublicId = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
-                    ModelType = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Shippers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -311,73 +278,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chats",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderUserUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
-                    SenderType = table.Column<byte>(type: "tinyint", nullable: false),
-                    RecipientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RecipientUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
-                    RecipientType = table.Column<byte>(type: "tinyint", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    DateSent = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DateRead = table.Column<DateTime>(type: "datetime", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Chats", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Chats_AspNetUsers_RecipientId",
-                        column: x => x.RecipientId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Chats_AspNetUsers_SenderId",
-                        column: x => x.SenderId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Chats_Shippers_RecipientId",
-                        column: x => x.RecipientId,
-                        principalTable: "Shippers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Chats_Shippers_SenderId",
-                        column: x => x.SenderId,
-                        principalTable: "Shippers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ShipperNotifications",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    NotificationType = table.Column<byte>(type: "tinyint", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ShipperNotifications", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ShipperNotifications_Shippers_ShipperId",
-                        column: x => x.ShipperId,
-                        principalTable: "Shippers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Wards",
                 columns: table => new
                 {
@@ -442,69 +342,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Orders",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeliveryMethodId = table.Column<int>(type: "int", nullable: true),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    OrderDescription = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    PhoneNumber = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
-                    TrackingNumber = table.Column<string>(type: "varchar(128)", unicode: false, maxLength: 128, nullable: true),
-                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true),
-                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
-                    TransactionId = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    CityId = table.Column<int>(type: "int", nullable: false),
-                    DistrictId = table.Column<int>(type: "int", nullable: false),
-                    WardId = table.Column<int>(type: "int", nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
-                    Longitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Orders_Cities_CityId",
-                        column: x => x.CityId,
-                        principalTable: "Cities",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Orders_DeliveryMethods_DeliveryMethodId",
-                        column: x => x.DeliveryMethodId,
-                        principalTable: "DeliveryMethods",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Orders_Districts_DistrictId",
-                        column: x => x.DistrictId,
-                        principalTable: "Districts",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Orders_Shippers_ShipperId",
-                        column: x => x.ShipperId,
-                        principalTable: "Shippers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Orders_Wards_WardId",
-                        column: x => x.WardId,
-                        principalTable: "Wards",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Restaurants",
                 columns: table => new
                 {
@@ -545,51 +382,57 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderDeliveries",
+                name: "Shippers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeliveryStatus = table.Column<byte>(type: "tinyint", nullable: false),
-                    EstimatedDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ActualDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderDeliveries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderDeliveries_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Payments",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
-                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true),
-                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
-                    TransactionId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CitizenIdentification = table.Column<string>(type: "varchar(12)", unicode: false, maxLength: 12, nullable: false),
+                    ImageUrl = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
+                    PublicId = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
+                    ModelType = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
+                    CityId = table.Column<int>(type: "int", nullable: false),
+                    DistrictId = table.Column<int>(type: "int", nullable: false),
+                    WardId = table.Column<int>(type: "int", nullable: false),
+                    Latitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    Longitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.PrimaryKey("PK_Shippers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payments_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Shippers_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Shippers_Districts_DistrictId",
+                        column: x => x.DistrictId,
+                        principalTable: "Districts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Shippers_Wards_WardId",
+                        column: x => x.WardId,
+                        principalTable: "Wards",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -678,6 +521,136 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderUserUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    SenderType = table.Column<byte>(type: "tinyint", nullable: false),
+                    RecipientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RecipientUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    RecipientType = table.Column<byte>(type: "tinyint", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    DateSent = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DateRead = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Chats_AspNetUsers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Chats_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Chats_Shippers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Chats_Shippers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeliveryMethodId = table.Column<int>(type: "int", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    OrderDescription = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
+                    TrackingNumber = table.Column<string>(type: "varchar(128)", unicode: false, maxLength: 128, nullable: true),
+                    OrderStatus = table.Column<byte>(type: "tinyint", nullable: true),
+                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
+                    TransactionId = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
+                    CityId = table.Column<int>(type: "int", nullable: false),
+                    DistrictId = table.Column<int>(type: "int", nullable: false),
+                    WardId = table.Column<int>(type: "int", nullable: false),
+                    Latitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    Longitude = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_DeliveryMethods_DeliveryMethodId",
+                        column: x => x.DeliveryMethodId,
+                        principalTable: "DeliveryMethods",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_Districts_DistrictId",
+                        column: x => x.DistrictId,
+                        principalTable: "Districts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_Shippers_ShipperId",
+                        column: x => x.ShipperId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_Wards_WardId",
+                        column: x => x.WardId,
+                        principalTable: "Wards",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShipperNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    NotificationType = table.Column<byte>(type: "tinyint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShipperNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShipperNotifications_Shippers_ShipperId",
+                        column: x => x.ShipperId,
+                        principalTable: "Shippers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MenuItemInventories",
                 columns: table => new
                 {
@@ -749,6 +722,54 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_MenuVariants_MenuItems_MenuItemId",
                         column: x => x.MenuItemId,
                         principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderDeliveries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeliveryStatus = table.Column<byte>(type: "tinyint", nullable: false),
+                    EstimatedDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
+                    ActualDeliveryTime = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderDeliveries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderDeliveries_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
+                    PaymentStatus = table.Column<byte>(type: "tinyint", nullable: true),
+                    PaymentMethod = table.Column<byte>(type: "tinyint", nullable: true),
+                    TransactionId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1121,6 +1142,21 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "IX_ShipperNotifications_ShipperId",
                 table: "ShipperNotifications",
                 column: "ShipperId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shippers_CityId",
+                table: "Shippers",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shippers_DistrictId",
+                table: "Shippers",
+                column: "DistrictId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shippers_WardId",
+                table: "Shippers",
+                column: "WardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShoppingCart_AppUserId",

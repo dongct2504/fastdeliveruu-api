@@ -34,5 +34,7 @@ namespace FastDeliveruu.Domain.Entities
         public virtual ICollection<Restaurant> Restaurants { get; set; }
         [InverseProperty("City")]
         public virtual ICollection<Order> Orders { get; set; }
+        [InverseProperty("City")]
+        public virtual ICollection<Shipper> Shippers { get; set; } = new HashSet<Shipper>();
     }
 }

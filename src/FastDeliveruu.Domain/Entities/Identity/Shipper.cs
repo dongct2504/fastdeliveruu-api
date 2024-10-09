@@ -6,6 +6,9 @@ using FastDeliveruu.Domain.Entities.AutoGenEntities;
 
 namespace FastDeliveruu.Domain.Entities.Identity;
 
+[Index("CityId", Name = "IX_Shippers_CityId")]
+[Index("DistrictId", Name = "IX_Shippers_DistrictId")]
+[Index("WardId", Name = "IX_Shippers_WardId")]
 public class Shipper : IdentityUser<Guid>
 {
     [StringLength(50)]
@@ -29,6 +32,16 @@ public class Shipper : IdentityUser<Guid>
     [StringLength(120)]
     public string? ModelType { get; set; }
 
+    [StringLength(60)]
+    public string Address { get; set; } = null!;
+    public int CityId { get; set; }
+    public int DistrictId { get; set; }
+    public int WardId { get; set; }
+    [Column(TypeName = "decimal(9, 6)")]
+    public decimal? Latitude { get; set; }
+    [Column(TypeName = "decimal(9, 6)")]
+    public decimal? Longitude { get; set; }
+
     [Column(TypeName = "datetime")]
     public DateTime? CreatedAt { get; set; }
 
@@ -46,4 +59,14 @@ public class Shipper : IdentityUser<Guid>
 
     [InverseProperty("RecipientShipper")]
     public ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
+
+    [ForeignKey("CityId")]
+    [InverseProperty("Shippers")]
+    public virtual City City { get; set; } = null!;
+    [ForeignKey("DistrictId")]
+    [InverseProperty("Shippers")]
+    public virtual District District { get; set; } = null!;
+    [ForeignKey("WardId")]
+    [InverseProperty("Shippers")]
+    public virtual Ward Ward { get; set; } = null!;
 }

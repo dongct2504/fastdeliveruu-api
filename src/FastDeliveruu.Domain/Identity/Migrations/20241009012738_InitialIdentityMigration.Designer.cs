@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20241001181703_InitialIdentityMigration")]
+    [Migration("20241009012738_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -515,11 +515,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
                     b.Property<string>("CitizenIdentification")
                         .IsRequired()
@@ -527,11 +531,17 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(12)");
 
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime");
+
+                    b.Property<int>("DistrictId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -554,11 +564,17 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("decimal(9,6)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<string>("ModelType")
                         .HasMaxLength(120)
@@ -596,7 +612,16 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("WardId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex(new[] { "CityId" }, "IX_Shippers_CityId");
+
+                    b.HasIndex(new[] { "DistrictId" }, "IX_Shippers_DistrictId");
+
+                    b.HasIndex(new[] { "WardId" }, "IX_Shippers_WardId");
 
                     b.ToTable("Shippers");
                 });
@@ -1445,6 +1470,36 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.City", "City")
+                        .WithMany("Shippers")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Shippers_Cities_CityId");
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.District", "District")
+                        .WithMany("Shippers")
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Shippers_Districts_DistrictId");
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Ward", "Ward")
+                        .WithMany("Shippers")
+                        .HasForeignKey("WardId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Shippers_Wards_WardId");
+
+                    b.Navigation("City");
+
+                    b.Navigation("District");
+
+                    b.Navigation("Ward");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.MenuItem", b =>
                 {
                     b.HasOne("FastDeliveruu.Domain.Entities.Genre", "Genre")
@@ -1775,6 +1830,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
+
+                    b.Navigation("Shippers");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.DeliveryMethod", b =>
@@ -1789,6 +1846,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
+
+                    b.Navigation("Shippers");
 
                     b.Navigation("Wards");
                 });
@@ -1890,6 +1949,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Restaurants");
+
+                    b.Navigation("Shippers");
                 });
 #pragma warning restore 612, 618
         }

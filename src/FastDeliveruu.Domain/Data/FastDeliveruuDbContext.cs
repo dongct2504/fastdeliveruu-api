@@ -132,6 +132,29 @@ namespace FastDeliveruu.Domain.Data
                     .HasConstraintName("FK_Restaurants_Wards_WardId");
             });
 
+            modelBuilder.Entity<Shipper>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.City)
+                    .WithMany(p => p.Shippers)
+                    .HasForeignKey(d => d.CityId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Shippers_Cities_CityId");
+
+                entity.HasOne(d => d.District)
+                    .WithMany(p => p.Shippers)
+                    .HasForeignKey(d => d.DistrictId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Shippers_Districts_DistrictId");
+
+                entity.HasOne(d => d.Ward)
+                    .WithMany(p => p.Shippers)
+                    .HasForeignKey(d => d.WardId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_Shippers_Wards_WardId");
+            });
+
             // order detail configuration for menu variant (delete menu variant affect order detail)
             modelBuilder.Entity<OrderDetail>(entity =>
             {
