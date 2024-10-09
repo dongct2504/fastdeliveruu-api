@@ -32,6 +32,10 @@ public class OrderHeaderDetailDto
 
     public string City { get; set; } = null!;
 
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
+
     public DeliveryMethodDto DeliveryMethodDto { get; set; } = null!;
 
     public IEnumerable<OrderDetailDto> OrderDetailDtos { get; set; } = null!;

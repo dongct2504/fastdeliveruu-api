@@ -6,20 +6,20 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
-namespace FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
+namespace FastDeliveruu.Application.Authentication.Queries.UserEmailConfirm;
 
-public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Result>
+public class UserEmailConfirmQueryHandler : IRequestHandler<UserEmailConfirmQuery, Result>
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly ILogger<EmailConfirmQueryHandler> _logger;
+    private readonly ILogger<UserEmailConfirmQueryHandler> _logger;
 
-    public EmailConfirmQueryHandler(UserManager<AppUser> userManager, ILogger<EmailConfirmQueryHandler> logger)
+    public UserEmailConfirmQueryHandler(UserManager<AppUser> userManager, ILogger<UserEmailConfirmQueryHandler> logger)
     {
         _userManager = userManager;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(EmailConfirmQuery request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UserEmailConfirmQuery request, CancellationToken cancellationToken)
     {
         AppUser? user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
@@ -36,7 +36,7 @@ public class EmailConfirmQueryHandler : IRequestHandler<EmailConfirmQuery, Resul
         {
             var errorMessages = result.Errors.Select(e => e.Description);
 
-            string message = string.Join(" ", errorMessages);
+            string message = string.Join("\n", errorMessages);
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }

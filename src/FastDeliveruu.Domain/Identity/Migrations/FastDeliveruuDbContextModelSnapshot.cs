@@ -513,6 +513,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Identity.Shipper", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")

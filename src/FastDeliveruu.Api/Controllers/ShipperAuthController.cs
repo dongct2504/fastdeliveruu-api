@@ -1,8 +1,8 @@
-using Asp.Versioning;
-using FastDeliveruu.Application.Authentication.Commands.Register;
-using FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
-using FastDeliveruu.Application.Authentication.Queries.Login;
-using FastDeliveruu.Application.Dtos.AppUserDtos;
+﻿using Asp.Versioning;
+using FastDeliveruu.Application.Authentication.Commands.ShipperRegister;
+using FastDeliveruu.Application.Authentication.Queries.ShipperEmailConfirm;
+using FastDeliveruu.Application.Authentication.Queries.ShipperLogin;
+using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FluentResults;
 using MediatR;
@@ -11,14 +11,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace FastDeliveruu.Api.Controllers;
 
 [ApiVersionNeutral]
-[Route("api/v{version:apiVersion}/user-auth")]
-public class AuthenticationController : ApiController
+[Route("api/v{version:apiVersion}/shipper-auth")]
+public class ShipperAuthController : ApiController
 {
     private readonly IMediator _mediator;
     private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
 
-    public AuthenticationController(
+    public ShipperAuthController(
         IMediator mediator,
         IEmailSender emailSender,
         IConfiguration configuration)
@@ -29,28 +29,28 @@ public class AuthenticationController : ApiController
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ShipperAuthenticationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+    public async Task<IActionResult> Register([FromBody] ShipperRegisterCommand command)
     {
-        Result<AuthenticationResponse> authenticationResult = await _mediator.Send(command);
-        if (authenticationResult.IsFailed)
+        Result<ShipperAuthenticationResponse> result = await _mediator.Send(command);
+        if (result.IsFailed)
         {
-            return Problem(authenticationResult.Errors);
+            return Problem(result.Errors);
         }
 
-        //await SendEmailAsync(authenticationResult.Value.AppUserDto.Email, authenticationResult.Value.Token);
+        await SendEmailAsync(result.Value.ShipperDto.Email, result.Value.Token);
 
-        return Ok(authenticationResult.Value);
+        return Ok(result.Value);
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ShipperAuthenticationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginQuery query)
+    public async Task<IActionResult> Login([FromBody] ShipperLoginQuery query)
     {
-        Result<AuthenticationResponse> authenticationResult = await _mediator.Send(query);
+        Result<ShipperAuthenticationResponse> authenticationResult = await _mediator.Send(query);
         if (authenticationResult.IsFailed)
         {
             return Problem(authenticationResult.Errors);
@@ -60,22 +60,20 @@ public class AuthenticationController : ApiController
     }
 
     [HttpGet("confirm-email")]
-    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ConfirmEmail(string email, string encodedToken)
     {
-        EmailConfirmQuery query = new EmailConfirmQuery(email, encodedToken);
-
-        Result<bool> isConfirmEmailResult = await _mediator.Send(query);
-        if (isConfirmEmailResult.IsFailed)
+        ShipperEmailConfirmQuery query = new ShipperEmailConfirmQuery(email, encodedToken);
+        Result result = await _mediator.Send(query);
+        if (result.IsFailed)
         {
-            return Problem(isConfirmEmailResult.Errors);
+            return Problem(result.Errors);
         }
 
         string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-
-        return Redirect($"{redirectUrlBase}/authen/login");
+        return Redirect($"{redirectUrlBase}/shipper-auth/login");
     }
 
     [NonAction]
@@ -83,7 +81,7 @@ public class AuthenticationController : ApiController
     {
         string? confirmationLink = Url.Action(
             action: nameof(ConfirmEmail),
-            controller: "Authentication",
+            controller: "ShipperAuth",
             values: new { email, encodedToken },
             Request.Scheme);
 

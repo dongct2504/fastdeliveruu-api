@@ -21,4 +21,8 @@ public class AppUserDto
     public string? District { get; set; }
 
     public string? City { get; set; }
+
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
 }

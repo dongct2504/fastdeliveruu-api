@@ -22,5 +22,9 @@ public class RestaurantDetailDto
 
     public string City { get; set; } = null!;
 
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
+
     public IEnumerable<MenuItemDto>? MenuItemDtos { get; set; }
 }

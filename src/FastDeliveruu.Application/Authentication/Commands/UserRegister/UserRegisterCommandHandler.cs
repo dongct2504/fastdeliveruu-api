@@ -14,23 +14,23 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
-namespace FastDeliveruu.Application.Authentication.Commands.Register;
+namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResponse>>
+public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, Result<UserAuthenticationResponse>>
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-    private readonly ILogger<RegisterCommandHandler> _logger;
+    private readonly ILogger<UserRegisterCommandHandler> _logger;
     private readonly IMapper _mapper;
 
-    public RegisterCommandHandler(
+    public UserRegisterCommandHandler(
         IMapper mapper,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         IDateTimeProvider dateTimeProvider,
-        ILogger<RegisterCommandHandler> logger,
+        ILogger<UserRegisterCommandHandler> logger,
         IFastDeliveruuUnitOfWork unitOfWork)
     {
         _mapper = mapper;
@@ -41,8 +41,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<AuthenticationResponse>> Handle(
-        RegisterCommand request,
+    public async Task<Result<UserAuthenticationResponse>> Handle(
+        UserRegisterCommand request,
         CancellationToken cancellationToken)
     {
         AppUser user = _mapper.Map<AppUser>(request);
@@ -109,7 +109,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         {
             var errorMessages = result.Errors.Select(e => e.Description);
 
-            string message = string.Join(" ", errorMessages);
+            string message = string.Join("\n", errorMessages);
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -144,6 +144,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
 
         string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        return _mapper.Map<AuthenticationResponse>((user, encodedToken));
+        return _mapper.Map<UserAuthenticationResponse>((user, encodedToken));
     }
 }

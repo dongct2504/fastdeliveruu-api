@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Authentication.Commands.Register;
+﻿using FastDeliveruu.Application.Authentication.Commands.UserRegister;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Domain.Entities.Identity;
 using Mapster;
@@ -56,6 +56,6 @@ public class AppUserMappingConfig : IRegister
         config.NewConfig<AppUser, AppUserWithRolesDto>()
             .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRole.Name).ToList());
 
-        config.NewConfig<RegisterCommand, AppUser>();
+        config.NewConfig<UserRegisterCommand, AppUser>();
     }
 }

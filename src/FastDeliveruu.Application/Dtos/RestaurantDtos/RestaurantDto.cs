@@ -17,4 +17,8 @@ public class RestaurantDto
     public string District { get; set; } = null!;
 
     public string City { get; set; } = null!;
+
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
 }

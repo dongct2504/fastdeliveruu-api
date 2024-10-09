@@ -4,5 +4,6 @@ namespace FastDeliveruu.Application.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    Task<string> GenerateTokenAsync(AppUser user);
+    Task<string> GenerateTokenForUserAsync(AppUser user);
+    string GenerateTokenForShipper(Shipper shipper);
 }

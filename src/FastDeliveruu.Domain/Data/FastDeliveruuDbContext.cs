@@ -134,8 +134,6 @@ namespace FastDeliveruu.Domain.Data
 
             modelBuilder.Entity<Shipper>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.HasOne(d => d.City)
                     .WithMany(p => p.Shippers)
                     .HasForeignKey(d => d.CityId)

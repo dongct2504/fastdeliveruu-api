@@ -1,11 +1,11 @@
 using FluentResults;
 using MediatR;
 
-namespace FastDeliveruu.Application.Authentication.Queries.EmailConfirm;
+namespace FastDeliveruu.Application.Authentication.Queries.UserEmailConfirm;
 
-public class EmailConfirmQuery : IRequest<Result>
+public class UserEmailConfirmQuery : IRequest<Result>
 {
-    public EmailConfirmQuery(string email, string encodedToken)
+    public UserEmailConfirmQuery(string email, string encodedToken)
     {
         Email = email;
         EnCodedToken = encodedToken;

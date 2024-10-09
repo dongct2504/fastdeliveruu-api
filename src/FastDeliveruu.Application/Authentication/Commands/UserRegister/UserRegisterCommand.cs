@@ -2,9 +2,9 @@ using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FluentResults;
 using MediatR;
 
-namespace FastDeliveruu.Application.Authentication.Commands.Register;
+namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
 
-public class RegisterCommand : IRequest<Result<AuthenticationResponse>>
+public class UserRegisterCommand : IRequest<Result<UserAuthenticationResponse>>
 {
     public string UserName { get; set; } = null!;
 

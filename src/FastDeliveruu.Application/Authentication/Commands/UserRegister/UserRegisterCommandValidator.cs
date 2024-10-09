@@ -1,11 +1,11 @@
 using FastDeliveruu.Application.Common.Behaviors;
 using FluentValidation;
 
-namespace FastDeliveruu.Application.Authentication.Commands.Register;
+namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public class UserRegisterCommandValidator : AbstractValidator<UserRegisterCommand>
 {
-    public RegisterCommandValidator()
+    public UserRegisterCommandValidator()
     {
         RuleFor(x => x.UserName)
             .NotEmpty()

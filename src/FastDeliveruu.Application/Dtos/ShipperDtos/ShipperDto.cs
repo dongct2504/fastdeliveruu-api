@@ -1,6 +1,6 @@
-﻿namespace FastDeliveruu.Application.Dtos.AppUserDtos;
+﻿namespace FastDeliveruu.Application.Dtos.ShipperDtos;
 
-public class AppUserDetailDto
+public class ShipperDto
 {
     public string Id { get; set; } = null!;
 
@@ -8,21 +8,23 @@ public class AppUserDetailDto
 
     public string LastName { get; set; } = null!;
 
+    public string CitizenIdentification { get; set; } = null!;
+
     public string UserName { get; set; } = null!;
 
     public string Email { get; set; } = null!;
 
-    public string PhoneNumber { get; set; } = null!;
+    public string? ModelType { get; set; }
 
     public string? ImageUrl { get; set; }
 
-    public string? Address { get; set; }
+    public string Address { get; set; } = null!;
 
-    public string? Ward { get; set; }
+    public string Ward { get; set; } = null!;
 
-    public string? District { get; set; }
+    public string District { get; set; } = null!;
 
-    public string? City { get; set; }
+    public string City { get; set; } = null!;
 
     public decimal? Latitude { get; set; }
 

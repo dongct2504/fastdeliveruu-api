@@ -1,0 +1,90 @@
+﻿using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Dtos.ShipperDtos;
+using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Addresses;
+using FluentResults;
+using MapsterMapper;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using System.Text;
+
+namespace FastDeliveruu.Application.Authentication.Commands.ShipperRegister;
+
+public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterCommand, Result<ShipperAuthenticationResponse>>
+{
+    private readonly UserManager<Shipper> _userManager;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ILogger<ShipperRegisterCommandHandler> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IMapper _mapper;
+
+    public ShipperRegisterCommandHandler(
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ILogger<ShipperRegisterCommandHandler> logger,
+        IDateTimeProvider dateTimeProvider,
+        UserManager<Shipper> userManager,
+        IMapper mapper)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
+        _userManager = userManager;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<ShipperAuthenticationResponse>> Handle(ShipperRegisterCommand request, CancellationToken cancellationToken)
+    {
+        Shipper shipper = _mapper.Map<Shipper>(request);
+        shipper.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
+
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            string message = "city does not exist.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        shipper.CityId = city.Id;
+
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
+        if (district == null)
+        {
+            string message = "district does not exist in city.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        shipper.DistrictId = district.Id;
+
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
+        if (ward == null)
+        {
+            string message = "ward does not exist in district.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        shipper.WardId = ward.Id;
+
+        IdentityResult result = await _userManager.CreateAsync(shipper, request.Password);
+        if (!result.Succeeded)
+        {
+            var errorMessages = result.Errors.Select(e => e.Description);
+
+            string message = string.Join("\n", errorMessages);
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        string token = await _userManager.GenerateEmailConfirmationTokenAsync(shipper);
+
+        string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        return _mapper.Map<ShipperAuthenticationResponse>((shipper, encodedToken));
+    }
+}

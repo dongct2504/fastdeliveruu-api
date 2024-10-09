@@ -69,6 +69,25 @@ public static class DependencyInjection
         .AddRoleValidator<RoleValidator<AppRole>>()
         .AddDefaultTokenProviders();
 
+        services.AddIdentityCore<Shipper>(options =>
+        {
+            // Password settings
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredLength = 3;
+
+            // User settings
+            options.User.RequireUniqueEmail = true;
+
+            // Sign-in settings
+            options.SignIn.RequireConfirmedEmail = true;
+        })
+        .AddEntityFrameworkStores<FastDeliveruuDbContext>()
+        .AddSignInManager<SignInManager<Shipper>>()
+        .AddDefaultTokenProviders();
+
         return services;
     }
 

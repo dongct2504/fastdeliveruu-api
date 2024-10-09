@@ -23,7 +23,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _dateTimeProvider = dateTimeProvider;
     }
 
-    public async Task<string> GenerateTokenAsync(AppUser appUser)
+    public async Task<string> GenerateTokenForUserAsync(AppUser appUser)
     {
         SigningCredentials signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
@@ -41,6 +41,31 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         }
         .Union(roleClaims);
+
+        JwtSecurityToken securityToken = new JwtSecurityToken(
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
+            expires: _dateTimeProvider.VietnamDateTimeNow.AddDays(_jwtSettings.ExpiryDays),
+            claims: claims,
+            signingCredentials: signingCredentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(securityToken);
+    }
+
+    public string GenerateTokenForShipper(Shipper shipper)
+    {
+        SigningCredentials signingCredentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
+            SecurityAlgorithms.HmacSha256
+        );
+
+        var claims = new Claim[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, shipper.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.NameId, shipper.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
 
         JwtSecurityToken securityToken = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,

@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace FastDeliveruu.Application.Authentication.Queries.Login;
+namespace FastDeliveruu.Application.Authentication.Queries.UserLogin;
 
-public class LoginQueryValidator : AbstractValidator<LoginQuery>
+public class UserLoginQueryValidator : AbstractValidator<UserLoginQuery>
 {
-    public LoginQueryValidator()
+    public UserLoginQueryValidator()
     {
         RuleFor(x => x.UserName)
             .NotEmpty()

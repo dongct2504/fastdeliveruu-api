@@ -1,6 +1,6 @@
 ﻿namespace FastDeliveruu.Application.Dtos.AppUserDtos;
 
-public class AuthenticationResponse
+public class UserAuthenticationResponse
 {
     public AppUserDto AppUserDto { get; set; } = null!;
 
