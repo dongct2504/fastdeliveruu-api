@@ -1,28 +1,29 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Domain.Identity.CustomManagers;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace FastDeliveruu.Application.Authentication.Queries.ShipperEmailConfirm;
 
 public class ShipperEmailConfirmQueryHandler : IRequestHandler<ShipperEmailConfirmQuery, Result>
 {
-    private readonly UserManager<Shipper> _userManager;
+    private readonly ShipperManager _shipperManager;
     private readonly ILogger<ShipperEmailConfirmQueryHandler> _logger;
 
-    public ShipperEmailConfirmQueryHandler(UserManager<Shipper> userManager, ILogger<ShipperEmailConfirmQueryHandler> logger)
+    public ShipperEmailConfirmQueryHandler(
+        ILogger<ShipperEmailConfirmQueryHandler> logger, ShipperManager shipperManager)
     {
-        _userManager = userManager;
         _logger = logger;
+        _shipperManager = shipperManager;
     }
 
     public async Task<Result> Handle(ShipperEmailConfirmQuery request, CancellationToken cancellationToken)
     {
-        Shipper? shipper = await _userManager.FindByEmailAsync(request.Email);
+        Shipper? shipper = await _shipperManager.FindByEmailAsync(request.Email);
         if (shipper == null)
         {
             string message = "Shipper not found.";
@@ -32,7 +33,7 @@ public class ShipperEmailConfirmQueryHandler : IRequestHandler<ShipperEmailConfi
 
         string decodedToken = System.Text.Encoding.UTF8
             .GetString(WebEncoders.Base64UrlDecode(request.EnCodedToken));
-        IdentityResult result = await _userManager.ConfirmEmailAsync(shipper, decodedToken);
+        IdentityResult result = await _shipperManager.ConfirmEmailAsync(shipper, decodedToken);
 
         if (!result.Succeeded)
         {

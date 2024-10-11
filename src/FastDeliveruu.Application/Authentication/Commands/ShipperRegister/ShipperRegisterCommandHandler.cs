@@ -3,6 +3,7 @@ using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Domain.Identity.CustomManagers;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
@@ -17,7 +18,7 @@ namespace FastDeliveruu.Application.Authentication.Commands.ShipperRegister;
 
 public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterCommand, Result<ShipperAuthenticationResponse>>
 {
-    private readonly UserManager<Shipper> _userManager;
+    private readonly ShipperManager _shipperManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<ShipperRegisterCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -27,14 +28,14 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<ShipperRegisterCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        UserManager<Shipper> userManager,
-        IMapper mapper)
+        IMapper mapper,
+        ShipperManager shipperManager)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
-        _userManager = userManager;
         _mapper = mapper;
+        _shipperManager = shipperManager;
     }
 
     public async Task<Result<ShipperAuthenticationResponse>> Handle(ShipperRegisterCommand request, CancellationToken cancellationToken)
@@ -71,7 +72,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         }
         shipper.WardId = ward.Id;
 
-        IdentityResult result = await _userManager.CreateAsync(shipper, request.Password);
+        IdentityResult result = await _shipperManager.CreateAsync(shipper, request.Password);
         if (!result.Succeeded)
         {
             var errorMessages = result.Errors.Select(e => e.Description);
@@ -81,7 +82,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
             return Result.Fail(new BadRequestError(message));
         }
 
-        string token = await _userManager.GenerateEmailConfirmationTokenAsync(shipper);
+        string token = await _shipperManager.GenerateEmailConfirmationTokenAsync(shipper);
 
         string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
