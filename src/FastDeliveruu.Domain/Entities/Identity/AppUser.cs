@@ -48,10 +48,10 @@ public class AppUser : IdentityUser<Guid>
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new HashSet<ShoppingCart>();
 
     [InverseProperty("SenderAppUser")]
-    public virtual ICollection<Chat> SentChats { get; set; } = new HashSet<Chat>();
+    public virtual ICollection<MessageThread> SenderMessageThreads { get; set; } = new HashSet<MessageThread>();
 
     [InverseProperty("RecipientAppUser")]
-    public virtual ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
+    public virtual ICollection<MessageThread> RecipientMessageThreads { get; set; } = new HashSet<MessageThread>();
 
     // identity
     public virtual ICollection<AppUserRole> AppUserRoles { get; set; } = new List<AppUserRole>();

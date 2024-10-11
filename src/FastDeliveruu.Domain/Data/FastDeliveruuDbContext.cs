@@ -43,6 +43,7 @@ namespace FastDeliveruu.Domain.Data
         public virtual DbSet<RestaurantReview> RestaurantReviews { get; set; } = null!;
         public virtual DbSet<Ward> Wards { get; set; } = null!;
         public virtual DbSet<WishList> WishLists { get; set; } = null!;
+        public virtual DbSet<MessageThread> MessageThreads { get; set; } = null!;
         public virtual DbSet<Chat> Chats { get; set; } = null!;
 
         // identity related
@@ -177,27 +178,27 @@ namespace FastDeliveruu.Domain.Data
                     .HasConstraintName("FK_Orders_Shippers_ShipperId");
             });
 
-            // config deletion behavior for sender and receipient in Chat table
-            modelBuilder.Entity<Chat>()
+            // config deletion behavior for sender and receipient in MessageThread table
+            modelBuilder.Entity<MessageThread>()
                 .HasOne(c => c.SenderAppUser)
-                .WithMany(u => u.SentChats)
-                .HasForeignKey(c => c.SenderId)
+                .WithMany(u => u.SenderMessageThreads)
+                .HasForeignKey(c => c.SenderAppUserId)
                 .OnDelete(DeleteBehavior.Cascade); // delete cascade for user sender
-            modelBuilder.Entity<Chat>()
+            modelBuilder.Entity<MessageThread>()
                 .HasOne(c => c.RecipientAppUser)
-                .WithMany(u => u.ReceivedChats)
-                .HasForeignKey(c => c.RecipientId)
+                .WithMany(u => u.RecipientMessageThreads)
+                .HasForeignKey(c => c.RecipientAppUserId)
                 .OnDelete(DeleteBehavior.NoAction); // can't delete for recipient
 
-            modelBuilder.Entity<Chat>()
+            modelBuilder.Entity<MessageThread>()
                 .HasOne(c => c.SenderShipper)
-                .WithMany(s => s.SentChats)
-                .HasForeignKey(c => c.SenderId)
+                .WithMany(s => s.SenderMessageThreads)
+                .HasForeignKey(c => c.SenderShipperId)
                 .OnDelete(DeleteBehavior.Cascade); // delete cascade for shiper sender
-            modelBuilder.Entity<Chat>()
+            modelBuilder.Entity<MessageThread>()
                 .HasOne(c => c.RecipientShipper)
-                .WithMany(s => s.ReceivedChats)
-                .HasForeignKey(c => c.RecipientId)
+                .WithMany(s => s.RecipientMessageThreads)
+                .HasForeignKey(c => c.RecipientShipperId)
                 .OnDelete(DeleteBehavior.NoAction); // can't delete for recipient
 
             // fix asp.net auto generate FK for AppUserRoles

@@ -521,44 +521,42 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chats",
+                name: "MessageThreads",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
-                    SenderType = table.Column<byte>(type: "tinyint", nullable: false),
-                    RecipientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RecipientUserName = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    SenderAppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SenderShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RecipientAppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RecipientShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     RecipientType = table.Column<byte>(type: "tinyint", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    DateSent = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DateRead = table.Column<DateTime>(type: "datetime", nullable: true),
+                    SenderType = table.Column<byte>(type: "tinyint", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Chats", x => x.Id);
+                    table.PrimaryKey("PK_MessageThreads", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Chats_AspNetUsers_RecipientId",
-                        column: x => x.RecipientId,
+                        name: "FK_MessageThreads_AspNetUsers_RecipientAppUserId",
+                        column: x => x.RecipientAppUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Chats_AspNetUsers_SenderId",
-                        column: x => x.SenderId,
+                        name: "FK_MessageThreads_AspNetUsers_SenderAppUserId",
+                        column: x => x.SenderAppUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Chats_Shippers_RecipientId",
-                        column: x => x.RecipientId,
+                        name: "FK_MessageThreads_Shippers_RecipientShipperId",
+                        column: x => x.RecipientShipperId,
                         principalTable: "Shippers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Chats_Shippers_SenderId",
-                        column: x => x.SenderId,
+                        name: "FK_MessageThreads_Shippers_SenderShipperId",
+                        column: x => x.SenderShipperId,
                         principalTable: "Shippers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -722,6 +720,29 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         name: "FK_MenuVariants_MenuItems_MenuItemId",
                         column: x => x.MenuItemId,
                         principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ThreadId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    DateSent = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DateRead = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Chats_MessageThreads_ThreadId",
+                        column: x => x.ThreadId,
+                        principalTable: "MessageThreads",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -978,14 +999,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Chats_RecipientId",
-                table: "Chats",
-                column: "RecipientId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Chats_SenderId",
                 table: "Chats",
-                column: "SenderId");
+                column: "ThreadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Coupons_AppUserId",
@@ -1042,6 +1058,26 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 name: "IX_MenuVariants_MenuItemId",
                 table: "MenuVariants",
                 column: "MenuItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageThreads_RecipientAppUserId",
+                table: "MessageThreads",
+                column: "RecipientAppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageThreads_RecipientShipperId",
+                table: "MessageThreads",
+                column: "RecipientShipperId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageThreads_SenderAppUserId",
+                table: "MessageThreads",
+                column: "SenderAppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageThreads_SenderShipperId",
+                table: "MessageThreads",
+                column: "SenderShipperId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDeliveries_OrderId",
@@ -1258,6 +1294,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "MessageThreads");
 
             migrationBuilder.DropTable(
                 name: "Orders");

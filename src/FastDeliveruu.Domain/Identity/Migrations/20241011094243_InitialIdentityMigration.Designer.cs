@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20241009091456_InitialIdentityMigration")]
+    [Migration("20241011094243_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,38 +132,15 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<DateTime?>("DateSent")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid>("RecipientId")
+                    b.Property<Guid>("ThreadId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("RecipientType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("RecipientUserName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(256)");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("SenderType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("SenderUserName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(256)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "RecipientId" }, "IX_Chats_RecipientId");
-
-                    b.HasIndex(new[] { "SenderId" }, "IX_Chats_SenderId");
+                    b.HasIndex(new[] { "ThreadId" }, "IX_Chats_SenderId");
 
                     b.ToTable("Chats");
                 });
@@ -222,6 +199,54 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.HasIndex(new[] { "MenuVariantId" }, "IX_MenuVariantInventory_MenuVariantId");
 
                     b.ToTable("MenuVariantInventories");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MessageThread", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("RecipientAppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RecipientShipperId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("RecipientType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid?>("SenderAppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SenderShipperId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("SenderType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "RecipientAppUserId" }, "IX_MessageThreads_RecipientAppUserId");
+
+                    b.HasIndex(new[] { "RecipientShipperId" }, "IX_MessageThreads_RecipientShipperId");
+
+                    b.HasIndex(new[] { "SenderAppUserId" }, "IX_MessageThreads_SenderAppUserId");
+
+                    b.HasIndex(new[] { "SenderShipperId" }, "IX_MessageThreads_SenderShipperId");
+
+                    b.ToTable("MessageThreads");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.City", b =>
@@ -1375,37 +1400,13 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.Chat", b =>
                 {
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "RecipientAppUser")
-                        .WithMany("ReceivedChats")
-                        .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "RecipientShipper")
-                        .WithMany("ReceivedChats")
-                        .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "SenderAppUser")
-                        .WithMany("SentChats")
-                        .HasForeignKey("SenderId")
+                    b.HasOne("FastDeliveruu.Domain.Entities.AutoGenEntities.MessageThread", "MessageThread")
+                        .WithMany("Chats")
+                        .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "SenderShipper")
-                        .WithMany("SentChats")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RecipientAppUser");
-
-                    b.Navigation("RecipientShipper");
-
-                    b.Navigation("SenderAppUser");
-
-                    b.Navigation("SenderShipper");
+                    b.Navigation("MessageThread");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MenuItemInventory", b =>
@@ -1428,6 +1429,37 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired();
 
                     b.Navigation("MenuVariant");
+                });
+
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MessageThread", b =>
+                {
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "RecipientAppUser")
+                        .WithMany("RecipientMessageThreads")
+                        .HasForeignKey("RecipientAppUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "RecipientShipper")
+                        .WithMany("RecipientMessageThreads")
+                        .HasForeignKey("RecipientShipperId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.AppUser", "SenderAppUser")
+                        .WithMany("SenderMessageThreads")
+                        .HasForeignKey("SenderAppUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("FastDeliveruu.Domain.Entities.Identity.Shipper", "SenderShipper")
+                        .WithMany("SenderMessageThreads")
+                        .HasForeignKey("SenderShipperId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("RecipientAppUser");
+
+                    b.Navigation("RecipientShipper");
+
+                    b.Navigation("SenderAppUser");
+
+                    b.Navigation("SenderShipper");
                 });
 
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.Coupon", b =>
@@ -1822,6 +1854,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("FastDeliveruu.Domain.Entities.AutoGenEntities.MessageThread", b =>
+                {
+                    b.Navigation("Chats");
+                });
+
             modelBuilder.Entity("FastDeliveruu.Domain.Entities.City", b =>
                 {
                     b.Navigation("AddressesCustomers");
@@ -1877,11 +1914,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Navigation("Orders");
 
-                    b.Navigation("ReceivedChats");
+                    b.Navigation("RecipientMessageThreads");
 
                     b.Navigation("RestaurantReviews");
 
-                    b.Navigation("SentChats");
+                    b.Navigation("SenderMessageThreads");
 
                     b.Navigation("ShoppingCarts");
 
@@ -1892,9 +1929,9 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                 {
                     b.Navigation("Orders");
 
-                    b.Navigation("ReceivedChats");
+                    b.Navigation("RecipientMessageThreads");
 
-                    b.Navigation("SentChats");
+                    b.Navigation("SenderMessageThreads");
 
                     b.Navigation("ShipperNotifications");
                 });

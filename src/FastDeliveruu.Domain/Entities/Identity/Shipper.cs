@@ -55,10 +55,10 @@ public class Shipper : IdentityUser<Guid>
     public virtual ICollection<ShipperNotification> ShipperNotifications { get; set; } = new HashSet<ShipperNotification>();
 
     [InverseProperty("SenderShipper")]
-    public ICollection<Chat> SentChats { get; set; } = new HashSet<Chat>();
+    public ICollection<MessageThread> SenderMessageThreads { get; set; } = new HashSet<MessageThread>();
 
     [InverseProperty("RecipientShipper")]
-    public ICollection<Chat> ReceivedChats { get; set; } = new HashSet<Chat>();
+    public ICollection<MessageThread> RecipientMessageThreads { get; set; } = new HashSet<MessageThread>();
 
     [ForeignKey("CityId")]
     [InverseProperty("Shippers")]
