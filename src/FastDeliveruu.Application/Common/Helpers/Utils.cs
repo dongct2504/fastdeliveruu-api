@@ -83,5 +83,11 @@ public static class Utils
         uriBuilder.Query = query.ToString();
         return uriBuilder.ToString();
     }
+
+    public static string GetGroupName(Guid calledId, Guid otherId)
+    {
+        bool stringCompare = string.CompareOrdinal(calledId.ToString(), otherId.ToString()) > 0;
+        return stringCompare ? $"{calledId}-{otherId}" : $"{otherId}-{calledId}";
+    }
 }
 

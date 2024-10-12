@@ -2,6 +2,9 @@
 
 public static class CacheConstants
 {
+    public const string Group = "group";
+    public const string Online = "online";
+
     public const string Genres = "genres";
 
     public const string Restaurants = "restaurants";
@@ -28,4 +31,6 @@ public static class CacheConstants
 
     public const string Wards = "wards";
     public const string WardsByDistrict = "wardsByDistrict";
+
+    public const string Threads = "Threads";
 }

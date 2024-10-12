@@ -9,4 +9,10 @@ public static class CacheOptions
 
     public static DistributedCacheEntryOptions CartExpiration =>
         new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7) };
+
+    public static DistributedCacheEntryOptions OnlineExpiration =>
+        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(2) };
+
+    public static DistributedCacheEntryOptions GroupChatExpiration =>
+        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(2) };
 }

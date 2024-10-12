@@ -26,6 +26,8 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
         Districts = new DistrictRepository(_dbContext);
         Wards = new WardRepository(_dbContext);
         AddressesCustomers = new AddressesCustomerRepository(_dbContext);
+        MessageThreads = new MessageThreadRepository(_dbContext);
+        Chats = new ChatRepository(_dbContext);
         WishLists = new WishlistRepository(_dbContext);
     }
 
@@ -60,6 +62,10 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
     public IAddressesCustomerRepository AddressesCustomers { get; private set; }
 
     public IWishListRepository WishLists { get; private set; }
+
+    public IChatRepository Chats { get; private set; }
+
+    public IMessageThreadRepository MessageThreads { get; private set; }
 
     public async Task SaveChangesAsync()
     {

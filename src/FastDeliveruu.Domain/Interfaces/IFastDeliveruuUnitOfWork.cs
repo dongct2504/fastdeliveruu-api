@@ -17,6 +17,8 @@ public interface IFastDeliveruuUnitOfWork : IDisposable
     IDistrictRepository Districts { get; }
     IWardRepository Wards { get; }
     IAddressesCustomerRepository AddressesCustomers { get; }
+    IMessageThreadRepository MessageThreads { get; }
+    IChatRepository Chats { get; }
     IWishListRepository WishLists { get; }
 
     Task SaveChangesAsync();

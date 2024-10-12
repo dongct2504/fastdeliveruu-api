@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.UnitOfWork;
 using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Domain.Identity.CustomManagers;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddSingleton<IVnpayServices, VnpayServices>();
 
         services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
+        services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();
 
         return services;
     }
@@ -85,8 +87,10 @@ public static class DependencyInjection
             options.SignIn.RequireConfirmedEmail = true;
         })
         .AddEntityFrameworkStores<FastDeliveruuDbContext>()
-        .AddSignInManager<SignInManager<Shipper>>()
-        .AddDefaultTokenProviders();
+        .AddSignInManager<SignInManager<Shipper>>();
+        //.AddDefaultTokenProviders(); // will generate the error: No IUserTwoFactorTokenProvider named 'Default' is registered.
+
+        services.AddTransient<ShipperManager>();
 
         return services;
     }
