@@ -124,14 +124,9 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         else
         {
             customerAddress.Address = request.Address;
-            customerAddress.CityId = request.CityId;
+            customerAddress.CityId = city.Id;
             customerAddress.DistrictId = district.Id;
             customerAddress.WardId = ward.Id;
-        }
-
-        if (!string.IsNullOrEmpty(request.Role))
-        {
-            await _userManager.AddToRoleAsync(user, request.Role);
         }
 
         user.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
