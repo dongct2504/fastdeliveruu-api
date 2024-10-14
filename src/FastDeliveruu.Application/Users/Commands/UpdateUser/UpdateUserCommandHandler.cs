@@ -10,6 +10,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
@@ -41,7 +42,10 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        AppUser? user = await _userManager.FindByIdAsync(request.Id.ToString());
+        AppUser? user = await _userManager.Users
+            .Include(u => u.AddressesCustomers)
+            .Where(u => u.Id == request.Id)
+            .FirstOrDefaultAsync(cancellationToken);
         if (user == null)
         {
             string message = "User not found.";
@@ -72,31 +76,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         }
 
         // handle addresses
-
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
             string message = "City not found";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
-        }
-
-        AddressesCustomer? customerAddress = user.AddressesCustomers.FirstOrDefault(ac => ac.IsPrimary);
-        if (customerAddress == null)
-        {
-            customerAddress = new AddressesCustomer
-            {
-                AppUserId = user.Id,
-                Address = request.Address,
-                CityId = city.Id,
-                IsPrimary = true,
-                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
-            };
-        }
-        else
-        {
-            customerAddress.Address = request.Address;
-            customerAddress.CityId = request.CityId;
         }
 
         District? district = await _unitOfWork.Districts.GetWithSpecAsync(
@@ -107,7 +92,6 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
-        customerAddress.DistrictId = district.Id;
 
         Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
             new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
@@ -117,9 +101,33 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
-        customerAddress.WardId = ward.Id;
 
-        _unitOfWork.AddressesCustomers.Add(customerAddress);
+        AddressesCustomer? customerAddress = user.AddressesCustomers
+            .Where(ac => ac.IsPrimary)
+            .FirstOrDefault();
+        if (customerAddress == null)
+        {
+            customerAddress = new AddressesCustomer
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = user.Id,
+                Address = request.Address,
+                CityId = city.Id,
+                DistrictId = district.Id,
+                WardId = ward.Id,
+                IsPrimary = true,
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+            };
+
+            _unitOfWork.AddressesCustomers.Add(customerAddress);
+        }
+        else
+        {
+            customerAddress.Address = request.Address;
+            customerAddress.CityId = request.CityId;
+            customerAddress.DistrictId = district.Id;
+            customerAddress.WardId = ward.Id;
+        }
 
         if (!string.IsNullOrEmpty(request.Role))
         {
