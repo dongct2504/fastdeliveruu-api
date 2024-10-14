@@ -2,7 +2,7 @@
 
 public enum PaymentMethodsEnum
 {
-    Cash,
+    Cash = 1,
     Vnpay,
     Paypal,
     Momo

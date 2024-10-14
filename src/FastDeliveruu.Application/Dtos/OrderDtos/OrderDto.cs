@@ -1,3 +1,5 @@
+using FastDeliveruu.Application.Common.Enums;
+
 namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
 public class OrderDto
@@ -18,9 +20,9 @@ public class OrderDto
 
     public decimal ShippingPrice { get; set; }
 
-    public string? OrderStatus { get; set; }
+    public OrderStatusEnum? OrderStatus { get; set; }
 
-    public string? PaymentMethod { get; set; }
+    public PaymentMethodsEnum? PaymentMethod { get; set; }
 
     public string? TransactionId { get; set; }
 

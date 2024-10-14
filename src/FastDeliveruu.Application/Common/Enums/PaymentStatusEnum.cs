@@ -2,7 +2,7 @@ namespace FastDeliveruu.Application.Common.Enums;
 
 public enum PaymentStatusEnum
 {
-    Pending,
+    Pending = 1,
     Processing,
     Cancelled,
     Failed,

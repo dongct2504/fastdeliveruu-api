@@ -2,6 +2,6 @@
 
 public enum SenderRecipientTypeEnum
 {
-    Shipper,
+    Shipper = 1,
     Customer
 }

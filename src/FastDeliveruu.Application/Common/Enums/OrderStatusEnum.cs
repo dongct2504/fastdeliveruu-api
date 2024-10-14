@@ -2,7 +2,7 @@ namespace FastDeliveruu.Application.Common.Enums;
 
 public enum OrderStatusEnum
 {
-    Pending,
+    Pending = 1,
     Processing,
     Cancelled,
     Failed,
