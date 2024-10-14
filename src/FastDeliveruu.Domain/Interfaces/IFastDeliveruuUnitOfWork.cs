@@ -20,6 +20,7 @@ public interface IFastDeliveruuUnitOfWork : IDisposable
     IMessageThreadRepository MessageThreads { get; }
     IChatRepository Chats { get; }
     IWishListRepository WishLists { get; }
+    IShipperRepository Shippers { get; }
 
     Task SaveChangesAsync();
 }

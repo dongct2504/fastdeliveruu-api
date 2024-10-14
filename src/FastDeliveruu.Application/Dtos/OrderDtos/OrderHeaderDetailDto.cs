@@ -26,11 +26,11 @@ public class OrderHeaderDetailDto
 
     public string Address { get; set; } = null!;
 
-    public string Ward { get; set; } = null!;
+    public int WardId { get; set; }
 
-    public string District { get; set; } = null!;
+    public int DistrictId { get; set; }
 
-    public string City { get; set; } = null!;
+    public int CityId { get; set; }
 
     public decimal? Latitude { get; set; }
 

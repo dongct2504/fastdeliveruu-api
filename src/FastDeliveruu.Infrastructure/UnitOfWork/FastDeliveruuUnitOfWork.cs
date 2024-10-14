@@ -29,6 +29,7 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
         MessageThreads = new MessageThreadRepository(_dbContext);
         Chats = new ChatRepository(_dbContext);
         WishLists = new WishlistRepository(_dbContext);
+        Shippers = new ShipperRepository(_dbContext);
     }
 
     public IGenreRepository Genres { get; private set; }
@@ -66,6 +67,8 @@ public class FastDeliveruuUnitOfWork : IFastDeliveruuUnitOfWork
     public IChatRepository Chats { get; private set; }
 
     public IMessageThreadRepository MessageThreads { get; private set; }
+
+    public IShipperRepository Shippers { get; private set; }
 
     public async Task SaveChangesAsync()
     {

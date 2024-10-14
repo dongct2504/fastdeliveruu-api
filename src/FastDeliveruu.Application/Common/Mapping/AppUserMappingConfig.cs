@@ -15,20 +15,20 @@ public class AppUserMappingConfig : IRegister
                     .Where(ac => ac.IsPrimary)
                     .Select(ac => ac.Address)
                     .FirstOrDefault())
-            .Map(dest => dest.City,
+            .Map(dest => dest.CityId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.City.Name)
+                    .Select(ac => ac.CityId)
                     .FirstOrDefault())
-            .Map(dest => dest.District,
+            .Map(dest => dest.DistrictId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.District.Name)
+                    .Select(ac => ac.DistrictId)
                     .FirstOrDefault())
-            .Map(dest => dest.Ward,
+            .Map(dest => dest.WardId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.Ward.Name)
+                    .Select(ac => ac.WardId)
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserDetailDto>()
@@ -37,20 +37,20 @@ public class AppUserMappingConfig : IRegister
                     .Where(ac => ac.IsPrimary)
                     .Select(ac => ac.Address)
                     .FirstOrDefault())
-            .Map(dest => dest.City,
+            .Map(dest => dest.CityId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.City.Name)
+                    .Select(ac => ac.CityId)
                     .FirstOrDefault())
-            .Map(dest => dest.District,
+            .Map(dest => dest.DistrictId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.District.Name)
+                    .Select(ac => ac.DistrictId)
                     .FirstOrDefault())
-            .Map(dest => dest.Ward,
+            .Map(dest => dest.WardId,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.Ward.Name)
+                    .Select(ac => ac.WardId)
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserWithRolesDto>()

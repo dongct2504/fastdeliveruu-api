@@ -163,6 +163,15 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.PaymentMethod = (byte?)request.PaymentMethod;
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
+        Shipper? shipper = await GetNearestShipperAsync(order.CityId, order.DistrictId, order.WardId, order.Address);
+        if (shipper == null)
+        {
+            string message = "Shipper not found.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+        order.ShipperId = shipper.Id;
+
         _unitOfWork.Orders.Add(order);
 
         Payment payment = new Payment
@@ -183,5 +192,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         await _cacheService.RemoveAsync(key, cancellationToken);
 
         return order;
+    }
+
+    private async Task<Shipper?> GetNearestShipperAsync(int cityId, int districtId, int wardId, string address)
+    {
+        // for now
+        return (await _unitOfWork.Shippers.ListAllAsync()).FirstOrDefault();
     }
 }
