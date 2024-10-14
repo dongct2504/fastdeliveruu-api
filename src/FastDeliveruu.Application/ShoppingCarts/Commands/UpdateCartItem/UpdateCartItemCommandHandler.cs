@@ -12,7 +12,6 @@ using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.UpdateCartItem;
 
@@ -54,8 +53,8 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         if (menuItem == null)
         {
             string message = "MenuItem not found.";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
 
         // check if menu variant provided
@@ -68,7 +67,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
             if (menuVariant == null)
             {
                 string message = "MenuVariant does not exist in the MenuItem.";
-                Log.Warning($"{request.GetType().Name} - {message} - {request}");
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                 return Result.Fail(new NotFoundError(message));
             }
         }
@@ -100,25 +99,9 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         }
 
         // check if the item already exists in the cart (check both menu item and menu variant)
-        //ShoppingCartDto? shoppingCartUpdate = customerCartDtoCache
-        //    .FirstOrDefault(sc => 
-        //        sc.AppUserId == request.AppUserId && 
-        //        sc.MenuItemId == request.MenuItemId &&
-        //        (!request.MenuVariantId.HasValue || sc.MenuVariantId == request.MenuVariantId));
-
-        // check if the item already exists in the cart (check both menu item and menu variant)
-        ShoppingCartDto? shoppingCartDto = null;
-
-        if (request.Id != Guid.Empty)
-        {
-            shoppingCartDto = customerCartDtoCache.FirstOrDefault(sc => sc.Id == request.Id);
-            if (shoppingCartDto == null)
-            {
-                string message = "cart item doesn't exist";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new NotFoundError(message));
-            }
-        }
+        ShoppingCartDto? shoppingCartDto = customerCartDtoCache.FirstOrDefault(sc =>
+            sc.MenuItemId == request.MenuItemId &&
+            (request.MenuVariantId == null || sc.MenuVariantId == request.MenuVariantId));
 
         if (shoppingCartDto == null) // item doesn't exist, hence create a new item and add it to the cart
         {
