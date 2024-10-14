@@ -40,7 +40,7 @@ public class UserAuthController : ApiController
             return Problem(authenticationResult.Errors);
         }
 
-        //await SendEmailAsync(authenticationResult.Value.AppUserDto.Email, authenticationResult.Value.Token);
+        await SendEmailAsync(authenticationResult.Value.AppUserDto.Email, authenticationResult.Value.Token);
 
         return Ok(authenticationResult.Value);
     }

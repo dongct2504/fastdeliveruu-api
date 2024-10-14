@@ -40,7 +40,7 @@ public class ShipperAuthController : ApiController
             return Problem(result.Errors);
         }
 
-        //await SendEmailAsync(result.Value.ShipperDto.Email, result.Value.Token);
+        await SendEmailAsync(result.Value.ShipperDto.Email, result.Value.Token);
 
         return Ok(result.Value);
     }
