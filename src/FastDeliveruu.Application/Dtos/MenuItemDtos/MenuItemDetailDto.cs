@@ -26,4 +26,6 @@ public class MenuItemDetailDto
     public GenreDto? GenreDto { get; set; }
 
     public RestaurantDto? RestaurantDto { get; set; }
+
+    public List<MenuVariantDto> MenuVariantDtos { get; set; } = new List<MenuVariantDto>();
 }

@@ -19,7 +19,8 @@ public class MenuItemMappingConfig : IRegister
         config.NewConfig<MenuItem, MenuItemDto>();
         config.NewConfig<MenuItem, MenuItemDetailDto>()
             .Map(dest => dest.GenreDto, src => src.Genre)
-            .Map(dest => dest.RestaurantDto, src => src.Restaurant);
+            .Map(dest => dest.RestaurantDto, src => src.Restaurant)
+            .Map(dest => dest.MenuVariantDtos, src => src.MenuVariants);
         config.NewConfig<CreateMenuItemCommand, MenuItem>();
         config.NewConfig<UpdateMenuItemCommand, MenuItem>();
 
