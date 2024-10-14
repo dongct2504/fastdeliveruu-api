@@ -1,21 +1,25 @@
 ﻿using FastDeliveruu.Application.Common;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
 using FastDeliveruu.Application.Interfaces;
-using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.ShoppingCarts.Commands.DeleteCartItem;
 
 public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemCommand, Result<int>>
 {
     private readonly ICacheService _cacheService;
+    private readonly ILogger<DeleteCartItemCommandHandler> _logger;
 
-    public DeleteCartItemCommandHandler(ICacheService cacheService)
+    public DeleteCartItemCommandHandler(
+        ICacheService cacheService,
+        ILogger<DeleteCartItemCommandHandler> logger)
     {
         _cacheService = cacheService;
+        _logger = logger;
     }
 
     public async Task<Result<int>> Handle(
@@ -24,27 +28,27 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
     {
         string key = $"{CacheConstants.CustomerCart}-{request.UserId}";
 
-        List<ShoppingCart>? customerCartCache = await _cacheService
-            .GetAsync<List<ShoppingCart>>(key, cancellationToken);
+        List<ShoppingCartDto>? customerCartCache = await _cacheService
+            .GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
 
         if (customerCartCache == null)
         {
             string message = "The customer's cart is already empty";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
-        ShoppingCart? shoppingCartRemove = customerCartCache
+        ShoppingCartDto? cartItem = customerCartCache
             .FirstOrDefault(sc => sc.Id == request.Id);
 
-        if (shoppingCartRemove == null)
+        if (cartItem == null)
         {
             string message = "Cart not found";
-            Log.Warning($"{request.GetType().Name} - {message} - {request}");
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new NotFoundError(message));
         }
 
-        customerCartCache.Remove(shoppingCartRemove);
+        customerCartCache.Remove(cartItem);
 
         await _cacheService.SetAsync(key, customerCartCache, CacheOptions.CartExpiration, cancellationToken);
 
