@@ -25,5 +25,18 @@ public class UserRegisterCommandValidator : AbstractValidator<UserRegisterComman
 
         RuleFor(x => x.Role)
             .Must(ValidateForRequest.BeValidRole).WithMessage("Role must be Customer, Staff or Admin.");
+
+        RuleFor(x => x.Address)
+            .NotNull()
+            .MaximumLength(60);
+
+        RuleFor(x => x.CityId)
+            .NotEmpty();
+
+        RuleFor(x => x.DistrictId)
+            .NotEmpty();
+
+        RuleFor(x => x.WardId)
+            .NotEmpty();
     }
 }

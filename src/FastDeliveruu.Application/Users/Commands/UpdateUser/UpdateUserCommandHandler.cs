@@ -2,7 +2,10 @@ using CloudinaryDotNet.Actions;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -14,6 +17,7 @@ namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Result>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly ILogger<UpdateUserCommand> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -24,13 +28,15 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         IMapper mapper,
         UserManager<AppUser> userManager,
         IDateTimeProvider dateTimeProvider,
-        ILogger<UpdateUserCommand> logger)
+        ILogger<UpdateUserCommand> logger,
+        IFastDeliveruuUnitOfWork unitOfWork)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _userManager = userManager;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -64,6 +70,56 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             user.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
             user.PublicId = uploadResult.PublicId;
         }
+
+        // handle addresses
+
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            string message = "City not found";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        AddressesCustomer? customerAddress = user.AddressesCustomers.FirstOrDefault(ac => ac.IsPrimary);
+        if (customerAddress == null)
+        {
+            customerAddress = new AddressesCustomer
+            {
+                AppUserId = user.Id,
+                Address = request.Address,
+                CityId = city.Id,
+                IsPrimary = true,
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+            };
+        }
+        else
+        {
+            customerAddress.Address = request.Address;
+            customerAddress.CityId = request.CityId;
+        }
+
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
+        if (district == null)
+        {
+            string message = "District not found";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+        customerAddress.DistrictId = district.Id;
+
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
+        if (ward == null)
+        {
+            string message = "Ward not found";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+        customerAddress.WardId = ward.Id;
+
+        _unitOfWork.AddressesCustomers.Add(customerAddress);
 
         if (!string.IsNullOrEmpty(request.Role))
         {

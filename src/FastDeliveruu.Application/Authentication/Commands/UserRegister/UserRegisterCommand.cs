@@ -14,13 +14,11 @@ public class UserRegisterCommand : IRequest<Result<UserAuthenticationResponse>>
 
     public string Password { get; set; } = null!;
 
-    public string? Address { get; set; }
+    public string Address { get; set; } = string.Empty;
 
-    public int? CityId { get; set; }
-
-    public int? DistrictId { get; set; }
-
-    public int? WardId { get; set; }
+    public int CityId { get; set; }
+    public int DistrictId { get; set; }
+    public int WardId { get; set; }
 
     public string? Role { get; set; }
 }

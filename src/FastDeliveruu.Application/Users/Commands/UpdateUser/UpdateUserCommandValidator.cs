@@ -21,15 +21,16 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
         RuleFor(x => x.Address)
-            .MaximumLength(128);
+            .NotNull()
+            .MaximumLength(60);
 
-        RuleFor(x => x.Ward)
-            .MaximumLength(50);
+        RuleFor(x => x.CityId)
+            .NotEmpty();
 
-        RuleFor(x => x.District)
-            .MaximumLength(30);
+        RuleFor(x => x.DistrictId)
+            .NotEmpty();
 
-        RuleFor(x => x.City)
-            .MaximumLength(30);
+        RuleFor(x => x.WardId)
+            .NotEmpty();
     }
 }

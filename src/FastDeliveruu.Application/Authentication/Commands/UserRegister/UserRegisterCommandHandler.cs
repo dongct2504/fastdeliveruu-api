@@ -48,61 +48,49 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         AppUser user = _mapper.Map<AppUser>(request);
         user.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        if (!string.IsNullOrEmpty(request.Address) || request.CityId.HasValue)
+        AddressesCustomer addressesCustomer = new AddressesCustomer
         {
-            AddressesCustomer addressesCustomer = new AddressesCustomer
-            {
-                Id = Guid.NewGuid(),
-                AppUserId = user.Id,
-                IsPrimary = true,
-                CreatedAt = _dateTimeProvider.VietnamDateTimeNow
-            };
+            Id = Guid.NewGuid(),
+            AppUserId = user.Id,
+            IsPrimary = true,
+            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+        };
 
-            if (!string.IsNullOrEmpty(request.Address))
-            {
-                addressesCustomer.Address = request.Address;
-            }
-
-            if (request.CityId.HasValue)
-            {
-                City? city = await _unitOfWork.Cities.GetAsync(request.CityId.Value);
-                if (city == null)
-                {
-                    string message = "city does not exist.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new NotFoundError(message));
-                }
-                addressesCustomer.CityId = request.CityId.Value;
-
-                if (request.DistrictId.HasValue)
-                {
-                    District? district = await _unitOfWork.Districts.GetWithSpecAsync(
-                        new DistrictExistInCitySpecification(request.CityId.Value, request.DistrictId.Value));
-                    if (district == null)
-                    {
-                        string message = "district does not exist in city.";
-                        _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                        return Result.Fail(new NotFoundError(message));
-                    }
-                    addressesCustomer.DistrictId = request.DistrictId.Value;
-
-                    if (request.WardId.HasValue)
-                    {
-                        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
-                            new WardExistInDistrictSpecification(request.DistrictId.Value, request.WardId.Value));
-                        if (ward == null)
-                        {
-                            string message = "ward does not exist in district.";
-                            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                            return Result.Fail(new NotFoundError(message));
-                        }
-                        addressesCustomer.WardId = request.WardId.Value;
-                    }
-                }
-            }
-
-            user.AddressesCustomers.Add(addressesCustomer);
+        if (!string.IsNullOrEmpty(request.Address))
+        {
+            addressesCustomer.Address = request.Address;
         }
+
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            string message = "city does not exist.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        addressesCustomer.CityId = request.CityId;
+
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
+        if (district == null)
+        {
+            string message = "district does not exist in city.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        addressesCustomer.DistrictId = request.DistrictId;
+
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
+        if (ward == null)
+        {
+            string message = "ward does not exist in district.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new NotFoundError(message));
+        }
+        addressesCustomer.WardId = request.WardId;
+
+        user.AddressesCustomers.Add(addressesCustomer);
 
         IdentityResult result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
