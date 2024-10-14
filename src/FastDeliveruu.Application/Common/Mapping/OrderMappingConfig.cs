@@ -20,7 +20,8 @@ public class OrderMappingConfig : IRegister
             .Map(dest => dest.OrderDetailDtos, src => src.OrderDetails);
 
         config.NewConfig<OrderDetail, OrderDetailDto>()
-            .Map(dest => dest.MenuItemDto, src => src.MenuItem);
+            .Map(dest => dest.MenuItemDto, src => src.MenuItem)
+            .Map(dest => dest.MenuVariantDto, src => src.MenuVariant);
 
         config.NewConfig<CreateOrderCommand, Order>();
     }

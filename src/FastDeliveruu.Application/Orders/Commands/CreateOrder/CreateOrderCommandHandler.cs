@@ -153,7 +153,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             }
         }
 
-        order.TotalAmount = totalAmount;
+        order.TotalAmount = totalAmount + deliveryMethod.Price;
         order.OrderDetails = orderDetails;
 
         order.OrderDescription = $"Create payment for order: {order.Id}";

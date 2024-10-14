@@ -19,4 +19,6 @@ public class OrderDetailDto
     public string ImageUrl { get; set; } = null!;
 
     public MenuItemDto MenuItemDto { get; set; } = null!;
+
+    public MenuVariantDto? MenuVariantDto { get; set; }
 }
