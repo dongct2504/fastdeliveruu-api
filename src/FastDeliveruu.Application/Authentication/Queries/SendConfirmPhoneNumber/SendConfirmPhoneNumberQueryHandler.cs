@@ -35,7 +35,7 @@ public class SendConfirmPhoneNumberQueryHandler : IRequestHandler<SendConfirmPho
         var user = await _userManager.FindByIdAsync(request.UserId.ToString());
         if (user == null)
         {
-            string message = "User not found";
+            string message = "Không tìm thấy user.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }

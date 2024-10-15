@@ -3,6 +3,7 @@ using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Users.Commands.UpdatePhoneNumber;
@@ -28,6 +29,17 @@ public class UpdatePhoneNumberCommandHandler : IRequestHandler<UpdatePhoneNumber
             string message = "User not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
+        }
+
+        AppUser? duplicatePhoneNumber = await _userManager.Users
+            .Where(u => u.PhoneNumber == request.PhoneNumber)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
+        if (duplicatePhoneNumber != null)
+        {
+            string message = "Số điện thoại đã tồn tại.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new DuplicateError(message));
         }
 
         appUser.PhoneNumber = request.PhoneNumber;
