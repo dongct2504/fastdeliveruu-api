@@ -40,6 +40,13 @@ public class SendConfirmPhoneNumberQueryHandler : IRequestHandler<SendConfirmPho
             return Result.Fail(new BadRequestError(message));
         }
 
+        if (user.PhoneNumberConfirmed)
+        {
+            string message = "Số điện thoại của tài khoản này đã xác thực!";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
         string otpCode = Utils.GenerateOtpCode();
 
         string key = $"{CacheConstants.OtpCode}-{request.UserId}";
