@@ -8,7 +8,6 @@ using FastDeliveruu.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 

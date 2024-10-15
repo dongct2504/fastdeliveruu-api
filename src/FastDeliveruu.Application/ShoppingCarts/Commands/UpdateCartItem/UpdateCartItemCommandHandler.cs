@@ -101,7 +101,9 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
         // check if the item already exists in the cart (check both menu item and menu variant)
         ShoppingCartDto? shoppingCartDto = customerCartDtoCache.FirstOrDefault(sc =>
             sc.MenuItemId == request.MenuItemId &&
-            (request.MenuVariantId == null || sc.MenuVariantId == request.MenuVariantId));
+            (request.MenuVariantId != null 
+                ? sc.MenuVariantId == request.MenuVariantId
+                : sc.MenuVariantId == null));
 
         if (shoppingCartDto == null) // item doesn't exist, hence create a new item and add it to the cart
         {

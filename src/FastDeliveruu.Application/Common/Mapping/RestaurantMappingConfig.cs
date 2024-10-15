@@ -15,7 +15,8 @@ public class RestaurantMappingConfig : IRegister
         // Restaurant config
         config.NewConfig<Restaurant, RestaurantDto>();
         config.NewConfig<Restaurant, RestaurantDetailDto>()
-            .Map(dest => dest.MenuItemDtos, src => src.MenuItems);
+            .Map(dest => dest.MenuItemDtos, src => src.MenuItems)
+            .Map(dest => dest.RestaurantHourDtos, src => src.RestaurantHours);
         config.NewConfig<CreateRestaurantCommand, Restaurant>();
         config.NewConfig<UpdateRestaurantCommand, Restaurant>();
 

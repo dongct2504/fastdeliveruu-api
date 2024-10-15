@@ -25,4 +25,6 @@ public class RestaurantDetailDto
     public decimal? Longitude { get; set; }
 
     public IEnumerable<MenuItemDto>? MenuItemDtos { get; set; }
+
+    public IEnumerable<RestaurantHourDto>? RestaurantHourDtos { get; set; }
 }
