@@ -89,5 +89,12 @@ public static class Utils
         bool stringCompare = string.CompareOrdinal(calledId.ToString(), otherId.ToString()) > 0;
         return stringCompare ? $"{calledId}-{otherId}" : $"{otherId}-{calledId}";
     }
+
+    public static string GenerateOtpCode()
+    {
+        Random random = new Random();
+        int otp = random.Next(100000, 999999);
+        return otp.ToString();
+    }
 }
 

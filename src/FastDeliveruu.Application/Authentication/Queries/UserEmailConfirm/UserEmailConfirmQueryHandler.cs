@@ -26,7 +26,7 @@ public class UserEmailConfirmQueryHandler : IRequestHandler<UserEmailConfirmQuer
         {
             string message = "User not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         var decodedToken = System.Text.Encoding.UTF8

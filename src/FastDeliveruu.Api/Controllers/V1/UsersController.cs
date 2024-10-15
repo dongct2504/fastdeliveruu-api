@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using FluentResults;
 using MediatR;
 using FastDeliveruu.Application.Users.Queries.GetUserById;
@@ -9,6 +9,8 @@ using Asp.Versioning;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Users.Commands.UpdatePhoneNumber;
+using System.Text.RegularExpressions;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -62,6 +64,28 @@ public class UsersController : ApiController
         {
             return Problem(updatedUserResult.Errors);
         }
+        return NoContent();
+    }
+
+    [HttpPut("update-phone-number/{phoneNumber}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdatePhoneNumber(string phoneNumber)
+    {
+        Regex phoneRegex = new Regex(@"^\+84\d{6,15}$");
+        if (string.IsNullOrEmpty(phoneNumber) || !phoneRegex.IsMatch(phoneNumber))
+        {
+            return Problem(statusCode: 400, detail: "Số điện thoại phải bắt đầu bằng +84 và bao gồm 6 đến 15 chữ số.");
+        }
+
+        UpdatePhoneNumberCommand command = new UpdatePhoneNumberCommand(User.GetCurrentUserId(), phoneNumber);
+
+        Result result = await _mediator.Send(command);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+
         return NoContent();
     }
 

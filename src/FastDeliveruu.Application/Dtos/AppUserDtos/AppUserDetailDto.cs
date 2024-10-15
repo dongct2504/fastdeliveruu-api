@@ -13,6 +13,7 @@ public class AppUserDetailDto
     public string Email { get; set; } = null!;
 
     public string PhoneNumber { get; set; } = null!;
+    public bool PhoneNumberConfirmed { get; set; }
 
     public string? ImageUrl { get; set; }
 

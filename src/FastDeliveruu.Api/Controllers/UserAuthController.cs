@@ -1,9 +1,12 @@
 using Asp.Versioning;
 using FastDeliveruu.Application.Authentication.Commands.UserRegister;
+using FastDeliveruu.Application.Authentication.Queries.ConfirmPhoneNumber;
+using FastDeliveruu.Application.Authentication.Queries.SendConfirmPhoneNumber;
 using FastDeliveruu.Application.Authentication.Queries.UserEmailConfirm;
 using FastDeliveruu.Application.Authentication.Queries.UserLogin;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -62,7 +65,6 @@ public class UserAuthController : ApiController
     [HttpGet("confirm-email")]
     [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ConfirmEmail(string email, string encodedToken)
     {
         UserEmailConfirmQuery query = new UserEmailConfirmQuery(email, encodedToken);
@@ -76,6 +78,38 @@ public class UserAuthController : ApiController
         string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
 
         return Redirect($"{redirectUrlBase}/auth/login");
+    }
+
+    [HttpGet("send-confirm-phone-number")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SendConfirmPhoneNumber(string phoneNumber)
+    {
+        SendConfirmPhoneNumberQuery query = new SendConfirmPhoneNumberQuery(User.GetCurrentUserId(), phoneNumber);
+
+        Result result = await _mediator.Send(query);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+
+        return Ok();
+    }
+
+    [HttpGet("confirm-phone-number")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConfirmPhoneNumber(string otpCode)
+    {
+        ConfirmPhoneNumberQuery query = new ConfirmPhoneNumberQuery(User.GetCurrentUserId(), otpCode);
+
+        Result result = await _mediator.Send(query);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+
+        return Ok();
     }
 
     [NonAction]

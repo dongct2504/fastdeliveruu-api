@@ -33,12 +33,19 @@ public static class DependencyInjection
 
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
+        // register email service
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
+        // register cloudinary service
         services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
         services.AddSingleton<IFileStorageServices, FileStorageServices>();
 
+        // register sms service
+        services.Configure<SmsSettings>(configuration.GetSection(SmsSettings.SectionName));
+        services.AddSingleton<ISmsSenderService, SmsSenderService>();
+
+        // register vnpay
         services.Configure<VnpaySettings>(configuration.GetSection(VnpaySettings.SectionName));
         services.AddSingleton<IVnpayServices, VnpayServices>();
 

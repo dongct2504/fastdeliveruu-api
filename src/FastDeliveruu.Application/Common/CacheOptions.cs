@@ -15,4 +15,7 @@ public static class CacheOptions
 
     public static DistributedCacheEntryOptions GroupChatExpiration =>
         new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(2) };
+
+    public static DistributedCacheEntryOptions OtpExpiration =>
+        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
 }
