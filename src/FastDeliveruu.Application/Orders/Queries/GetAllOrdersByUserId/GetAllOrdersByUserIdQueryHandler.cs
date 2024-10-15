@@ -38,8 +38,9 @@ public class GetAllOrdersByUserIdQueryHandler : IRequestHandler<GetAllOrdersByUs
 
         IQueryable<Order> ordersQuery = _dbContext.Orders.AsQueryable();
 
-        ordersQuery = ordersQuery
-            .Where(o => o.AppUserId == request.UserId);
+        ordersQuery = ordersQuery.Where(o => o.AppUserId == request.UserId);
+
+        ordersQuery = ordersQuery.OrderByDescending(o => o.OrderDate);
 
         PagedList<OrderDto> pagedList = new PagedList<OrderDto>
         {

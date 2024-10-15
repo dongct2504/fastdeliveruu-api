@@ -47,7 +47,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         AppUser? appUser = await _userManager.FindByIdAsync(request.AppUserId.ToString());
         if (appUser == null)
         {
-            string message = "The user currently does not login or not found.";
+            string message = "Người dùng hiện tại không đăng nhập hoặc không tìm thấy.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        if (!appUser.PhoneNumberConfirmed)
+        {
+            string message = "Vui lòng xác nhận số điện thoại để tiếp tục thực hiện thanh toán!";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -55,7 +62,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         DeliveryMethod? deliveryMethod = await _unitOfWork.DeliveryMethods.GetAsync(request.DeliveryMethodId);
         if (deliveryMethod == null)
         {
-            string message = "The delivery method does not exist.";
+            string message = "Không tìm thấy phương thức thanh toán";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -63,7 +70,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
-            string message = "City does not exist.";
+            string message = "Không tìm thấy Thành phố.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -72,7 +79,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
         if (district == null)
         {
-            string message = "District does not exist in city.";
+            string message = "Không tìm thấy quận.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -81,7 +88,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
         if (ward == null)
         {
-            string message = "Ward does not exist in district.";
+            string message = "Không tìm thấy phường.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
@@ -91,13 +98,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         List<ShoppingCartDto>? customerCartDto = await _cacheService.GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
         if (customerCartDto == null || !customerCartDto.Any())
         {
-            string message = "The customer's cart is empty.";
+            string message = "Giỏ hàng đang trống";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
 
         Order order = _mapper.Map<Order>(request);
         order.Id = Guid.NewGuid();
+        order.PhoneNumber = appUser.PhoneNumber;
 
         decimal totalAmount = 0;
         List<OrderDetail> orderDetails = new List<OrderDetail>();
@@ -128,7 +136,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
                 if (menuItemInventory == null || menuItemInventory.QuantityAvailable < cartItemDto.Quantity)
                 {
-                    string message = "Insufficient inventory for the menu item.";
+                    string message = "Không đủ hàng cho đồ ăn!";
                     _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                     return Result.Fail(new BadRequestError(message));
                 }
@@ -143,7 +151,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
                 if (menuVariantInventory == null || menuVariantInventory.QuantityAvailable < cartItemDto.Quantity)
                 {
-                    string message = "Insufficient inventory for the menu variant.";
+                    string message = "Không đủ hàng cho loại đồ ăn!";
                     _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
                     return Result.Fail(new BadRequestError(message));
                 }
@@ -166,7 +174,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         Shipper? shipper = await GetNearestShipperAsync(order.CityId, order.DistrictId, order.WardId, order.Address);
         if (shipper == null)
         {
-            string message = "Shipper not found.";
+            string message = "Không tìm thấy Shipper.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }

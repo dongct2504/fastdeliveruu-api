@@ -28,7 +28,6 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
     {
         OrderHeaderDetailDto? orderHeaderDetailDto = await _dbContext.Orders
             .Where(o => o.AppUserId == request.UserId && o.Id == request.OrderId)
-            .OrderByDescending(o => o.OrderDate)
             .AsNoTracking()
             .ProjectToType<OrderHeaderDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);

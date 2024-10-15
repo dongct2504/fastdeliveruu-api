@@ -51,7 +51,7 @@ public class CheckoutsController : ApiController
             IsSuccess = true,
             OrderId = createOrderResult.Value.Id,
             OrderDescription = createOrderResult.Value.OrderDescription ?? string.Empty,
-            PaymentMethod = (PaymentMethodsEnum)(createOrderResult.Value.PaymentMethod ?? 0), // cash
+            PaymentMethod = (PaymentMethodsEnum)(createOrderResult.Value.PaymentMethod ?? 0),
             TotalAmount = createOrderResult.Value.TotalAmount,
             TransactionId = createOrderResult.Value.TransactionId ?? "0"
         };
@@ -60,7 +60,7 @@ public class CheckoutsController : ApiController
     }
 
     [HttpPost("checkout-vnpay")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaymentResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CheckoutVnpay([FromBody] CreateOrderCommand command)
     {
@@ -72,7 +72,14 @@ public class CheckoutsController : ApiController
             return Problem(createOrderResult.Errors);
         }
 
-        return Ok(_vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value));
+        PaymentResponse paymentResponse = new PaymentResponse()
+        {
+            IsSuccess = true,
+            OrderId = createOrderResult.Value.Id,
+            VnpayReturnUrl = _vnPayServices.CreatePaymentUrl(HttpContext, createOrderResult.Value)
+        };
+
+        return Ok(paymentResponse);
     }
 
     [AllowAnonymous]
@@ -82,14 +89,14 @@ public class CheckoutsController : ApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VnpayReturn()
     {
-        VnpayResponse? vnpayResponse = _vnPayServices.PaymentExecute(Request.Query);
+        PaymentResponse? vnpayResponse = _vnPayServices.PaymentExecute(Request.Query);
         if (vnpayResponse == null)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "can't create the response.");
         }
 
         UpdateVnpayCommand command = new UpdateVnpayCommand(vnpayResponse);
-        Result<VnpayResponse> updateVnpayResult = await _mediator.Send(command);
+        Result<PaymentResponse> updateVnpayResult = await _mediator.Send(command);
         if (updateVnpayResult.IsFailed)
         {
             return Problem(updateVnpayResult.Errors);

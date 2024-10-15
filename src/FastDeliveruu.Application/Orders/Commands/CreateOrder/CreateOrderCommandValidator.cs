@@ -18,10 +18,6 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
             .NotEmpty()
             .MaximumLength(50);
 
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
-
         RuleFor(x => x.PaymentMethod)
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPaymentMethod).WithMessage("Must be cash, vnpay or momo.");

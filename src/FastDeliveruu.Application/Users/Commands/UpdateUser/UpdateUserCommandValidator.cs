@@ -1,4 +1,3 @@
-using FastDeliveruu.Application.Common.Behaviors;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Users.Commands.UpdateUser;
@@ -15,10 +14,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 
         RuleFor(x => x.LastName)
             .MaximumLength(50);
-
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");
 
         RuleFor(x => x.Address)
             .NotNull()

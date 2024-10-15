@@ -74,10 +74,10 @@ public static class Utils
         query["paymentMethod"] = paymentResponse.PaymentMethod.ToString();
         query["orderDescription"] = paymentResponse.OrderDescription;
 
-        if (paymentResponse is VnpayResponse)
+        // vnpay
+        if (!string.IsNullOrEmpty(paymentResponse.VnpayResponseCode))
         {
-            VnpayResponse vnpayResponse = (VnpayResponse)paymentResponse;
-            query["vnpayResponseCode"] = vnpayResponse.VnpayResponseCode;
+            query["vnpayResponseCode"] = paymentResponse.VnpayResponseCode;
         }
 
         uriBuilder.Query = query.ToString();

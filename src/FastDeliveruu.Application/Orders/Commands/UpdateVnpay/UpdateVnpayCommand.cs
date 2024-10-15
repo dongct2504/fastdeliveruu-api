@@ -4,12 +4,12 @@ using MediatR;
 
 namespace FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 
-public class UpdateVnpayCommand : IRequest<Result<VnpayResponse>>
+public class UpdateVnpayCommand : IRequest<Result<PaymentResponse>>
 {
-    public UpdateVnpayCommand(VnpayResponse vnPayResponse)
+    public UpdateVnpayCommand(PaymentResponse vnPayResponse)
     {
-        VnPayResponse = vnPayResponse;
+        PaymentResponse = vnPayResponse;
     }
 
-    public VnpayResponse VnPayResponse { get; } = null!;
+    public PaymentResponse PaymentResponse { get; } = null!;
 }

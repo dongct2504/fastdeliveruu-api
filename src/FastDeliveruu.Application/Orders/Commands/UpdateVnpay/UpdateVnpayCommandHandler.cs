@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 
-public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Result<VnpayResponse>>
+public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Result<PaymentResponse>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateVnpayCommandHandler> _logger;
@@ -23,11 +23,11 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
         _logger = logger;
     }
 
-    public async Task<Result<VnpayResponse>> Handle(UpdateVnpayCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PaymentResponse>> Handle(UpdateVnpayCommand request, CancellationToken cancellationToken)
     {
-        VnpayResponse vnpayResponse = request.VnPayResponse;
+        PaymentResponse paymentResponse = request.PaymentResponse;
 
-        Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsById(vnpayResponse.OrderId));
+        Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsById(paymentResponse.OrderId));
         if (order == null)
         {
             string message = "Order not found.";
@@ -43,29 +43,29 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
             return Result.Fail(new NotFoundError(message));
         }
 
-        order.TransactionId = request.VnPayResponse.TransactionId;
-        payment.TransactionId = request.VnPayResponse.TransactionId;
+        order.TransactionId = request.PaymentResponse.TransactionId;
+        payment.TransactionId = request.PaymentResponse.TransactionId;
 
-        switch (vnpayResponse.VnpayResponseCode)
+        switch (paymentResponse.VnpayResponseCode)
         {
             case "00":
-                vnpayResponse.IsSuccess = true;
+                paymentResponse.IsSuccess = true;
                 order.OrderStatus = (byte?)OrderStatusEnum.Success;
                 payment.PaymentStatus = (byte?)PaymentStatusEnum.Approved;
                 break;
 
             case "24":
-                vnpayResponse.IsSuccess = false;
+                paymentResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatusEnum.Cancelled;
                 payment.PaymentStatus = (byte?)PaymentStatusEnum.Cancelled;
                 break;
 
             default:
-                vnpayResponse.IsSuccess = false;
+                paymentResponse.IsSuccess = false;
                 order.OrderStatus = (byte?)OrderStatusEnum.Failed;
                 payment.PaymentStatus = (byte?)PaymentStatusEnum.Failed;
                 await _unitOfWork.SaveChangesAsync();
-                string unknownMessage = $"Payment failed with response code {request.VnPayResponse.VnpayResponseCode}.";
+                string unknownMessage = $"Payment failed with response code {request.PaymentResponse.VnpayResponseCode}.";
                 _logger.LogWarning($"{request.GetType().Name} - {unknownMessage} - {request}");
                 return Result.Fail(new BadRequestError(unknownMessage));
         }
@@ -83,7 +83,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                     return Result.Fail(new BadRequestError(message));
                 }
 
-                if (vnpayResponse.IsSuccess)
+                if (paymentResponse.IsSuccess)
                 {
                     menuItemInventory.QuantityReserved -= orderDetail.Quantity;
                 }
@@ -104,7 +104,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                     return Result.Fail(new BadRequestError(message));
                 }
 
-                if (vnpayResponse.IsSuccess)
+                if (paymentResponse.IsSuccess)
                 {
                     menuVariantInventory.QuantityReserved -= orderDetail.Quantity;
                 }
@@ -118,6 +118,6 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
 
         await _unitOfWork.SaveChangesAsync();
 
-        return vnpayResponse;
+        return paymentResponse;
     }
 }

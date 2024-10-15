@@ -12,8 +12,6 @@ public class UpdateUserCommand : IRequest<Result>
 
     public string? LastName { get; set; }
 
-    public string PhoneNumber { get; set; } = null!;
-
     public string Address { get; set; } = string.Empty;
 
     public int CityId { get; set; }

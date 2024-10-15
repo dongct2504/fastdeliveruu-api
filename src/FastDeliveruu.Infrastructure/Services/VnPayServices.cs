@@ -43,7 +43,7 @@ public class VnpayServices : IVnpayServices
         return vnpayLibrary.CreateRequestUrl(_vnpaySettings.Url, _vnpaySettings.HashSecret);
     }
 
-    public VnpayResponse PaymentExecute(IQueryCollection collection)
+    public PaymentResponse PaymentExecute(IQueryCollection collection)
     {
         VnpayLibrary vnPayLibrary = new VnpayLibrary();
 
@@ -62,24 +62,24 @@ public class VnpayServices : IVnpayServices
         string vnp_OrderInfo = vnPayLibrary.GetResponseData("vnp_OrderInfo");
         decimal vnp_Amount = Convert.ToDecimal(vnPayLibrary.GetResponseData("vnp_Amount")) / 100;
 
-        VnpayResponse vnpayResponse = new VnpayResponse();
+        PaymentResponse paymentResponse = new PaymentResponse();
 
         bool checkSignature = vnPayLibrary.ValidateSignature(vnp_SecureHash, _vnpaySettings.HashSecret);
         if (!checkSignature)
         {
-            vnpayResponse.IsSuccess = false;
-            return vnpayResponse;
+            paymentResponse.IsSuccess = false;
+            return paymentResponse;
         }
 
-        vnpayResponse.IsSuccess = true;
-        vnpayResponse.OrderId = vnp_orderId;
-        vnpayResponse.TotalAmount = vnp_Amount;
-        vnpayResponse.TransactionId = vnp_transactionId;
-        vnpayResponse.PaymentMethod = PaymentMethodsEnum.Vnpay;
-        vnpayResponse.OrderDescription = vnp_OrderInfo;
-        vnpayResponse.Token = vnp_SecureHash;
-        vnpayResponse.VnpayResponseCode = vnp_ResponseCode;
+        paymentResponse.IsSuccess = true;
+        paymentResponse.OrderId = vnp_orderId;
+        paymentResponse.TotalAmount = vnp_Amount;
+        paymentResponse.TransactionId = vnp_transactionId;
+        paymentResponse.PaymentMethod = PaymentMethodsEnum.Vnpay;
+        paymentResponse.OrderDescription = vnp_OrderInfo;
+        paymentResponse.VnpayToken = vnp_SecureHash;
+        paymentResponse.VnpayResponseCode = vnp_ResponseCode;
 
-        return vnpayResponse;
+        return paymentResponse;
     }
 }
