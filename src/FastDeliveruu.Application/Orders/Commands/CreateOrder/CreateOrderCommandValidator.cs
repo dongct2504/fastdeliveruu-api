@@ -20,7 +20,7 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 
         RuleFor(x => x.PaymentMethod)
             .NotEmpty()
-            .Must(ValidateForRequest.BeValidPaymentMethod).WithMessage("Must be cash, vnpay or momo.");
+            .Must(ValidateForRequest.BeValidPaymentMethod).WithMessage("Must be cash, vnpay, paypal or momo.");
 
         RuleFor(x => x.Address)
             .NotEmpty()

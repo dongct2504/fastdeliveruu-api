@@ -14,6 +14,7 @@ using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.UnitOfWork;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Identity.CustomManagers;
+using FastDeliveruu.Infrastructure.Helpers;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -48,6 +49,13 @@ public static class DependencyInjection
         // register vnpay
         services.Configure<VnpaySettings>(configuration.GetSection(VnpaySettings.SectionName));
         services.AddSingleton<IVnpayServices, VnpayServices>();
+
+        // register paypal
+        services.AddSingleton(x => new PaypalClient(
+            configuration["Payment:Paypal:AppId"],
+            configuration["Payment:Paypal:AppSecret"],
+            configuration["Payment:Paypal:Mode"]
+        ));
 
         services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
         services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();

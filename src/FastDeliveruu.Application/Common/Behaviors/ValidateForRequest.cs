@@ -33,6 +33,7 @@ public static class ValidateForRequest
     {
         return paymentMethod == PaymentMethodsEnum.Cash ||
             paymentMethod == PaymentMethodsEnum.Vnpay ||
+            paymentMethod == PaymentMethodsEnum.Paypal ||
             paymentMethod == PaymentMethodsEnum.Momo;
     }
 }

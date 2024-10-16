@@ -1,12 +1,15 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Helpers;
+using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Orders.Commands.CreateOrder;
+using FastDeliveruu.Application.Orders.Commands.UpdatePaypal;
 using FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
+using FastDeliveruu.Infrastructure.Helpers;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,15 +25,18 @@ public class CheckoutsController : ApiController
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
     private readonly IVnpayServices _vnPayServices;
+    private readonly PaypalClient _paypalClient;
 
     public CheckoutsController(
         IMediator mediator,
         IConfiguration configuration,
-        IVnpayServices vnPayServices)
+        IVnpayServices vnPayServices,
+        PaypalClient paypalClient)
     {
         _mediator = mediator;
         _configuration = configuration;
         _vnPayServices = vnPayServices;
+        _paypalClient = paypalClient;
     }
 
     [HttpPost("checkout-cash")]
@@ -114,5 +120,60 @@ public class CheckoutsController : ApiController
             return Redirect(Utils
                 .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/failed", updateVnpayResult.Value));
         }
+    }
+
+    [HttpPost("create-paypal-order")]
+    public async Task<IActionResult> CreatePaypalOrder([FromBody] CreateOrderCommand command)
+    {
+        command.AppUserId = User.GetCurrentUserId();
+        Result<Order> createOrderResult = await _mediator.Send(command);
+        if (createOrderResult.IsFailed)
+        {
+            return Problem(createOrderResult.Errors);
+        }
+
+        CreateOrderResponse createOrderResponse = await _paypalClient
+            .CreateOrder(command.Amount, command.Currency, command.Reference);
+
+        if (createOrderResponse != null)
+        {
+            return Ok(new
+            {
+                OrderId = createOrderResult.Value.Id,
+                PaymentOrderId = createOrderResponse.id,
+                ApprovalLink = createOrderResponse.links.FirstOrDefault(l => l.rel == "approve")?.href
+            });
+        }
+
+        return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Failed to create PayPal order.");
+    }
+
+    [AllowAnonymous]
+    [HttpGet("capture-payment-order")]
+    public async Task<IActionResult> CapturePaypalOrder(string token, string PayerId)
+    {
+        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(PayerId))
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Token or PayerId is null");
+        }
+
+        CaptureOrderResponse captureOrderResponse = await _paypalClient.CaptureOrder(token);
+
+        if (captureOrderResponse != null)
+        {
+            UpdatePaypalCommand command = new UpdatePaypalCommand(token, PayerId);
+            Result<PaymentResponse> result = await _mediator.Send(command);
+            if (result.IsFailed)
+            {
+                return Problem(result.Errors);
+            }
+
+            string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
+
+            return Redirect(Utils
+                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/success", result.Value));
+        }
+
+        return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Failed to capture PayPal order.");
     }
 }

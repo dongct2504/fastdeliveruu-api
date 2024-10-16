@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using FastDeliveruu.Application.Common;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShoppingCartDtos;
@@ -163,6 +164,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
         order.TotalAmount = totalAmount + deliveryMethod.Price;
         order.OrderDetails = orderDetails;
+
+        // paypal setting
+        if (request.PaymentMethod == PaymentMethodsEnum.Paypal)
+        {
+            await _cacheService.SetAsync("TempOrderId", order.Id.ToString(), CacheOptions.TempOrderId, cancellationToken);
+
+            decimal totalAmountUSD = order.TotalAmount * (decimal)0.000042;
+            request.Amount = totalAmountUSD.ToString("F2");
+            request.Reference = order.Id.ToString();
+        }
 
         order.OrderDescription = $"Create payment for order: {order.Id}";
         order.OrderDate = _dateTimeProvider.VietnamDateTimeNow;

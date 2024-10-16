@@ -12,7 +12,6 @@ public class CreateOrderCommand : IRequest<Result<Order>>
     public int DeliveryMethodId { get; set; }
 
     public string FirstName { get; set; } = null!;
-
     public string LastName { get; set; } = null!;
 
     public PaymentMethodsEnum PaymentMethod { get; set; }
@@ -20,8 +19,10 @@ public class CreateOrderCommand : IRequest<Result<Order>>
     public string Address { get; set; } = null!;
 
     public int CityId { get; set; }
-
     public int DistrictId { get; set; }
-
     public int WardId { get; set; }
+
+    public string Amount { get; set; } = string.Empty;
+    public string Currency { get; set; } = "USD";
+    public string Reference { get; set; } = string.Empty;   
 }
