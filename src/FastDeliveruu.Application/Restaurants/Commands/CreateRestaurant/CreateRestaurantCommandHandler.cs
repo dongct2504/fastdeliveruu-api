@@ -5,6 +5,7 @@ using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.Addresses;
 using FastDeliveruu.Domain.Specifications.Restaurants;
 using FluentResults;
 using MapsterMapper;
@@ -44,6 +45,32 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
             string message = "Restaurant is already exist.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail<RestaurantDto>(new DuplicateError(message));
+        }
+
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            string message = "Không tìm thấy Thành phố.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
+        if (district == null)
+        {
+            string message = "Không tìm thấy quận.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
+        if (ward == null)
+        {
+            string message = "Không tìm thấy phường.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
         }
 
         restaurant = _mapper.Map<Restaurant>(request);
