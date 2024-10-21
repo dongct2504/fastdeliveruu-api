@@ -48,7 +48,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         {
             string message = "city does not exist.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         shipper.CityId = city.Id;
 
@@ -58,7 +58,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         {
             string message = "district does not exist in city.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         shipper.DistrictId = district.Id;
 
@@ -68,7 +68,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         {
             string message = "ward does not exist in district.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         shipper.WardId = ward.Id;
 

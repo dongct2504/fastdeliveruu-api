@@ -61,7 +61,6 @@ public class AdminController : ApiController
 
     [HttpPost("edit-user-roles/{id:guid}")]
     [ProducesResponseType(typeof(PagedList<AppUserWithRolesDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> EditUserRoles(Guid id, [FromQuery] string roles)
     {
@@ -76,7 +75,6 @@ public class AdminController : ApiController
 
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromForm] UpdateUserCommand command)
     {
@@ -95,7 +93,6 @@ public class AdminController : ApiController
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         DeleteUserCommand command = new DeleteUserCommand(id);

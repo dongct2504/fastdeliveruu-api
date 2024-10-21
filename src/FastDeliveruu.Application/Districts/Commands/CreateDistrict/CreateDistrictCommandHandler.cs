@@ -37,7 +37,7 @@ public class CreateDistrictCommandHandler : IRequestHandler<CreateDistrictComman
         {
             string message = "City not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         District? district = await _unitOfWork.Districts

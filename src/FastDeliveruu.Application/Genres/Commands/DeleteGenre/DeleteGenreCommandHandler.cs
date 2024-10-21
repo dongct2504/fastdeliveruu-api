@@ -25,7 +25,7 @@ public class DeleteGenreCommandHandler : IRequestHandler<DeleteGenreCommand, Res
         {
             string message = "Genre not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _unitOfWork.Genres.Delete(genre);

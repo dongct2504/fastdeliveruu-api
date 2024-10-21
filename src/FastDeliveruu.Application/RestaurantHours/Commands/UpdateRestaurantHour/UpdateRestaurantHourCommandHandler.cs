@@ -35,7 +35,7 @@ public class UpdateRestaurantHourCommandHandler : IRequestHandler<UpdateRestaura
         {
             string message = "Restaurant not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         RestaurantHour? restaurantHour = await _unitOfWork.RestaurantHours.GetAsync(request.Id);
@@ -43,7 +43,7 @@ public class UpdateRestaurantHourCommandHandler : IRequestHandler<UpdateRestaura
         {
             string message = "RestaurantHour not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _mapper.Map(request, restaurantHour);

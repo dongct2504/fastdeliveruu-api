@@ -43,7 +43,6 @@ public class MenuVariantInventoriesController : ApiController
 
     [HttpPost]
     [ProducesResponseType(typeof(MenuVariantInventoryDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMenuVariantInventory([FromBody] UpdateMenuVariantInventoryCommand command)
     {
         Result<MenuVariantInventoryDto> result = await _mediator.Send(command);
@@ -56,7 +55,6 @@ public class MenuVariantInventoriesController : ApiController
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMenuVariantInventory(Guid id)
     {
         DeleteMenuVariantInventoryCommand command = new DeleteMenuVariantInventoryCommand(id);

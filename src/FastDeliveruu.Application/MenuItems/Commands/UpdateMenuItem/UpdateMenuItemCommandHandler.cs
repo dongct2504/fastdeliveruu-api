@@ -40,7 +40,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         {
             string message = "Genre not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
@@ -48,7 +48,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         {
             string message = "Restaurant not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.Id);
@@ -56,7 +56,7 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         {
             string message = "MenuItem not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _mapper.Map(request, menuItem);

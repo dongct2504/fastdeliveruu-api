@@ -66,7 +66,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         {
             string message = "city does not exist.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         addressesCustomer.CityId = request.CityId;
 
@@ -76,7 +76,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         {
             string message = "district does not exist in city.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         addressesCustomer.DistrictId = request.DistrictId;
 
@@ -86,7 +86,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         {
             string message = "ward does not exist in district.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
         addressesCustomer.WardId = request.WardId;
 

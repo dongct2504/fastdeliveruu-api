@@ -35,7 +35,7 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
         {
             string message = "City not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         District? district = await _unitOfWork.Districts.GetAsync(request.Id);
@@ -43,7 +43,7 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
         {
             string message = "District not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _mapper.Map(request, district);

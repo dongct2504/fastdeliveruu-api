@@ -68,7 +68,7 @@ public class UpdateCartItemCommandHandler : IRequestHandler<UpdateCartItemComman
             {
                 string message = "MenuVariant does not exist in the MenuItem.";
                 _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new NotFoundError(message));
+                return Result.Fail(new BadRequestError(message));
             }
         }
 

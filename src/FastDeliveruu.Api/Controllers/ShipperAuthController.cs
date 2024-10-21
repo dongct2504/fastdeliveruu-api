@@ -62,7 +62,6 @@ public class ShipperAuthController : ApiController
     [HttpGet("confirm-email")]
     [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ConfirmEmail(string email, string encodedToken)
     {
         ShipperEmailConfirmQuery query = new ShipperEmailConfirmQuery(email, encodedToken);

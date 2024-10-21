@@ -53,7 +53,6 @@ public class WishListsController : ApiController
 
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteWishList()
     {
         DeleteWishListCommand command = new DeleteWishListCommand(User.GetCurrentUserId());
@@ -68,7 +67,6 @@ public class WishListsController : ApiController
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteWishListItem(Guid id)
     {

@@ -67,7 +67,6 @@ public class WardsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(typeof(WardDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateWard([FromBody] CreateWardCommand command)
     {
         Result<WardDto> result = await _mediator.Send(command);
@@ -85,7 +84,6 @@ public class WardsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateWard(int id, [FromBody] UpdateWardCommand command)
     {
         if (id != command.Id)
@@ -104,7 +102,6 @@ public class WardsController : ApiController
     [HttpDelete("{id:int}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteWard(int id)
     {
         DeleteWardCommand command = new DeleteWardCommand(id);

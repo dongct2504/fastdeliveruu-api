@@ -4,6 +4,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
+using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -35,14 +36,22 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
+            string message = "Sản phẩm này không tồn tại.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         MenuItemInventory? menuItemInventory;
         if (request.Id == Guid.Empty) // add
         {
+            menuItemInventory = await _unitOfWork.MenuItemInventories.GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(menuItem.Id), true);
+            if (menuItemInventory != null)
+            {
+                string message = "Kho hàng cho sản phẩm này đã tồn tại.";
+                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+                return Result.Fail(new DuplicateError(message));
+            }
+
             menuItemInventory = _mapper.Map<MenuItemInventory>(request);
             menuItemInventory.Id = Guid.NewGuid();
             menuItemInventory.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
@@ -53,9 +62,9 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
             menuItemInventory = await _unitOfWork.MenuItemInventories.GetAsync(request.Id);
             if (menuItemInventory == null)
             {
-                string message = "MenuItem Inventory not found.";
+                string message = "Kho hàng cho sản phẩm này không tồn tại.";
                 _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new NotFoundError(message));
+                return Result.Fail(new BadRequestError(message));
             }
 
             _mapper.Map(request, menuItemInventory);

@@ -133,7 +133,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             if (!cartItemDto.MenuVariantId.HasValue)
             {
                 MenuItemInventory? menuItemInventory = await _unitOfWork.MenuItemInventories
-                    .GetWithSpecAsync(new MenuItemInventoryByIdSpecification(cartItemDto.MenuItemId));
+                    .GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(cartItemDto.MenuItemId));
 
                 if (menuItemInventory == null || menuItemInventory.QuantityAvailable < cartItemDto.Quantity)
                 {
@@ -148,7 +148,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             else // if it's a menu variant
             {
                 MenuVariantInventory? menuVariantInventory = await _unitOfWork.MenuVariantInventories
-                    .GetWithSpecAsync(new MenuVariantInventoryByIdSpecification(cartItemDto.MenuVariantId.Value));
+                    .GetWithSpecAsync(new MenuVariantInventoryByMenuVariantIdSpecification(cartItemDto.MenuVariantId.Value));
 
                 if (menuVariantInventory == null || menuVariantInventory.QuantityAvailable < cartItemDto.Quantity)
                 {
@@ -168,8 +168,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         // paypal setting
         if (request.PaymentMethod == PaymentMethodsEnum.Paypal)
         {
-            await _cacheService.SetAsync("TempOrderId", order.Id.ToString(), CacheOptions.TempOrderId, cancellationToken);
-
             decimal totalAmountUSD = order.TotalAmount * (decimal)0.000042;
             request.Amount = totalAmountUSD.ToString("F2");
             request.Reference = order.Id.ToString();

@@ -72,7 +72,6 @@ public class MenuItemsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMenuItem(Guid id, [FromForm] UpdateMenuItemCommand command)
     {
         if (id != command.Id)
@@ -92,7 +91,6 @@ public class MenuItemsController : ApiController
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMenuItem(Guid id)
     {
         DeleteMenuItemCommand command = new DeleteMenuItemCommand(id);

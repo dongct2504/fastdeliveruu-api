@@ -67,7 +67,6 @@ public class DistrictsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(typeof(DistrictDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateDistrict([FromBody] CreateDistrictCommand command)
     {
         Result<DistrictDto> result = await _mediator.Send(command);
@@ -85,7 +84,6 @@ public class DistrictsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateDistrict(int id, [FromBody] UpdateDistrictCommand command)
     {
         if (id != command.Id)
@@ -104,7 +102,6 @@ public class DistrictsController : ApiController
     [HttpDelete("{id:int}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDistrict(int id)
     {
         DeleteDistrictCommand command = new DeleteDistrictCommand(id);

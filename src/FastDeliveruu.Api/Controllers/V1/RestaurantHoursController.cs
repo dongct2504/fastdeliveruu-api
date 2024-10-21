@@ -69,7 +69,6 @@ public class RestaurantHoursController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateRestaurantHour(Guid id, [FromBody] UpdateRestaurantHourCommand command)
     {
         if (id != command.Id)
@@ -89,7 +88,6 @@ public class RestaurantHoursController : ApiController
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteRestaurantHour(Guid id)
     {
         DeleteRestaurantHourCommand command = new DeleteRestaurantHourCommand(id);

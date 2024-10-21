@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace FastDeliveruu.Infrastructure.Helpers
+namespace FastDeliveruu.Application.Common.Helpers
 {
     public sealed class PaypalClient
     {

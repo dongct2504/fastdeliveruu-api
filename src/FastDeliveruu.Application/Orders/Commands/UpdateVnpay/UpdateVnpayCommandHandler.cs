@@ -75,7 +75,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
             if (!orderDetail.MenuVariantId.HasValue) // menu item
             {
                 MenuItemInventory? menuItemInventory = await _unitOfWork.MenuItemInventories
-                    .GetWithSpecAsync(new MenuItemInventoryByIdSpecification(orderDetail.MenuItemId));
+                    .GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(orderDetail.MenuItemId));
                 if (menuItemInventory == null)
                 {
                     string message = "MenuItem Inventory not found.";
@@ -96,7 +96,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
             else // menu variant
             {
                 MenuVariantInventory? menuVariantInventory = await _unitOfWork.MenuVariantInventories
-                    .GetWithSpecAsync(new MenuVariantInventoryByIdSpecification(orderDetail.MenuVariantId.Value));
+                    .GetWithSpecAsync(new MenuVariantInventoryByMenuVariantIdSpecification(orderDetail.MenuVariantId.Value));
                 if (menuVariantInventory == null)
                 {
                     string message = "MenuVariant Inventory not found.";

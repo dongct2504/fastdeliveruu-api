@@ -37,7 +37,7 @@ public class CreateRestaurantHourCommandHandler : IRequestHandler<CreateRestaura
         {
             string message = "Restaurant not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         var spec = new RestaurantHoursExistInRestaurantSpecification(request.RestaurantId, request.WeekenDay, request.StartTime, request.EndTime);

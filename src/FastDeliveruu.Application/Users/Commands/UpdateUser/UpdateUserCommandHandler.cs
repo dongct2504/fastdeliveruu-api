@@ -50,7 +50,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         {
             string message = "User not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _mapper.Map(request, user);

@@ -5,20 +5,22 @@ using FluentResults;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace FastDeliveruu.Application.Orders.Commands.DeleteOrder;
+namespace FastDeliveruu.Application.Orders.Commands.UpdateOrder;
 
-public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, Result>
+public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
-    private readonly ILogger<DeleteOrderCommandHandler> _logger;
+    private readonly ILogger<UpdateOrderCommandHandler> _logger;
 
-    public DeleteOrderCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<DeleteOrderCommandHandler> logger)
+    public UpdateOrderCommandHandler(
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ILogger<UpdateOrderCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
         Order? order = await _unitOfWork.Orders.GetAsync(request.Id);
         if (order == null)
@@ -28,7 +30,7 @@ public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, Res
             return Result.Fail(new BadRequestError(message));
         }
 
-        _unitOfWork.Orders.Delete(order);
+        order.PaymentOrderId = request.PaymentOrderId;
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();

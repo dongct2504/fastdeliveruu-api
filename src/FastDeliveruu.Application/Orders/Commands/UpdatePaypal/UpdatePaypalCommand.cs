@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Dtos.PaymentResponses;
+﻿using FastDeliveruu.Application.Common.Helpers;
+using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FluentResults;
 using MediatR;
 
@@ -6,12 +7,10 @@ namespace FastDeliveruu.Application.Orders.Commands.UpdatePaypal;
 
 public class UpdatePaypalCommand : IRequest<Result<PaymentResponse>>
 {
-    public UpdatePaypalCommand(string token, string payer)
+    public UpdatePaypalCommand(CaptureOrderResponse captureOrderResponse)
     {
-        Token = token;
-        PayerId = payer;
+        CaptureOrderResponse = captureOrderResponse;
     }
 
-    public string Token { get; }
-    public string PayerId { get; }
+    public CaptureOrderResponse CaptureOrderResponse { get; }
 }

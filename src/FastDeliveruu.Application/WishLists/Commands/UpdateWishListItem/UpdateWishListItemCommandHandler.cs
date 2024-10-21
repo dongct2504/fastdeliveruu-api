@@ -1,5 +1,4 @@
 ﻿using FastDeliveruu.Application.Common.Errors;
-using FastDeliveruu.Application.Dtos.WishListDtos;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
@@ -61,7 +60,7 @@ public class UpdateWishListItemCommandHandler : IRequestHandler<UpdateWishListIt
             {
                 string message = "MenuVariant does not exist in the MenuItem.";
                 _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new NotFoundError(message));
+                return Result.Fail(new BadRequestError(message));
             }
         }
 

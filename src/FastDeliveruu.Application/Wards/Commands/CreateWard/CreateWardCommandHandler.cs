@@ -37,7 +37,7 @@ public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Resul
         {
             string message = "District not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         Ward? ward = await _unitOfWork.Wards

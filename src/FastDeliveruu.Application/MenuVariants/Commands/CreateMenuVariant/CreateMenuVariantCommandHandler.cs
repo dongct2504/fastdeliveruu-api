@@ -42,7 +42,7 @@ public class CreateMenuVariantCommandHandler : IRequestHandler<CreateMenuVariant
         {
             string message = "MenuItem not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         var spec = new MenuVariantNameExistInMenuItemSpecification(request.MenuItemId, request.VarietyName);

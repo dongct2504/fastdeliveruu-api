@@ -2,9 +2,9 @@
 
 namespace FastDeliveruu.Domain.Specifications.MenuItems;
 
-public class MenuVariantInventoryByIdSpecification : Specification<MenuVariantInventory>
+public class MenuVariantInventoryByMenuVariantIdSpecification : Specification<MenuVariantInventory>
 {
-    public MenuVariantInventoryByIdSpecification(Guid menuVariantId)
+    public MenuVariantInventoryByMenuVariantIdSpecification(Guid menuVariantId)
         : base(mi => mi.MenuVariantId == menuVariantId)
     {
     }

@@ -38,7 +38,6 @@ public class CustomerCartsController : ApiController
     [HttpPost]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemCommand command)
     {
         command.AppUserId = User.GetCurrentUserId();
@@ -54,7 +53,6 @@ public class CustomerCartsController : ApiController
 
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCustomerCart()
     {
         Guid userId = User.GetCurrentUserId();
@@ -71,7 +69,6 @@ public class CustomerCartsController : ApiController
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteCartItem(Guid id)
     {

@@ -75,7 +75,7 @@ var app = builder.Build();
         app.UseSwaggerDocument();
     }
 
-    //app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
     using (IServiceScope serviceScope = app.Services.CreateScope())
     {

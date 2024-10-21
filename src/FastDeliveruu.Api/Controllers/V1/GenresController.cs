@@ -71,7 +71,6 @@ public class GenresController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateGenre(Guid id, [FromBody] UpdateGenreCommand command)
     {
         if (id != command.Id)
@@ -91,7 +90,6 @@ public class GenresController : ApiController
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteGenre(Guid id)
     {
         DeleteGenreCommand command = new DeleteGenreCommand(id);

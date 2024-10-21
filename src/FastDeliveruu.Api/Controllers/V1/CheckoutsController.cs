@@ -5,11 +5,11 @@ using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Orders.Commands.CreateOrder;
+using FastDeliveruu.Application.Orders.Commands.UpdateOrder;
 using FastDeliveruu.Application.Orders.Commands.UpdatePaypal;
 using FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Extensions;
-using FastDeliveruu.Infrastructure.Helpers;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -90,8 +90,7 @@ public class CheckoutsController : ApiController
 
     [AllowAnonymous]
     [HttpGet("vnpay-return")]
-    [ProducesResponseType(StatusCodes.Status302Found)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VnpayReturn()
     {
@@ -123,6 +122,8 @@ public class CheckoutsController : ApiController
     }
 
     [HttpPost("create-paypal-order")]
+    [ProducesResponseType(typeof(PaymentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreatePaypalOrder([FromBody] CreateOrderCommand command)
     {
         command.AppUserId = User.GetCurrentUserId();
@@ -133,10 +134,17 @@ public class CheckoutsController : ApiController
         }
 
         CreateOrderResponse createOrderResponse = await _paypalClient
-            .CreateOrder(command.Amount, command.Currency, command.Reference);
+            .CreateOrder(command.Amount, command.Currency, createOrderResult.Value.Id.ToString());
 
         if (createOrderResponse != null)
         {
+            Result updateOrderResult = await _mediator.Send(
+                new UpdateOrderCommand(createOrderResult.Value.Id, createOrderResponse.id));
+            if (updateOrderResult.IsFailed)
+            {
+                return Problem(createOrderResult.Errors);
+            }
+
             return Ok(new
             {
                 OrderId = createOrderResult.Value.Id,
@@ -150,6 +158,8 @@ public class CheckoutsController : ApiController
 
     [AllowAnonymous]
     [HttpGet("capture-payment-order")]
+    [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CapturePaypalOrder(string token, string PayerId)
     {
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(PayerId))
@@ -161,7 +171,7 @@ public class CheckoutsController : ApiController
 
         if (captureOrderResponse != null)
         {
-            UpdatePaypalCommand command = new UpdatePaypalCommand(token, PayerId);
+            UpdatePaypalCommand command = new UpdatePaypalCommand(captureOrderResponse);
             Result<PaymentResponse> result = await _mediator.Send(command);
             if (result.IsFailed)
             {

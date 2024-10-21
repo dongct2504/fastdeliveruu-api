@@ -26,7 +26,7 @@ public class DeleteMenuVariantInventoryCommandHandler : IRequestHandler<DeleteMe
 
             string message = "MenuItemInventory not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _unitOfWork.MenuVariantInventories.Delete(menuVariantInventory);

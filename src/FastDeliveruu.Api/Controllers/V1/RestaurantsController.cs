@@ -72,7 +72,6 @@ public class RestaurantsController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateRestaurant(Guid id, [FromForm] UpdateRestaurantCommand command)
     {
         if (id != command.Id)
@@ -92,7 +91,6 @@ public class RestaurantsController : ApiController
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteRestaurant(Guid id)
     {
         DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);

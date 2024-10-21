@@ -25,7 +25,7 @@ public class DeleteWishListItemCommandHandler : IRequestHandler<DeleteWishListIt
         {
             string message = "This item does not exist.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _unitOfWork.WishLists.Delete(wishList);

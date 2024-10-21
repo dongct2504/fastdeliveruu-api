@@ -22,6 +22,7 @@ public class CreateOrderCommand : IRequest<Result<Order>>
     public int DistrictId { get; set; }
     public int WardId { get; set; }
 
+    public string? PaymentOrderId { get; set; }
     public string Amount { get; set; } = string.Empty;
     public string Currency { get; set; } = "USD";
     public string Reference { get; set; } = string.Empty;   

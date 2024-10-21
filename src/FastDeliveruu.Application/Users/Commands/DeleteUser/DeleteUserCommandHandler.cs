@@ -30,7 +30,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
         {
             string message = "User Not found";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         if (!string.IsNullOrEmpty(user.PublicId))

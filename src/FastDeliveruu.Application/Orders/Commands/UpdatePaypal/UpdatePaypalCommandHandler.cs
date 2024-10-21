@@ -29,21 +29,34 @@ public class UpdatePaypalCommandHandler : IRequestHandler<UpdatePaypalCommand, R
 
     public async Task<Result<PaymentResponse>> Handle(UpdatePaypalCommand request, CancellationToken cancellationToken)
     {
-        string? orderIdString = await _cacheService.GetAsync<string>("TempOrderId");
-        if (orderIdString == null)
-        {
-            string message = "Order not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
-        }
-
-        Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsById(Guid.Parse(orderIdString)));
+        Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsByPaymentOrderId(request.CaptureOrderResponse.id));
         if (order == null)
         {
             string message = "Order not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
             return Result.Fail(new BadRequestError(message));
         }
+
+        Payment? payment = order.Payments.FirstOrDefault();
+        if (payment == null)
+        {
+            string message = "Payment not found for the order.";
+            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            return Result.Fail(new BadRequestError(message));
+        }
+
+        string? transactionId = request.CaptureOrderResponse.purchase_units
+            .FirstOrDefault()?
+            .payments?
+            .captures?
+            .FirstOrDefault()?
+            .id;
+
+        order.OrderStatus = (byte?)OrderStatusEnum.Success;
+        order.TransactionId = transactionId;
+
+        payment.PaymentStatus = (byte)PaymentStatusEnum.Approved;
+        payment.TransactionId = transactionId;
 
         PaymentResponse paymentResponse = new PaymentResponse()
         {
@@ -54,8 +67,6 @@ public class UpdatePaypalCommandHandler : IRequestHandler<UpdatePaypalCommand, R
             TotalAmount = order.TotalAmount,
             TransactionId = order.TransactionId ?? "0"
         };
-
-        order.OrderStatus = (byte?)OrderStatusEnum.Success;
 
         await _unitOfWork.SaveChangesAsync();
 

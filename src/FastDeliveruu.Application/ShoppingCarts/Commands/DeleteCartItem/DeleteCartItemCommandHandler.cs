@@ -45,7 +45,7 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
         {
             string message = "Cart not found";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         customerCartCache.Remove(cartItem);

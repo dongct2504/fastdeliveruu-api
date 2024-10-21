@@ -69,7 +69,6 @@ public class CitiesController : ApiController
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCity(int id, [FromBody] UpdateCityCommand command)
     {
         if (id != command.Id)
@@ -88,7 +87,6 @@ public class CitiesController : ApiController
     [HttpDelete("{id:int}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCity(int id)
     {
         DeleteCityCommand command = new DeleteCityCommand(id);

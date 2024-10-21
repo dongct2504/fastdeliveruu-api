@@ -14,7 +14,7 @@ using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.UnitOfWork;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Identity.CustomManagers;
-using FastDeliveruu.Infrastructure.Helpers;
+using FastDeliveruu.Application.Common.Helpers;
 
 namespace FastDeliveruu.Infrastructure;
 

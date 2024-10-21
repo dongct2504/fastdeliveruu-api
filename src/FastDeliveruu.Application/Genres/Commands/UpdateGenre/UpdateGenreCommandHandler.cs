@@ -36,7 +36,7 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
         {
             string message = "Genre not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         _mapper.Map(request, genre);

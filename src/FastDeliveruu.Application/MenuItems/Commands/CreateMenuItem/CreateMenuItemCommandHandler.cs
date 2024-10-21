@@ -44,7 +44,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         {
             string message = "Genre not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
@@ -52,7 +52,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         {
             string message = "Restaurant not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         var spec = new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name);

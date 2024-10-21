@@ -32,7 +32,7 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
         {
             string message = "Restaurant not found.";
             _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            return Result.Fail(new BadRequestError(message));
         }
 
         DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(restaurant.PublicId);

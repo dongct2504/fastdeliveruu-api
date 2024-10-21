@@ -70,7 +70,6 @@ public class MenuVariantsController : ApiController
     [HttpPut("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateMenuVariant(Guid id, [FromForm] UpdateMenuVariantCommand command)
     {
@@ -91,7 +90,6 @@ public class MenuVariantsController : ApiController
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyConstants.ManageResources)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMenuVariant(Guid id)
     {
         DeleteMenuVariantCommand command = new DeleteMenuVariantCommand(id, User.GetCurrentUserId());

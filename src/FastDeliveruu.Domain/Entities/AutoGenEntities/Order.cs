@@ -23,6 +23,8 @@ namespace FastDeliveruu.Domain.Entities
 
         [Key]
         public Guid Id { get; set; }
+        [StringLength(32)]
+        public string? PaymentOrderId { get; set; }
         public Guid AppUserId { get; set; }
         public Guid ShipperId { get; set; }
         public int? DeliveryMethodId { get; set; }
