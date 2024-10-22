@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -35,9 +36,8 @@ public class CreateRestaurantHourCommandHandler : IRequestHandler<CreateRestaura
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
-            string message = "Restaurant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantNotFound));
         }
 
         var spec = new RestaurantHoursExistInRestaurantSpecification(request.RestaurantId, request.WeekenDay, request.StartTime, request.EndTime);
@@ -45,9 +45,8 @@ public class CreateRestaurantHourCommandHandler : IRequestHandler<CreateRestaura
         RestaurantHour? restaurantHour = await _unitOfWork.RestaurantHours.GetWithSpecAsync(spec, true);
         if (restaurantHour != null)
         {
-            string message = "RestaurantHour is already exist in Restaurant.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantHourDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantHourDuplicate));
         }
 
         restaurantHour = _mapper.Map<RestaurantHour>(request);

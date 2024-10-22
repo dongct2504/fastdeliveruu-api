@@ -8,6 +8,7 @@ using FastDeliveruu.Api.Extensions;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.Services;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -91,6 +92,7 @@ var app = builder.Build();
     app.UseResponseCaching();
 
     app.UseCors(policy => policy
+        .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod()
         .WithOrigins("http://localhost:4200"));
@@ -99,6 +101,10 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
+
+    app.MapHub<OnlineHub>("hubs/online");
+    app.MapHub<ChatHub>("hubs/chat");
+    app.MapHub<NotificationHub>("hubs/notification");
 
     app.Run();
 }

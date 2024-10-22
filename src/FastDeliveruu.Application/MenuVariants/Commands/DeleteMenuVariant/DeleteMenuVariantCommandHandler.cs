@@ -34,9 +34,8 @@ public class DeleteMenuVariantCommandHandler : IRequestHandler<DeleteMenuVariant
             .GetWithSpecAsync(new MenuVariantWithOrderDetailByIdSpecification(request.Id));
         if (menuVariant == null)
         {
-            string message = "MenuVariant does not exist";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantNotFound));
         }
 
         // manually set null for order detail

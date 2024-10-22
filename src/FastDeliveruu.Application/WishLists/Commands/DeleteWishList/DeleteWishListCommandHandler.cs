@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.WishLists;
@@ -26,9 +27,8 @@ public class DeleteWishListCommandHandler : IRequestHandler<DeleteWishListComman
 
         if (!wishLists.Any())
         {
-            string message = "The customer's wish list is already empty";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WishListEmpty} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WishListEmpty));
         }
 
         _unitOfWork.WishLists.DeleteRange(wishLists);

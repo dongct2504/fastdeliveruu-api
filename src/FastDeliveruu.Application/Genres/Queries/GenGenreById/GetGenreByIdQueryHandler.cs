@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Domain.Data;
@@ -31,11 +32,11 @@ public class GetGenreByIdQueryHandler : IRequestHandler<GetGenreByIdQuery, Resul
             .AsNoTracking()
             .ProjectToType<GenreDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);
+
         if (genreDetailDto == null)
         {
-            string message = "Genre not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.GenreNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.GenreNotFound));
         }
 
         return genreDetailDto;

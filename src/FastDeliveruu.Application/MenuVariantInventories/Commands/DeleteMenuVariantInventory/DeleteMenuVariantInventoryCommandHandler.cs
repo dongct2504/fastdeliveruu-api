@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
@@ -23,10 +24,8 @@ public class DeleteMenuVariantInventoryCommandHandler : IRequestHandler<DeleteMe
         MenuVariantInventory? menuVariantInventory = await _unitOfWork.MenuVariantInventories.GetAsync(request.Id);
         if (menuVariantInventory == null)
         {
-
-            string message = "MenuItemInventory not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantInventoryNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantInventoryNotFound));
         }
 
         _unitOfWork.MenuVariantInventories.Delete(menuVariantInventory);

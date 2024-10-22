@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common.Constants;
+﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -7,11 +7,14 @@ using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
+using GoogleMaps.LocationServices;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenCage.Geocode;
 using System.Text;
 
 namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
@@ -24,6 +27,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
     private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<UserRegisterCommandHandler> _logger;
     private readonly IMapper _mapper;
+    private readonly IConfiguration _configuration;
 
     public UserRegisterCommandHandler(
         IMapper mapper,
@@ -31,7 +35,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         RoleManager<AppRole> roleManager,
         IDateTimeProvider dateTimeProvider,
         ILogger<UserRegisterCommandHandler> logger,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        IConfiguration configuration)
     {
         _mapper = mapper;
         _userManager = userManager;
@@ -39,6 +44,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _configuration = configuration;
     }
 
     public async Task<Result<UserAuthenticationResponse>> Handle(
@@ -64,9 +70,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
-            string message = "city does not exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
         }
         addressesCustomer.CityId = request.CityId;
 
@@ -74,9 +79,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
         if (district == null)
         {
-            string message = "district does not exist in city.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
         }
         addressesCustomer.DistrictId = request.DistrictId;
 
@@ -84,11 +88,38 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
         if (ward == null)
         {
-            string message = "ward does not exist in district.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
         }
         addressesCustomer.WardId = request.WardId;
+
+        // convert to lat and long
+        string fullAddress = $"{request.Address}, {ward.Name}, {district.Name}, {city.Name}";
+
+        //GoogleLocationService locationService = new GoogleLocationService(apikey: _configuration["Google:ApiKey"]);
+        //MapPoint point = locationService.GetLatLongFromAddress(fullAddress);
+
+        //addressesCustomer.Latitude = (decimal?)point.Latitude;
+        //addressesCustomer.Longitude = (decimal?)point.Longitude;
+
+        Geocoder geocoder = new Geocoder(_configuration["OpenCage:ApiKey"]);
+        GeocoderResponse geocoderResponse = await geocoder.GeocodeAsync(fullAddress);
+
+        Location? mostAccurateLocation = null;
+
+        foreach (Location? item in geocoderResponse.Results)
+        {
+            if (!string.IsNullOrEmpty(item.Components.Road))
+            {
+                mostAccurateLocation = item;
+            }
+        }
+
+        if (mostAccurateLocation == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
+        }
 
         user.AddressesCustomers.Add(addressesCustomer);
 
@@ -112,7 +143,11 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             }
         }
 
-        if (request.UserName == "admin")
+        if (request.UserName == "admin" || 
+            request.UserName == "admin1" || 
+            request.UserName == "admin2" ||
+            request.UserName == "admin3" ||
+            request.UserName == "admin4")
         {
             await _userManager.AddToRoleAsync(user, RoleConstants.Admin);
         }

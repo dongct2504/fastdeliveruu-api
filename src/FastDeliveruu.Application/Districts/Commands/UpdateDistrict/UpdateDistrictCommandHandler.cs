@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -33,17 +34,15 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
-            string message = "City not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
         }
 
         District? district = await _unitOfWork.Districts.GetAsync(request.Id);
         if (district == null)
         {
-            string message = "District not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
         }
 
         _mapper.Map(request, district);

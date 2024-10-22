@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -29,9 +30,8 @@ public class GetCityByIdQueryHandler : IRequestHandler<GetCityByIdQuery, Result<
 
         if (cityDetailDto == null)
         {
-            string message = "City not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.CityNotFound));
         }
 
         return cityDetailDto;

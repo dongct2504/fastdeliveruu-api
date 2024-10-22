@@ -45,9 +45,8 @@ public class GetDistrictsByCityQueryHandler : IRequestHandler<GetDistrictsByCity
             .FirstOrDefaultAsync(c => c.Id == request.DistrictParams.CityId, cancellationToken);
         if (city == null)
         {
-            string message = "City does not exist";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
         }
 
         IQueryable<District> districtsQuery = _dbContext.Districts.AsQueryable();

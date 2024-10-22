@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -31,9 +32,8 @@ public class GetRestaurantHourByIdQueryHandler : IRequestHandler<GetRestaurantHo
 
         if (restaurantHourDto == null)
         {
-            string message = "RestaurantHour does not exist";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantHourNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.RestaurantHourNotFound));
         }
 
         return restaurantHourDto;

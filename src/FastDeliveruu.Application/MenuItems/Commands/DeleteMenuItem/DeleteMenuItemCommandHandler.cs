@@ -1,4 +1,5 @@
 ﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -30,9 +31,8 @@ public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemComman
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.Id);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(menuItem.PublicId);

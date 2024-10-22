@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -46,9 +47,8 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
-            string message = "city does not exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
         }
         shipper.CityId = city.Id;
 
@@ -56,9 +56,8 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
             new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
         if (district == null)
         {
-            string message = "district does not exist in city.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
         }
         shipper.DistrictId = district.Id;
 
@@ -66,9 +65,8 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
             new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
         if (ward == null)
         {
-            string message = "ward does not exist in district.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
         }
         shipper.WardId = ward.Id;
 

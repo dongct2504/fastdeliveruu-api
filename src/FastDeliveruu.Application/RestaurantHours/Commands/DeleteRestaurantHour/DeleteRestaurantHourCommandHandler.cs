@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
@@ -25,9 +26,8 @@ public class DeleteRestaurantHourCommandHandler : IRequestHandler<DeleteRestaura
         RestaurantHour? restaurantHours = await _unitOfWork.RestaurantHours.GetAsync(request.Id);
         if (restaurantHours == null)
         {
-            string message = "RestaurantHour not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantHourNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantHourNotFound));
         }
 
         _unitOfWork.RestaurantHours.Delete(restaurantHours);

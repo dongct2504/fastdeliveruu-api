@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -36,9 +37,8 @@ public class UpdateMenuVariantInventoryCommandHandler : IRequestHandler<UpdateMe
         MenuVariant? menuVariant = await _unitOfWork.MenuVariants.GetAsync(request.MenuVariantId);
         if (menuVariant == null)
         {
-            string message = "Loại sản phẩm này không tồn tại.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantNotFound));
         }
 
         MenuVariantInventory? menuVariantInventory;
@@ -47,9 +47,8 @@ public class UpdateMenuVariantInventoryCommandHandler : IRequestHandler<UpdateMe
             menuVariantInventory = await _unitOfWork.MenuVariantInventories.GetWithSpecAsync(new MenuVariantInventoryByMenuVariantIdSpecification(menuVariant.Id), true);
             if (menuVariantInventory != null)
             {
-                string message = "Kho hàng cho loại sản phẩm này đã tồn tại.";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new DuplicateError(message));
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantInventoryDuplicate} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantInventoryDuplicate));
             }
 
             menuVariantInventory = _mapper.Map<MenuVariantInventory>(request);
@@ -62,9 +61,8 @@ public class UpdateMenuVariantInventoryCommandHandler : IRequestHandler<UpdateMe
             menuVariantInventory = await _unitOfWork.MenuVariantInventories.GetAsync(request.Id);
             if (menuVariantInventory == null)
             {
-                string message = "Kho hàng cho loại sản phẩm này không tồn tại.";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new BadRequestError(message));
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantInventoryNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantInventoryNotFound));
             }
 
             _mapper.Map(request, menuVariantInventory);

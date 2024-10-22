@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using FluentResults;
@@ -26,9 +27,8 @@ public class ShipperEmailConfirmQueryHandler : IRequestHandler<ShipperEmailConfi
         Shipper? shipper = await _shipperManager.FindByEmailAsync(request.Email);
         if (shipper == null)
         {
-            string message = "Shipper not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.ShipperNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.ShipperNotFound));
         }
 
         string decodedToken = System.Text.Encoding.UTF8

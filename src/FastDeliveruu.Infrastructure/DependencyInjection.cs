@@ -24,15 +24,15 @@ public static class DependencyInjection
         ConfigurationManager configuration)
     {
         services.AddIdentity();
-
         services.AddAuth(configuration);
 
         services.AddStackExchangeRedisCache(options =>
             options.Configuration = configuration.GetConnectionString("Cache"));
-
         services.AddSingleton<ICacheService, CacheService>();
 
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        services.AddSignalR();
 
         // register email service
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));

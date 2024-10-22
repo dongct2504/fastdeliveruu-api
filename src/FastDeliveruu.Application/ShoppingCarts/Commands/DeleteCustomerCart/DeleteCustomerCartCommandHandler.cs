@@ -30,9 +30,8 @@ public class DeleteCustomerCartCommandHandler : IRequestHandler<DeleteCustomerCa
 
         if (customerCartCache == null)
         {
-            string message = "The customer's cart is already empty";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CustomerCartEmpty} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CustomerCartEmpty));
         }
 
         await _cacheService.RemoveAsync(key, cancellationToken);

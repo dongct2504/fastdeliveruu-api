@@ -42,27 +42,23 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         Genre? genre = await _unitOfWork.Genres.GetAsync(request.GenreId);
         if (genre == null)
         {
-            string message = "Genre not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.GenreNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.GenreNotFound));
         }
 
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
-            string message = "Restaurant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantNotFound));
         }
 
-        var spec = new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name);
-
-        MenuItem? menuItem = await _unitOfWork.MenuItems.GetWithSpecAsync(spec, asNoTracking: true);
+        MenuItem? menuItem = await _unitOfWork.MenuItems
+            .GetWithSpecAsync(new MenuItemExistInRestaurantSpecification(request.RestaurantId, request.Name), true);
         if (menuItem != null)
         {
-            string message = "MenuItem is already exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemDuplicate));
         }
 
         menuItem = _mapper.Map<MenuItem>(request);

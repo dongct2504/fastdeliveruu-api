@@ -42,15 +42,38 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
+        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
+        if (city == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
+        }
+
+        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
+        if (district == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
+        }
+
+        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
+        if (ward == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
+        }
+
         AppUser? user = await _userManager.Users
             .Include(u => u.AddressesCustomers)
             .Where(u => u.Id == request.Id)
             .FirstOrDefaultAsync(cancellationToken);
+
         if (user == null)
         {
-            string message = "User not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         _mapper.Map(request, user);
@@ -73,33 +96,6 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 
             user.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
             user.PublicId = uploadResult.PublicId;
-        }
-
-        // handle addresses
-        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
-        if (city == null)
-        {
-            string message = "City not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
-        }
-
-        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
-            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
-        if (district == null)
-        {
-            string message = "District not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
-        }
-
-        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
-            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
-        if (ward == null)
-        {
-            string message = "Ward not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
         }
 
         AddressesCustomer? customerAddress = user.AddressesCustomers

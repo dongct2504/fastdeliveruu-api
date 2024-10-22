@@ -42,35 +42,31 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetWithSpecAsync(spec, asNoTracking: true);
         if (restaurant != null)
         {
-            string message = "Restaurant is already exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail<RestaurantDto>(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantDuplicate));
         }
 
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
-            string message = "Không tìm thấy Thành phố.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
         }
 
         District? district = await _unitOfWork.Districts.GetWithSpecAsync(
             new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
         if (district == null)
         {
-            string message = "Không tìm thấy quận.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
         }
 
         Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
             new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
         if (ward == null)
         {
-            string message = "Không tìm thấy phường.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
         }
 
         restaurant = _mapper.Map<Restaurant>(request);

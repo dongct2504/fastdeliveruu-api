@@ -38,25 +38,22 @@ public class UpdateMenuItemCommandHandler : IRequestHandler<UpdateMenuItemComman
         Genre? genre = await _unitOfWork.Genres.GetAsync(request.GenreId);
         if (genre == null)
         {
-            string message = "Genre not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.GenreNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.GenreNotFound));
         }
 
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.RestaurantId);
         if (restaurant == null)
         {
-            string message = "Restaurant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantNotFound));
         }
 
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.Id);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         _mapper.Map(request, menuItem);

@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
 using FastDeliveruu.Domain.Data;
@@ -31,11 +32,11 @@ public class GetRestaurantByIdQueryHandler : IRequestHandler<GetRestaurantByIdQu
             .AsNoTracking()
             .ProjectToType<RestaurantDetailDto>()
             .FirstOrDefaultAsync(cancellationToken);
+
         if (restaurantDetailDto == null)
         {
-            string message = "Restaurant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.RestaurantNotFound));
         }
 
         return restaurantDetailDto;

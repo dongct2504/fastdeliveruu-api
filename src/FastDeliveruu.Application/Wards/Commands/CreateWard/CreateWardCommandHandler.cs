@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -35,18 +36,16 @@ public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Resul
         District? district = await _unitOfWork.Districts.GetAsync(request.DistrictId);
         if (district == null)
         {
-            string message = "District not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
         }
 
         Ward? ward = await _unitOfWork.Wards
             .GetWithSpecAsync(new WardExistInDistrictSpecification(request.DistrictId, request.Name));
         if (ward != null)
         {
-            string message = "Ward is already exist in city.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardDuplicate));
         }
 
         ward = _mapper.Map<Ward>(request);

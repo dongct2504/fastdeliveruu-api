@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
@@ -24,9 +25,8 @@ public class UserEmailConfirmQueryHandler : IRequestHandler<UserEmailConfirmQuer
         AppUser? user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            string message = "User not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         var decodedToken = System.Text.Encoding.UTF8

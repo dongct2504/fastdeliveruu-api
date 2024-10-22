@@ -41,9 +41,8 @@ public class EditUserRolesCommandHandler : IRequestHandler<EditUserRolesCommand,
         AppUser? appUser = await _userManager.FindByIdAsync(request.Id.ToString());
         if (appUser == null)
         {
-            string message = $"User not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         var userRoles = await _userManager.GetRolesAsync(appUser);

@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -36,9 +37,8 @@ public class CreateCityCommandHandler : IRequestHandler<CreateCityCommand, Resul
         City? city = await _unitOfWork.Cities.GetWithSpecAsync(spec, true);
         if (city != null)
         {
-            string message = "city is already exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityDuplicate));
         }
 
         city = _mapper.Map<City>(request);

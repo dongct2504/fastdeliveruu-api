@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Enums;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;
@@ -32,17 +33,15 @@ public class UpdatePaypalCommandHandler : IRequestHandler<UpdatePaypalCommand, R
         Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsByPaymentOrderId(request.CaptureOrderResponse.id));
         if (order == null)
         {
-            string message = "Order not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.OrderNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.OrderNotFound));
         }
 
         Payment? payment = order.Payments.FirstOrDefault();
         if (payment == null)
         {
-            string message = "Payment not found for the order.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PaymentNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.PaymentNotFound));
         }
 
         string? transactionId = request.CaptureOrderResponse.purchase_units

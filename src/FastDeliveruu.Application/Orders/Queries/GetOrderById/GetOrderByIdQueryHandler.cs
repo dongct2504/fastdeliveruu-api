@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -34,9 +35,8 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
 
         if (orderHeaderDetailDto == null)
         {
-            string message = "Order not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.OrderNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.OrderNotFound));
         }
 
         return orderHeaderDetailDto;

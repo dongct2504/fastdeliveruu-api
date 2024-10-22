@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities.Identity;
@@ -40,25 +41,22 @@ public class ShipperLoginQueryHandler : IRequestHandler<ShipperLoginQuery, Resul
         Shipper? shipper = await _userManager.FindByNameAsync(request.UserName);
         if (shipper == null)
         {
-            string message = "The username is incorrect.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WrongUserName} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WrongUserName));
         }
 
         bool isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(shipper);
         if (!isEmailConfirmed)
         {
-            string message = "The email has not been confirmed yet.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.EmailYetConfirmed} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.EmailYetConfirmed));
         }
 
         SignInResult signInResult = await _signInManager.CheckPasswordSignInAsync(shipper, request.Password, false);
         if (!signInResult.Succeeded)
         {
-            string message = "The password is incorrect.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WrongPassword} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WrongPassword));
         }
 
         string token = _jwtTokenGenerator.GenerateTokenForShipper(shipper);

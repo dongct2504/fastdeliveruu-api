@@ -40,19 +40,16 @@ public class CreateMenuVariantCommandHandler : IRequestHandler<CreateMenuVariant
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
-        var spec = new MenuVariantNameExistInMenuItemSpecification(request.MenuItemId, request.VarietyName);
-
-        MenuVariant? menuVariant = await _unitOfWork.MenuVariants.GetWithSpecAsync(spec);
+        MenuVariant? menuVariant = await _unitOfWork.MenuVariants
+            .GetWithSpecAsync(new MenuVariantNameExistInMenuItemSpecification(request.MenuItemId, request.VarietyName), true);
         if (menuVariant != null)
         {
-            string message = "MenuVariant is already exist in MenuItem.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityDuplicate));
         }
 
         menuVariant = _mapper.Map<MenuVariant>(request);

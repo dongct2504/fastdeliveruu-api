@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.GenreDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -36,9 +37,8 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
         Genre? genre = await _unitOfWork.Genres.GetWithSpecAsync(spec, asNoTracking: true);
         if (genre != null)
         {
-            string message = "genre is already exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.GenreDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.GenreDuplicate));
         }
 
         genre = _mapper.Map<Genre>(request);

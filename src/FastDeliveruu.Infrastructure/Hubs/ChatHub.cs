@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace FastDeliveruu.Infrastructure.Hubs;
 
 [Authorize]
-public class ChatHubClient : Hub
+public class ChatHub : Hub
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IHubContext<OnlineHub> _onlineHubContext;
@@ -27,7 +27,7 @@ public class ChatHubClient : Hub
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IOnlineTrackerService _onlineTrackerService;
 
-    public ChatHubClient(
+    public ChatHub(
         ICacheService cacheService,
         UserManager<AppUser> appUserManager,
         UserManager<Shipper> shipperManager,

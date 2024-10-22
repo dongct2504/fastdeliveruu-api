@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
@@ -36,17 +37,15 @@ public class UpdateWishListItemCommandHandler : IRequestHandler<UpdateWishListIt
         AppUser? appUser = await _userManager.FindByIdAsync(request.AppUserId.ToString());
         if (appUser == null)
         {
-            string message = "The user currently does not login or not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         // check if menu variant provided
@@ -58,9 +57,8 @@ public class UpdateWishListItemCommandHandler : IRequestHandler<UpdateWishListIt
 
             if (menuVariant == null)
             {
-                string message = "MenuVariant does not exist in the MenuItem.";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new BadRequestError(message));
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantNotFound));
             }
         }
 

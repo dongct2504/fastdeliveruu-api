@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -31,9 +32,8 @@ public class GetMenuVariantByIdQueryHandler : IRequestHandler<GetMenuVariantById
 
         if (menuVariantDto == null)
         {
-            string message = "MenuVariant does not exist";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.MenuVariantNotFound));
         }
 
         return menuVariantDto;

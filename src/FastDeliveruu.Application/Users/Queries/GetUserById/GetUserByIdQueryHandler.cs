@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Domain.Entities.Identity;
@@ -35,9 +36,8 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
 
         if (userDetailDto == null)
         {
-            string message = "User not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         return userDetailDto;

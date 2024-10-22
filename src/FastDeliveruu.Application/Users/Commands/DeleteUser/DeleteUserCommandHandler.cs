@@ -1,4 +1,5 @@
 using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities.Identity;
@@ -28,9 +29,8 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
         AppUser? user = await _userManager.FindByIdAsync(request.Id.ToString());
         if (user == null)
         {
-            string message = "User Not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         if (!string.IsNullOrEmpty(user.PublicId))

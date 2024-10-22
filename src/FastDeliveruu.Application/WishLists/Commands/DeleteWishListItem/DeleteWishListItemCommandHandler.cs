@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
@@ -23,9 +24,8 @@ public class DeleteWishListItemCommandHandler : IRequestHandler<DeleteWishListIt
         WishList? wishList = await _unitOfWork.WishLists.GetAsync(request.Id);
         if (wishList == null)
         {
-            string message = "This item does not exist.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WishListNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.WishListNotFound));
         }
 
         _unitOfWork.WishLists.Delete(wishList);

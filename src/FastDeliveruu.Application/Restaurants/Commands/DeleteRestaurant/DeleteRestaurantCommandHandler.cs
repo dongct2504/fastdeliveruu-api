@@ -1,4 +1,5 @@
 ﻿using CloudinaryDotNet.Actions;
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -30,9 +31,8 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
         Restaurant? restaurant = await _unitOfWork.Restaurants.GetAsync(request.Id);
         if (restaurant == null)
         {
-            string message = "Restaurant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.RestaurantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.RestaurantNotFound));
         }
 
         DeletionResult deletionResult = await _fileStorageServices.DeleteImageAsync(restaurant.PublicId);

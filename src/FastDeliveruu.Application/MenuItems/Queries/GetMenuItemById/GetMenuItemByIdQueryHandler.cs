@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -34,9 +35,8 @@ public class GetMenuItemByIdQueryHandler : IRequestHandler<GetMenuItemByIdQuery,
 
         if (menuItemDetailDto == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         return menuItemDetailDto;

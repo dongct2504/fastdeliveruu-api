@@ -17,6 +17,8 @@ public class Shipper : IdentityUser<Guid>
     [StringLength(50)]
     public string LastName { get; set; } = null!;
 
+    public bool IsAvailable { get; set; } = true;
+
     [StringLength(12)]
     [Unicode(false)]
     public string CitizenIdentification { get; set; } = null!;

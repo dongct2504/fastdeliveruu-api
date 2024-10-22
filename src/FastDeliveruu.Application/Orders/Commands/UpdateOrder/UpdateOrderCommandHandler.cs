@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FluentResults;
@@ -25,9 +26,8 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand, Res
         Order? order = await _unitOfWork.Orders.GetAsync(request.Id);
         if (order == null)
         {
-            string message = "Order not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.OrderNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.OrderNotFound));
         }
 
         order.PaymentOrderId = request.PaymentOrderId;

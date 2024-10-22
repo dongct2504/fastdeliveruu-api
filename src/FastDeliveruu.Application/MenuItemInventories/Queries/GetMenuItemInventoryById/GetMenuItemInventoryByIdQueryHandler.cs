@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -30,9 +31,8 @@ public class GetMenuItemInventoryByIdQueryHandler : IRequestHandler<GetMenuItemI
 
         if (menuItemInventoryDto == null)
         {
-            string message = "MenuItem Inventory not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemInventoryNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.MenuItemInventoryNotFound));
         }
 
         return menuItemInventoryDto;

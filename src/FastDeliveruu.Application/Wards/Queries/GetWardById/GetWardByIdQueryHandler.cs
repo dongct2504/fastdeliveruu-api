@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -26,11 +27,11 @@ public class GetWardByIdQueryHandler : IRequestHandler<GetWardByIdQuery, Result<
             .AsNoTracking()
             .ProjectToType<WardDto>()
             .FirstOrDefaultAsync(w => w.Id == request.Id);
+
         if (wardDto == null)
         {
-            string message = "ward not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.WardNotFound));
         }
 
         return wardDto;

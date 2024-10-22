@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MediatR;
@@ -26,9 +27,8 @@ public class UpdatePhoneNumberCommandHandler : IRequestHandler<UpdatePhoneNumber
         AppUser? appUser = await _userManager.FindByIdAsync(request.UserId.ToString());
         if (appUser == null)
         {
-            string message = "User not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         AppUser? duplicatePhoneNumber = await _userManager.Users
@@ -37,9 +37,8 @@ public class UpdatePhoneNumberCommandHandler : IRequestHandler<UpdatePhoneNumber
             .FirstOrDefaultAsync(cancellationToken);
         if (duplicatePhoneNumber != null)
         {
-            string message = "Số điện thoại đã tồn tại.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new DuplicateError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PhoneDuplicated} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.PhoneDuplicated));
         }
 
         appUser.PhoneNumber = request.PhoneNumber;

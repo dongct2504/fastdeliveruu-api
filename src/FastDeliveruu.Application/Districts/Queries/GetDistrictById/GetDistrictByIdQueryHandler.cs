@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Domain.Data;
 using FluentResults;
@@ -30,9 +31,8 @@ public class GetDistrictByIdQueryHandler : IRequestHandler<GetDistrictByIdQuery,
             .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
         if (districtDetailDto == null)
         {
-            string message = "District does not exist";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new NotFoundError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+            return Result.Fail(new NotFoundError(ErrorMessageConstants.DistrictNotFound));
         }
 
         return districtDetailDto;

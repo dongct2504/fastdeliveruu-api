@@ -33,9 +33,8 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
 
         if (customerCartCache == null)
         {
-            string message = "The customer's cart is already empty";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CustomerCartEmpty} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CustomerCartEmpty));
         }
 
         ShoppingCartDto? cartItem = customerCartCache
@@ -43,9 +42,8 @@ public class DeleteCartItemCommandHandler : IRequestHandler<DeleteCartItemComman
 
         if (cartItem == null)
         {
-            string message = "Cart not found";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CartItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityDuplicate));
         }
 
         customerCartCache.Remove(cartItem);

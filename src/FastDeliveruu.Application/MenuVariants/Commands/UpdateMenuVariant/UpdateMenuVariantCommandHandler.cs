@@ -38,17 +38,15 @@ public class UpdateMenuVariantCommandHandler : IRequestHandler<UpdateMenuVariant
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
-            string message = "MenuItem not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         MenuVariant? menuVariant = await _unitOfWork.MenuVariants.GetAsync(request.Id);
         if (menuVariant == null)
         {
-            string message = "MenuVariant not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantNotFound));
         }
 
         _mapper.Map(request, menuVariant);

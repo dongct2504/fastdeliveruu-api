@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -36,9 +37,8 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
         MenuItem? menuItem = await _unitOfWork.MenuItems.GetAsync(request.MenuItemId);
         if (menuItem == null)
         {
-            string message = "Sản phẩm này không tồn tại.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemNotFound));
         }
 
         MenuItemInventory? menuItemInventory;
@@ -47,9 +47,8 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
             menuItemInventory = await _unitOfWork.MenuItemInventories.GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(menuItem.Id), true);
             if (menuItemInventory != null)
             {
-                string message = "Kho hàng cho sản phẩm này đã tồn tại.";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new DuplicateError(message));
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemInventoryDuplicate} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemInventoryDuplicate));
             }
 
             menuItemInventory = _mapper.Map<MenuItemInventory>(request);
@@ -62,9 +61,8 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
             menuItemInventory = await _unitOfWork.MenuItemInventories.GetAsync(request.Id);
             if (menuItemInventory == null)
             {
-                string message = "Kho hàng cho sản phẩm này không tồn tại.";
-                _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                return Result.Fail(new BadRequestError(message));
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemInventoryNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemInventoryNotFound));
             }
 
             _mapper.Map(request, menuItemInventory);

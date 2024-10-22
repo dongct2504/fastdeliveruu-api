@@ -35,16 +35,14 @@ public class SendConfirmPhoneNumberQueryHandler : IRequestHandler<SendConfirmPho
         var user = await _userManager.FindByIdAsync(request.UserId.ToString());
         if (user == null)
         {
-            string message = "Không tìm thấy user.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
         if (user.PhoneNumberConfirmed)
         {
-            string message = "Số điện thoại của tài khoản này đã xác thực!";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PhoneConfirmed} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.PhoneConfirmed));
         }
 
         string otpCode = Utils.GenerateOtpCode();

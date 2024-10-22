@@ -1,3 +1,4 @@
+using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
@@ -23,9 +24,8 @@ public class DeleteGenreCommandHandler : IRequestHandler<DeleteGenreCommand, Res
         Genre? genre = await _unitOfWork.Genres.GetAsync(request.Id);
         if (genre == null)
         {
-            string message = "Genre not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.GenreNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.GenreNotFound));
         }
 
         _unitOfWork.Genres.Delete(genre);

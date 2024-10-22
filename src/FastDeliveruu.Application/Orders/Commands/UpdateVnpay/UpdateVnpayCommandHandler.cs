@@ -1,4 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Enums;
+﻿using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Domain.Entities;
@@ -30,17 +31,15 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
         Order? order = await _unitOfWork.Orders.GetWithSpecAsync(new OrderWithPaymentsById(paymentResponse.OrderId));
         if (order == null)
         {
-            string message = "Order not found.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.OrderNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.OrderNotFound));
         }
 
         Payment? payment = order.Payments.FirstOrDefault();
         if (payment == null)
         {
-            string message = "Payment not found for the order.";
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-            return Result.Fail(new BadRequestError(message));
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PaymentNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.PaymentNotFound));
         }
 
         order.TransactionId = request.PaymentResponse.TransactionId;
@@ -65,6 +64,7 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                 order.OrderStatus = (byte?)OrderStatusEnum.Failed;
                 payment.PaymentStatus = (byte?)PaymentStatusEnum.Failed;
                 await _unitOfWork.SaveChangesAsync();
+
                 string unknownMessage = $"Payment failed with response code {request.PaymentResponse.VnpayResponseCode}.";
                 _logger.LogWarning($"{request.GetType().Name} - {unknownMessage} - {request}");
                 return Result.Fail(new BadRequestError(unknownMessage));
@@ -78,9 +78,8 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                     .GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(orderDetail.MenuItemId));
                 if (menuItemInventory == null)
                 {
-                    string message = "MenuItem Inventory not found.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new BadRequestError(message));
+                    _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemInventoryNotFound} - {request}");
+                    return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuItemInventoryNotFound));
                 }
 
                 if (paymentResponse.IsSuccess)
@@ -99,9 +98,8 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                     .GetWithSpecAsync(new MenuVariantInventoryByMenuVariantIdSpecification(orderDetail.MenuVariantId.Value));
                 if (menuVariantInventory == null)
                 {
-                    string message = "MenuVariant Inventory not found.";
-                    _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
-                    return Result.Fail(new BadRequestError(message));
+                    _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuVariantInventoryNotFound} - {request}");
+                    return Result.Fail(new BadRequestError(ErrorMessageConstants.MenuVariantInventoryNotFound));
                 }
 
                 if (paymentResponse.IsSuccess)
