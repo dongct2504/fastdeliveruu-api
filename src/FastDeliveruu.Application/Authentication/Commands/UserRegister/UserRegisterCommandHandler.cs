@@ -7,14 +7,13 @@ using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.Addresses;
 using FluentResults;
-using GoogleMaps.LocationServices;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OpenCage.Geocode;
 using System.Text;
 
 namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
@@ -25,9 +24,9 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    private readonly IGeocodingService _geocodingService;
     private readonly ILogger<UserRegisterCommandHandler> _logger;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
 
     public UserRegisterCommandHandler(
         IMapper mapper,
@@ -36,7 +35,7 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         IDateTimeProvider dateTimeProvider,
         ILogger<UserRegisterCommandHandler> logger,
         IFastDeliveruuUnitOfWork unitOfWork,
-        IConfiguration configuration)
+        IGeocodingService geocodingService)
     {
         _mapper = mapper;
         _userManager = userManager;
@@ -44,14 +43,25 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _configuration = configuration;
+        _geocodingService = geocodingService;
     }
 
     public async Task<Result<UserAuthenticationResponse>> Handle(
         UserRegisterCommand request,
         CancellationToken cancellationToken)
     {
-        AppUser user = _mapper.Map<AppUser>(request);
+        AppUser? user = await _userManager.Users
+            .AsNoTracking()
+            .Where(u => u.Email == request.Email || u.UserName == request.UserName)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (user != null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.AppUserDuplicate} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserDuplicate));
+        }
+
+        user = _mapper.Map<AppUser>(request);
         user.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         AddressesCustomer addressesCustomer = new AddressesCustomer
@@ -96,30 +106,16 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         // convert to lat and long
         string fullAddress = $"{request.Address}, {ward.Name}, {district.Name}, {city.Name}";
 
-        //GoogleLocationService locationService = new GoogleLocationService(apikey: _configuration["Google:ApiKey"]);
-        //MapPoint point = locationService.GetLatLongFromAddress(fullAddress);
-
-        //addressesCustomer.Latitude = (decimal?)point.Latitude;
-        //addressesCustomer.Longitude = (decimal?)point.Longitude;
-
-        Geocoder geocoder = new Geocoder(_configuration["OpenCage:ApiKey"]);
-        GeocoderResponse geocoderResponse = await geocoder.GeocodeAsync(fullAddress);
-
-        Location? mostAccurateLocation = null;
-
-        foreach (Location? item in geocoderResponse.Results)
-        {
-            if (!string.IsNullOrEmpty(item.Components.Road))
-            {
-                mostAccurateLocation = item;
-            }
-        }
+        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLong(fullAddress);
 
         if (mostAccurateLocation == null)
         {
             _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
             return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
         }
+
+        addressesCustomer.Latitude = (decimal?)mostAccurateLocation.Value.Item1;
+        addressesCustomer.Longitude = (decimal?)mostAccurateLocation.Value.Item2;
 
         user.AddressesCustomers.Add(addressesCustomer);
 
@@ -143,8 +139,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             }
         }
 
-        if (request.UserName == "admin" || 
-            request.UserName == "admin1" || 
+        if (request.UserName == "admin" ||
+            request.UserName == "admin1" ||
             request.UserName == "admin2" ||
             request.UserName == "admin3" ||
             request.UserName == "admin4")

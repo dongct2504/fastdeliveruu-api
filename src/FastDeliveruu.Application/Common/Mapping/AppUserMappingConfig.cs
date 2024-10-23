@@ -29,6 +29,16 @@ public class AppUserMappingConfig : IRegister
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
                     .Select(ac => ac.WardId)
+                    .FirstOrDefault())
+            .Map(dest => dest.Latitude,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.Latitude)
+                    .FirstOrDefault())
+            .Map(dest => dest.Longitude,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.Longitude)
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserDetailDto>()
@@ -51,6 +61,16 @@ public class AppUserMappingConfig : IRegister
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
                     .Select(ac => ac.WardId)
+                    .FirstOrDefault())
+            .Map(dest => dest.Latitude,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.Latitude)
+                    .FirstOrDefault())
+            .Map(dest => dest.Longitude,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.Longitude)
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserWithRolesDto>()

@@ -27,7 +27,7 @@ public static class ErrorMessageConstants
     public const string WardOrderDelete = "Không thể xóa Phường/Xã vì phường/xã này đang được dùng bởi một hoặc nhiều đơn hàng";
 
     // lat, long
-    public const string LatLongNotFound = "Không tìm thấy Tọa Độ gần nhất";
+    public const string LatLongNotFound = "Không tìm thấy Tọa Độ gần nhất, vui lòng kiểm tra lại Địa Chỉ Đường";
 
     // genres
     public const string GenreNotFound = "Không tìm thấy Thể Loại";
@@ -83,7 +83,7 @@ public static class ErrorMessageConstants
 
     // app users
     public const string AppUserNotFound = "Không tìm thấy Người Dùng";
-    public const string AppUserDuplicate = "Người Dùng đã tồn tại";
+    public const string AppUserDuplicate = "Email hoặc UserName của người dùng đã tồn tại";
 
     // shippers
     public const string ShipperNotFound = "Không tìm thấy Người Giao Hàng";

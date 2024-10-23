@@ -38,6 +38,10 @@ public static class DependencyInjection
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddSingleton<IEmailSender, EmailSender>();
 
+        // register geocoding service
+        services.Configure<OpenCageSettings>(configuration.GetSection(OpenCageSettings.SectionName));
+        services.AddSingleton<IGeocodingService, GeocodingService>();
+
         // register cloudinary service
         services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
         services.AddSingleton<IFileStorageServices, FileStorageServices>();

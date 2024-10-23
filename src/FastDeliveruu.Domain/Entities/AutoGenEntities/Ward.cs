@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FastDeliveruu.Domain.Entities.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Domain.Entities
 {
