@@ -1,6 +1,8 @@
-﻿namespace FastDeliveruu.Application.Interfaces;
+﻿using FastDeliveruu.Domain.Entities.Identity;
+
+namespace FastDeliveruu.Application.Interfaces;
 
 public interface IGeocodingService
 {
-    Task<(double, double)?> ConvertToLatLong(string fullAddress);
+    Task<(double, double)?> ConvertToLatLongAsync(string fullAddress);
 }

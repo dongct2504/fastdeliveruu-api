@@ -14,7 +14,7 @@ public class GeocodingService : IGeocodingService
         _openCageSettings = options.Value;
     }
 
-    public async Task<(double, double)?> ConvertToLatLong(string fullAddress)
+    public async Task<(double, double)?> ConvertToLatLongAsync(string fullAddress)
     {
         //GoogleLocationService locationService = new GoogleLocationService(apikey: _configuration["Google:ApiKey"]);
         //MapPoint point = locationService.GetLatLongFromAddress(fullAddress);
@@ -24,6 +24,11 @@ public class GeocodingService : IGeocodingService
 
         Geocoder geocoder = new Geocoder(_openCageSettings.ApiKey);
         GeocoderResponse geocoderResponse = await geocoder.GeocodeAsync(fullAddress);
+
+        if (geocoderResponse == null || geocoderResponse.Results == null || geocoderResponse.Results.Length == 0)
+        {
+            return null;
+        }
 
         Location? mostAccurateLocation = null;
 
@@ -36,7 +41,7 @@ public class GeocodingService : IGeocodingService
             }
         }
 
-        if (mostAccurateLocation == null)
+        if (mostAccurateLocation == null || mostAccurateLocation.Geometry == null)
         {
             return null;
         }

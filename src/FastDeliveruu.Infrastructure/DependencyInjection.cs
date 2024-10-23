@@ -23,16 +23,19 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services,
         ConfigurationManager configuration)
     {
+        services.AddSignalR();
+
         services.AddIdentity();
         services.AddAuth(configuration);
+
+        services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
+        services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();
 
         services.AddStackExchangeRedisCache(options =>
             options.Configuration = configuration.GetConnectionString("Cache"));
         services.AddSingleton<ICacheService, CacheService>();
 
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
-        services.AddSignalR();
 
         // register email service
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
@@ -60,9 +63,6 @@ public static class DependencyInjection
             configuration["Payment:Paypal:AppSecret"],
             configuration["Payment:Paypal:Mode"]
         ));
-
-        services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
-        services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();
 
         return services;
     }

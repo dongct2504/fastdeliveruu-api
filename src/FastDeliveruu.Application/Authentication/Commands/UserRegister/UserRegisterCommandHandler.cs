@@ -72,11 +72,6 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             CreatedAt = _dateTimeProvider.VietnamDateTimeNow
         };
 
-        if (!string.IsNullOrEmpty(request.Address))
-        {
-            addressesCustomer.Address = request.Address;
-        }
-
         City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
         if (city == null)
         {
@@ -104,9 +99,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         addressesCustomer.WardId = request.WardId;
 
         // convert to lat and long
-        string fullAddress = $"{request.Address}, {ward.Name}, {district.Name}, {city.Name}";
-
-        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLong(fullAddress);
+        string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
+        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
 
         if (mostAccurateLocation == null)
         {
@@ -114,8 +108,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
         }
 
-        addressesCustomer.Latitude = (decimal?)mostAccurateLocation.Value.Item1;
-        addressesCustomer.Longitude = (decimal?)mostAccurateLocation.Value.Item2;
+        addressesCustomer.Latitude = (decimal)mostAccurateLocation.Value.Item1;
+        addressesCustomer.Longitude = (decimal)mostAccurateLocation.Value.Item2;
 
         user.AddressesCustomers.Add(addressesCustomer);
 

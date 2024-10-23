@@ -1,4 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Behaviors;
+using FastDeliveruu.Application.Common.Constants;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Authentication.Commands.ShipperRegister;
@@ -26,7 +27,7 @@ public class ShipperRegisterCommandValidator : AbstractValidator<ShipperRegister
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber)
-                .WithMessage("Invalid phone number.");
+            .WithMessage(ErrorMessageConstants.PhoneValidator);
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -35,9 +36,13 @@ public class ShipperRegisterCommandValidator : AbstractValidator<ShipperRegister
         RuleFor(x => x.Password)
             .NotEmpty();
 
-        RuleFor(x => x.Address)
+        RuleFor(x => x.HouseNumber)
             .NotEmpty()
-            .MaximumLength(60);
+            .MaximumLength(50);
+
+        RuleFor(x => x.StreetName)
+            .NotEmpty()
+            .MaximumLength(80);
 
         RuleFor(x => x.CityId)
             .NotEmpty();

@@ -15,7 +15,7 @@ namespace FastDeliveruu.Domain.Entities
 
         [Key]
         public int Id { get; set; }
-        [StringLength(20)]
+        [StringLength(80)]
         public string ShortName { get; set; } = null!;
         [StringLength(20)]
         public string? EstimatedDeliveryTime { get; set; }

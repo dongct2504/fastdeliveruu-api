@@ -21,6 +21,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IGeocodingService _geocodingService;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
@@ -32,7 +33,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<CreateOrderCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        IGeocodingService geocodingService)
     {
         _mapper = mapper;
         _cacheService = cacheService;
@@ -40,6 +42,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _userManager = userManager;
+        _geocodingService = geocodingService;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -87,6 +90,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
         }
 
+        string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
+        (double, double)? accurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
+        if (accurateLocation == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
+        }
+
         string key = $"{CacheConstants.CustomerCart}-{request.AppUserId}";
 
         List<ShoppingCartDto>? customerCartDto = await _cacheService.GetAsync<List<ShoppingCartDto>>(key, cancellationToken);
@@ -99,6 +110,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         Order order = _mapper.Map<Order>(request);
         order.Id = Guid.NewGuid();
         order.PhoneNumber = appUser.PhoneNumber;
+
+        order.Latitude = (decimal)accurateLocation.Value.Item1;
+        order.Longitude = (decimal)accurateLocation.Value.Item2;
 
         decimal totalAmount = 0;
         List<OrderDetail> orderDetails = new List<OrderDetail>();
@@ -170,7 +184,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.PaymentMethod = (byte?)request.PaymentMethod;
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        Shipper? shipper = await GetNearestShipperAsync(order.CityId, order.DistrictId, order.WardId, order.Address);
+        Shipper? shipper = await _unitOfWork.Shippers.FindNearestShipper(order.Latitude, order.Longitude);
         if (shipper == null)
         {
             _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.ShipperNotFound} - {request}");
@@ -198,11 +212,5 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         await _cacheService.RemoveAsync(key, cancellationToken);
 
         return order;
-    }
-
-    private async Task<Shipper?> GetNearestShipperAsync(int cityId, int districtId, int wardId, string address)
-    {
-        // for now
-        return (await _unitOfWork.Shippers.ListAllAsync()).FirstOrDefault();
     }
 }

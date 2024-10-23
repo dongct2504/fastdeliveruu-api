@@ -21,6 +21,7 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
 {
     private readonly ShipperManager _shipperManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly IGeocodingService _geocodingService;
     private readonly ILogger<ShipperRegisterCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
@@ -30,13 +31,15 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         ILogger<ShipperRegisterCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
         IMapper mapper,
-        ShipperManager shipperManager)
+        ShipperManager shipperManager,
+        IGeocodingService geocodingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _mapper = mapper;
         _shipperManager = shipperManager;
+        _geocodingService = geocodingService;
     }
 
     public async Task<Result<ShipperAuthenticationResponse>> Handle(ShipperRegisterCommand request, CancellationToken cancellationToken)
@@ -69,6 +72,18 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
             return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
         }
         shipper.WardId = ward.Id;
+
+        string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
+        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
+
+        if (mostAccurateLocation == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
+        }
+
+        shipper.Latitude = (decimal)mostAccurateLocation.Value.Item1;
+        shipper.Longitude = (decimal)mostAccurateLocation.Value.Item2;
 
         IdentityResult result = await _shipperManager.CreateAsync(shipper, request.Password);
         if (!result.Succeeded)

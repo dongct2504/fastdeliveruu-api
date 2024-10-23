@@ -21,9 +21,13 @@ public class UpdateRestaurantCommandValidator : AbstractValidator<UpdateRestaura
             .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber);
 
-        RuleFor(x => x.Address)
+        RuleFor(x => x.HouseNumber)
             .NotEmpty()
-            .MaximumLength(128);
+            .MaximumLength(50);
+
+        RuleFor(x => x.StreetName)
+            .NotEmpty()
+            .MaximumLength(80);
 
         RuleFor(x => x.WardId)
             .NotEmpty();

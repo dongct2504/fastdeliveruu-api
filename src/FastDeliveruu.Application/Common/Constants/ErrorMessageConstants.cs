@@ -92,6 +92,7 @@ public static class ErrorMessageConstants
     // deliveries
     public const string DeliveryNotFound = "Không tìm thấy Phương thức thanh toán";
     public const string DeliveryDuplicate = "Phương thức thanh toán này đã tồn tại";
+    public const string DeliveryValidator = "Phương thức thanh toán phải là tiền mặt (cash), VNPAY hoặc là PayPal";
 
     // authen, confirms
     public const string WrongUserName = "Tên đăng nhập không hợp lệ";
@@ -101,4 +102,8 @@ public static class ErrorMessageConstants
     public const string PhoneConfirmed = "Số điện thoại của tài khoản này đã xác thực";
     public const string PhoneYetConfirmed = "Số điện thoại của tài khoản này chưa xác thực";
     public const string PhoneDuplicated = "Số điện thoại đã tồn tại";
+    public const string PhoneValidator = "Số điện thoại phải có +84 ở đầu và các số sau phải có độ dài từ 6-15 kí tự";
+
+    // author
+    public const string RoleValidator = "Vai trò của người dùng phải là Customer, Staff hoặc Admin";
 }

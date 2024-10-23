@@ -1,4 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Behaviors;
+using FastDeliveruu.Application.Common.Constants;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Orders.Commands.CreateOrder;
@@ -20,11 +21,16 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 
         RuleFor(x => x.PaymentMethod)
             .NotEmpty()
-            .Must(ValidateForRequest.BeValidPaymentMethod).WithMessage("Must be cash, vnpay, paypal or momo.");
+            .Must(ValidateForRequest.BeValidPaymentMethod)
+            .WithMessage(ErrorMessageConstants.DeliveryValidator);
 
-        RuleFor(x => x.Address)
+        RuleFor(x => x.HouseNumber)
             .NotEmpty()
-            .MaximumLength(128);
+            .MaximumLength(50);
+
+        RuleFor(x => x.StreetName)
+            .NotEmpty()
+            .MaximumLength(80);
 
         RuleFor(x => x.WardId)
             .NotEmpty();

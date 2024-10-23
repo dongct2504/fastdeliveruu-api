@@ -34,15 +34,17 @@ public class Shipper : IdentityUser<Guid>
     [StringLength(120)]
     public string? ModelType { get; set; }
 
-    [StringLength(60)]
-    public string Address { get; set; } = null!;
+    [StringLength(50)]
+    public string HouseNumber { get; set; } = null!;
+    [StringLength(80)]
+    public string StreetName { get; set; } = null!;
     public int CityId { get; set; }
     public int DistrictId { get; set; }
     public int WardId { get; set; }
     [Column(TypeName = "decimal(9, 6)")]
-    public decimal? Latitude { get; set; }
+    public decimal Latitude { get; set; }
     [Column(TypeName = "decimal(9, 6)")]
-    public decimal? Longitude { get; set; }
+    public decimal Longitude { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedAt { get; set; }

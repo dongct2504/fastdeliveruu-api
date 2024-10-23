@@ -14,11 +14,12 @@ public class AppUserDto
 
     public string? ImageUrl { get; set; }
 
-    public string? Address { get; set; }
+    public string HouseNumber { get; set; } = null!;
+    public string StreetName { get; set; } = null!;
 
-    public int? CityId { get; set; }
-    public int? DistrictId { get; set; }
-    public int? WardId { get; set; }
+    public int CityId { get; set; }
+    public int DistrictId { get; set; }
+    public int WardId { get; set; }
 
     public decimal? Latitude { get; set; }
 

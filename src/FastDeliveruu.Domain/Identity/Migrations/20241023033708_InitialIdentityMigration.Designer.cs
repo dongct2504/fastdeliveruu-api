@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastDeliveruu.Domain.Identity.Migrations
 {
     [DbContext(typeof(FastDeliveruuDbContext))]
-    [Migration("20241011094243_InitialIdentityMigration")]
+    [Migration("20241023033708_InitialIdentityMigration")]
     partial class InitialIdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,11 +29,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<Guid>("AppUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -46,14 +41,24 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<int>("DistrictId")
                         .HasColumnType("int");
 
+                    b.Property<string>("HouseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("Latitude")
+                    b.Property<decimal>("Latitude")
                         .HasColumnType("decimal(9,6)");
 
-                    b.Property<decimal?>("Longitude")
+                    b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(9,6)");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
@@ -340,8 +345,8 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Property<string>("ShortName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
@@ -546,11 +551,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<string>("CitizenIdentification")
                         .IsRequired()
                         .HasMaxLength(12)
@@ -580,17 +580,25 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("HouseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal?>("Latitude")
+                    b.Property<decimal>("Latitude")
                         .HasColumnType("decimal(9,6)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -599,7 +607,7 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<decimal?>("Longitude")
+                    b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
                     b.Property<string>("ModelType")
@@ -628,6 +636,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -791,11 +804,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<Guid>("AppUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -816,15 +824,20 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("HouseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal?>("Latitude")
+                    b.Property<decimal>("Latitude")
                         .HasColumnType("decimal(9,6)");
 
-                    b.Property<decimal?>("Longitude")
+                    b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
                     b.Property<DateTime?>("OrderDate")
@@ -840,6 +853,10 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<byte?>("PaymentMethod")
                         .HasColumnType("tinyint");
 
+                    b.Property<string>("PaymentOrderId")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(15)
@@ -848,6 +865,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
 
                     b.Property<Guid>("ShipperId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(19,4)");
@@ -998,11 +1020,6 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<int>("CityId")
                         .HasColumnType("int");
 
@@ -1016,6 +1033,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<int>("DistrictId")
                         .HasColumnType("int");
 
+                    b.Property<string>("HouseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -1025,10 +1047,10 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                     b.Property<bool>("IsVerify")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("Latitude")
+                    b.Property<decimal>("Latitude")
                         .HasColumnType("decimal(9,6)");
 
-                    b.Property<decimal?>("Longitude")
+                    b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
                     b.Property<string>("Name")
@@ -1047,6 +1069,11 @@ namespace FastDeliveruu.Domain.Identity.Migrations
                         .HasMaxLength(256)
                         .IsUnicode(false)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");

@@ -14,7 +14,8 @@ public class RestaurantDetailDto
 
     public string ImageUrl { get; set; } = null!;
 
-    public string Address { get; set; } = null!;
+    public string HouseNumber { get; set; } = null!;
+    public string StreetName { get; set; } = null!;
 
     public int CityId { get; set; }
     public int DistrictId { get; set; }

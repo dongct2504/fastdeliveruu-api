@@ -10,10 +10,15 @@ public class AppUserMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<AppUser, AppUserDto>()
-            .Map(dest => dest.Address,
+            .Map(dest => dest.HouseNumber,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.Address)
+                    .Select(ac => ac.HouseNumber)
+                    .FirstOrDefault())
+            .Map(dest => dest.StreetName,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.StreetName)
                     .FirstOrDefault())
             .Map(dest => dest.CityId,
                 src => src.AddressesCustomers
@@ -42,10 +47,15 @@ public class AppUserMappingConfig : IRegister
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserDetailDto>()
-            .Map(dest => dest.Address,
+            .Map(dest => dest.HouseNumber,
                 src => src.AddressesCustomers
                     .Where(ac => ac.IsPrimary)
-                    .Select(ac => ac.Address)
+                    .Select(ac => ac.HouseNumber)
+                    .FirstOrDefault())
+            .Map(dest => dest.StreetName,
+                src => src.AddressesCustomers
+                    .Where(ac => ac.IsPrimary)
+                    .Select(ac => ac.StreetName)
                     .FirstOrDefault())
             .Map(dest => dest.CityId,
                 src => src.AddressesCustomers

@@ -1,4 +1,5 @@
 using FastDeliveruu.Application.Common.Behaviors;
+using FastDeliveruu.Application.Common.Constants;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
@@ -16,11 +17,16 @@ public class CreateRestaurantCommandValidator : AbstractValidator<CreateRestaura
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Must(ValidateForRequest.BeValidPhoneNumber).WithMessage("Invalid phone number.");;
+            .Must(ValidateForRequest.BeValidPhoneNumber)
+            .WithMessage(ErrorMessageConstants.PhoneValidator);;
 
-        RuleFor(x => x.Address)
+        RuleFor(x => x.HouseNumber)
             .NotEmpty()
-            .MaximumLength(128);
+            .MaximumLength(50);
+
+        RuleFor(x => x.StreetName)
+            .NotEmpty()
+            .MaximumLength(80);
 
         RuleFor(x => x.WardId)
             .NotEmpty();

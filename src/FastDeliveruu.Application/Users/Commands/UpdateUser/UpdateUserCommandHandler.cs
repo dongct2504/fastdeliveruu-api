@@ -107,7 +107,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             {
                 Id = Guid.NewGuid(),
                 AppUserId = user.Id,
-                Address = request.Address,
+                HouseNumber = request.HouseNumber,
+                StreetName = request.StreetName,
                 CityId = city.Id,
                 DistrictId = district.Id,
                 WardId = ward.Id,
@@ -119,7 +120,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         }
         else
         {
-            customerAddress.Address = request.Address;
+            customerAddress.HouseNumber = request.HouseNumber;
+            customerAddress.StreetName = request.StreetName;
             customerAddress.CityId = city.Id;
             customerAddress.DistrictId = district.Id;
             customerAddress.WardId = ward.Id;

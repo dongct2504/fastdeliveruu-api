@@ -15,9 +15,13 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         RuleFor(x => x.LastName)
             .MaximumLength(50);
 
-        RuleFor(x => x.Address)
-            .NotNull()
-            .MaximumLength(60);
+        RuleFor(x => x.HouseNumber)
+            .NotEmpty()
+            .MaximumLength(50);
+
+        RuleFor(x => x.StreetName)
+            .NotEmpty()
+            .MaximumLength(80);
 
         RuleFor(x => x.CityId)
             .NotEmpty();
