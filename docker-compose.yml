@@ -23,7 +23,7 @@ services:
     volumes:
       - ./.containers/fastdeliveruu-db:/var/opt/mssql/data
     ports:
-      - 1433:1433    
+      - 14330:1433
     networks:
       - fastdeliveruu-network
 
