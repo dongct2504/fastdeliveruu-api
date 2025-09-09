@@ -1,6 +1,9 @@
 using Asp.Versioning;
+using FastDeliveruu.Application.Authentication.Commands.ChangePassword;
+using FastDeliveruu.Application.Authentication.Commands.ResetPassword;
 using FastDeliveruu.Application.Authentication.Commands.UserRegister;
 using FastDeliveruu.Application.Authentication.Queries.ConfirmPhoneNumber;
+using FastDeliveruu.Application.Authentication.Queries.ForgotPassword;
 using FastDeliveruu.Application.Authentication.Queries.SendConfirmPhoneNumber;
 using FastDeliveruu.Application.Authentication.Queries.UserEmailConfirm;
 using FastDeliveruu.Application.Authentication.Queries.UserLogin;
@@ -9,6 +12,7 @@ using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FastDeliveruu.Api.Controllers;
@@ -75,9 +79,7 @@ public class UserAuthController : ApiController
             return Problem(isConfirmEmailResult.Errors);
         }
 
-        string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-
-        return Redirect($"{redirectUrlBase}/auth/login");
+        return Redirect(_configuration["AppSettings:RedirectUrl"]);
     }
 
     [HttpGet("send-confirm-phone-number")]
@@ -109,6 +111,48 @@ public class UserAuthController : ApiController
             return Problem(result.Errors);
         }
 
+        return Ok();
+    }
+
+    [HttpGet("forgot-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        ForgotPasswordQuery query = new ForgotPasswordQuery(email);
+        Result result = await _mediator.Send(query);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+        return Ok();
+    }
+
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        Result result = await _mediator.Send(command);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+    {
+        command.UserId = User.GetCurrentUserId().ToString();
+        Result result = await _mediator.Send(command);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
         return Ok();
     }
 

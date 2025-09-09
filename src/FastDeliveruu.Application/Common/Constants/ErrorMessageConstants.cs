@@ -96,6 +96,7 @@ public static class ErrorMessageConstants
 
     // authen, confirms
     public const string WrongUserName = "Tên đăng nhập không hợp lệ";
+    public const string WrongEmail = "Email không hợp lệ";
     public const string WrongPassword = "Mật khẩu không hợp lệ";
     public const string EmailYetConfirmed = "Chưa xác thực email";
     public const string OtpError = "Mã OTP không phù hợp hoặc đã hết hạn";
@@ -103,6 +104,10 @@ public static class ErrorMessageConstants
     public const string PhoneYetConfirmed = "Số điện thoại của tài khoản này chưa xác thực";
     public const string PhoneDuplicated = "Số điện thoại đã tồn tại";
     public const string PhoneValidator = "Số điện thoại phải có +84 ở đầu và các số sau phải có độ dài từ 6-15 kí tự";
+
+    //tokens
+    public const string TokenNotFound = "Token không hợp lệ hoặc đã hết hạn.";
+    public const string InvalidToken = "Token không hợp lệ.";
 
     // author
     public const string RoleValidator = "Vai trò của người dùng phải là Customer, Staff hoặc Admin";

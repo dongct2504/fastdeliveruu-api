@@ -12,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -69,6 +68,8 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             Id = Guid.NewGuid(),
             AppUserId = user.Id,
             IsPrimary = true,
+            HouseNumber = request.HouseNumber,
+            StreetName = request.StreetName,
             CreatedAt = _dateTimeProvider.VietnamDateTimeNow
         };
 

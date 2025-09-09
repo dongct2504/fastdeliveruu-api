@@ -17,7 +17,10 @@ public static class CacheOptions
         new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(2) };
 
     public static DistributedCacheEntryOptions OtpExpiration =>
-        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) };
+        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15) };
+
+    public static DistributedCacheEntryOptions ChangePasswordTokenExpiration =>
+        new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(20) };
 
     public static DistributedCacheEntryOptions TempOrderId =>
         new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3) };

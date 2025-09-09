@@ -7,6 +7,7 @@ public static class CacheConstants
     public const string Threads = "threads";
 
     public const string OtpCode = "otpCode";
+    public const string ResetPasswordToken = "resetPasswordToken";
 
     public const string Genres = "genres";
 
