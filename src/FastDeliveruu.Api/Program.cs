@@ -9,6 +9,8 @@ using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.Services;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Infrastructure.Hubs;
+using FastDeliveruu.Infrastructure.Seed.Seeders;
+using FastDeliveruu.Infrastructure.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -81,8 +83,10 @@ var app = builder.Build();
     using (IServiceScope serviceScope = app.Services.CreateScope())
     {
         var services = serviceScope.ServiceProvider;
-        using FastDeliveruuDbContext dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
-        dbContext.Database.Migrate();
+        var dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
+        var seeders = services.GetServices<IDataSeeder>();
+        await dbContext.Database.MigrateAsync();
+        await SeedData.InitializeAsync(dbContext, seeders);
     }
 
     app.UseMiddleware<ExceptionHandlerMiddleware>();
