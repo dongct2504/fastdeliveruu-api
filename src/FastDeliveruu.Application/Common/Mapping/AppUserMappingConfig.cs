@@ -84,7 +84,8 @@ public class AppUserMappingConfig : IRegister
                     .FirstOrDefault());
 
         config.NewConfig<AppUser, AppUserWithRolesDto>()
-            .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRole.Name).ToList());
+            .Map(dest => dest.Roles, src => src.AppUserRoles.Select(ur => ur.AppRole.Name).ToList())
+            .Map(dest => dest.IsLocked, src => src.LockoutEnd != null && src.LockoutEnd > DateTimeOffset.UtcNow);
 
         config.NewConfig<UserRegisterCommand, AppUser>();
     }

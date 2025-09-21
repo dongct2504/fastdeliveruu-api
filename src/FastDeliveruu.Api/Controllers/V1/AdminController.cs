@@ -4,6 +4,7 @@ using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Users.Commands.DeleteUser;
 using FastDeliveruu.Application.Users.Commands.EditUserRoles;
+using FastDeliveruu.Application.Users.Commands.ToggleLock;
 using FastDeliveruu.Application.Users.Commands.UpdateUser;
 using FastDeliveruu.Application.Users.Queries.GetAllUsers;
 using FastDeliveruu.Application.Users.Queries.GetAllUsersWithRoles;
@@ -57,6 +58,17 @@ public class AdminController : ApiController
             return Problem(getUserResult.Errors);
         }
         return Ok(getUserResult.Value);
+    }
+
+    [HttpPost("toggle-lock")]
+    public async Task<IActionResult> ToggleLock([FromBody] ToggleLockCommand command)
+    {
+        Result result = await _mediator.Send(command);
+        if (result.IsFailed)
+        {
+            return Problem(result.Errors);
+        }
+        return Ok();
     }
 
     [HttpPost("edit-user-roles/{id:guid}")]
