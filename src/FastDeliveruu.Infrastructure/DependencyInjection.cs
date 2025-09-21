@@ -15,6 +15,7 @@ using FastDeliveruu.Infrastructure.UnitOfWork;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using FastDeliveruu.Application.Common.Helpers;
+using FastDeliveruu.Infrastructure.Seed.Seeders;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -108,8 +109,10 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<FastDeliveruuDbContext>()
         .AddSignInManager<SignInManager<Shipper>>();
         //.AddDefaultTokenProviders(); // will generate the error: No IUserTwoFactorTokenProvider named 'Default' is registered.
-
         services.AddTransient<ShipperManager>();
+
+        // Add Seedata
+        services.AddTransient<IDataSeeder, UserRoleSeeder>();
 
         return services;
     }
