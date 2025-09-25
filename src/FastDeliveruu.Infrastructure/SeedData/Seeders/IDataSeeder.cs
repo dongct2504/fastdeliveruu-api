@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Domain.Data;
 
-namespace FastDeliveruu.Infrastructure.Seed.Seeders;
+namespace FastDeliveruu.Infrastructure.SeedData.Seeders;
 
 public interface IDataSeeder
 {

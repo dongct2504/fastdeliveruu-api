@@ -4,7 +4,7 @@ using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using Microsoft.AspNetCore.Identity;
 
-namespace FastDeliveruu.Infrastructure.Seed.Seeders;
+namespace FastDeliveruu.Infrastructure.SeedData.Seeders;
 
 public class UserRoleSeeder : IDataSeeder
 {
