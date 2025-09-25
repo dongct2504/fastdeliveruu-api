@@ -107,17 +107,15 @@ public class CheckoutsController : ApiController
             return Problem(updateVnpayResult.Errors);
         }
 
-        string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-
         if (updateVnpayResult.Value.IsSuccess)
         {
             return Redirect(Utils
-                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/success", updateVnpayResult.Value));
+                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutSuccessRedirectUrl"], updateVnpayResult.Value));
         }
         else
         {
             return Redirect(Utils
-                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/failed", updateVnpayResult.Value));
+                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutFailedRedirectUrl"], updateVnpayResult.Value));
         }
     }
 
@@ -178,10 +176,8 @@ public class CheckoutsController : ApiController
                 return Problem(result.Errors);
             }
 
-            string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-
             return Redirect(Utils
-                .CreateResponsePaymentUrl($"{redirectUrlBase}/checkout/success", result.Value));
+                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutSuccessRedirectUrl"], result.Value));
         }
 
         return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Failed to capture PayPal order.");

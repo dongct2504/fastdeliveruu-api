@@ -7,6 +7,6 @@ public class OrderWithPaymentsById : Specification<Order>
     public OrderWithPaymentsById(Guid orderId)
         : base(o => o.Id == orderId)
     {
-
+        AddInclude(o => o.Payments);
     }
 }
