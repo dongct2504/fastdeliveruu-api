@@ -1,7 +1,7 @@
 ﻿using FastDeliveruu.Domain.Data;
-using FastDeliveruu.Infrastructure.Seed.Seeders;
+using FastDeliveruu.Infrastructure.SeedData.Seeders;
 
-namespace FastDeliveruu.Infrastructure.Seed;
+namespace FastDeliveruu.Infrastructure.SeedData;
 
 public static class SeedData
 {

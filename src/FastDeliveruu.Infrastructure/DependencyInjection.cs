@@ -15,7 +15,7 @@ using FastDeliveruu.Infrastructure.UnitOfWork;
 using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using FastDeliveruu.Application.Common.Helpers;
-using FastDeliveruu.Infrastructure.Seed.Seeders;
+using FastDeliveruu.Infrastructure.SeedData.Seeders;
 
 namespace FastDeliveruu.Infrastructure;
 
@@ -28,6 +28,14 @@ public static class DependencyInjection
 
         services.AddIdentity();
         services.AddAuth(configuration);
+
+        // Add Seedata
+        services.AddTransient<IDataSeeder, AddressSeeder>();
+        services.AddTransient<IDataSeeder, UserRoleSeeder>();
+        services.AddTransient<IDataSeeder, RestaurantSeeder>();
+        services.AddTransient<IDataSeeder, GenreSeeder>();
+        services.AddTransient<IDataSeeder, MenuItemSeeder>();
+        services.AddTransient<IDataSeeder, MenuVariantSeeder>();
 
         services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
         services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();
@@ -110,9 +118,6 @@ public static class DependencyInjection
         .AddSignInManager<SignInManager<Shipper>>();
         //.AddDefaultTokenProviders(); // will generate the error: No IUserTwoFactorTokenProvider named 'Default' is registered.
         services.AddTransient<ShipperManager>();
-
-        // Add Seedata
-        services.AddTransient<IDataSeeder, UserRoleSeeder>();
 
         return services;
     }

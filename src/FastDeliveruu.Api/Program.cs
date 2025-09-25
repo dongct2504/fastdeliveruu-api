@@ -9,8 +9,8 @@ using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.Services;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Infrastructure.Hubs;
-using FastDeliveruu.Infrastructure.Seed.Seeders;
-using FastDeliveruu.Infrastructure.Seed;
+using FastDeliveruu.Infrastructure.SeedData.Seeders;
+using FastDeliveruu.Infrastructure.SeedData;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -86,7 +86,17 @@ var app = builder.Build();
         var dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
         var seeders = services.GetServices<IDataSeeder>();
         await dbContext.Database.MigrateAsync();
-        await SeedData.InitializeAsync(dbContext, seeders);
+        using var transaction = await dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            await SeedData.InitializeAsync(dbContext, seeders);
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     app.UseMiddleware<ExceptionHandlerMiddleware>();
