@@ -1,8 +1,10 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Domain.Data;
+using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastDeliveruu.Infrastructure.SeedData.Seeders;
 
@@ -25,7 +27,7 @@ public class UserRoleSeeder : IDataSeeder
     {
         await SeedRolesAsync();
         await SeedUsersAsync();
-        //await SeedShippersAsync();
+        await SeedShippersAsync(context);
     }
 
     private async Task SeedRolesAsync()
@@ -65,7 +67,9 @@ public class UserRoleSeeder : IDataSeeder
                 {
                     UserName = userName,
                     Email = $"{userName}@example.com",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    PhoneNumber = "+841234567890",
+                    PhoneNumberConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, "Pa$$w0rd");
@@ -88,16 +92,37 @@ public class UserRoleSeeder : IDataSeeder
         }
     }
 
-    private async Task SeedShippersAsync()
+    private async Task SeedShippersAsync(FastDeliveruuDbContext context)
     {
-        var shippersToSeed = new List<(string UserName, string Role)>
+        var now = DateTime.UtcNow;
+
+        // load address đã seed
+        var hcm = await context.Cities
+            .Include(c => c.Districts).ThenInclude(d => d.Wards)
+            .FirstOrDefaultAsync(c => c.Name == "Hồ Chí Minh");
+
+        var hanoi = await context.Cities
+            .Include(c => c.Districts).ThenInclude(d => d.Wards)
+            .FirstOrDefaultAsync(c => c.Name == "Hà Nội");
+
+        if (hcm == null || hanoi == null) return; // chưa seed AddressSeeder
+
+        var shippersData = new List<(string UserName, string Email, string House, string Street, City City, District District, Ward Ward)>
         {
-            ("shipper1", RoleConstants.Shipper),
-            ("shipper1", RoleConstants.Shipper),
-            ("shipper1", RoleConstants.Shipper),
+            ("shipper1", "shipper1@example.com", "12", "Lê Lợi", hcm,
+                hcm.Districts.First(d => d.Name == "Quận 1"),
+                hcm.Districts.First(d => d.Name == "Quận 1").Wards.First()),
+
+            ("shipper2", "shipper2@example.com", "34", "Hàng Bài", hanoi,
+                hanoi.Districts.First(d => d.Name == "Hoàn Kiếm"),
+                hanoi.Districts.First(d => d.Name == "Hoàn Kiếm").Wards.First()),
+
+            ("shipper3", "shipper3@example.com", "45", "Nguyễn Thị Minh Khai", hcm,
+                hcm.Districts.First(d => d.Name == "Quận 3"),
+                hcm.Districts.First(d => d.Name == "Quận 3").Wards.First())
         };
 
-        foreach (var (userName, role) in shippersToSeed)
+        foreach (var (userName, email, house, street, city, district, ward) in shippersData)
         {
             var user = await _shipperManager.FindByNameAsync(userName);
             if (user == null)
@@ -105,33 +130,27 @@ public class UserRoleSeeder : IDataSeeder
                 user = new Shipper
                 {
                     UserName = userName,
-                    Email = $"{userName}@example.com",
+                    Email = email,
                     EmailConfirmed = true,
                     FirstName = userName,
                     LastName = userName,
-                    CitizenIdentification = "123",
-                    HouseNumber = "12",
-                    StreetName = "123",
-                    WardId = 1,
-                    DistrictId = 1,
-                    CityId = 1
+                    CitizenIdentification = "123456789",
+                    PhoneNumber = "+841234567890",
+                    PhoneNumberConfirmed = true,
+                    HouseNumber = house,
+                    StreetName = street,
+                    CityId = city.Id,
+                    DistrictId = district.Id,
+                    WardId = ward.Id,
+                    CreatedAt = now
                 };
 
                 var result = await _shipperManager.CreateAsync(user, "Pa$$w0rd");
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-                    await _shipperManager.AddToRoleAsync(user, role);
-                }
-                else
-                {
-                    throw new Exception($"Seeding user {userName} failed: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                }
-            }
-            else
-            {
-                if (!await _shipperManager.IsInRoleAsync(user, role))
-                {
-                    await _shipperManager.AddToRoleAsync(user, role);
+                    throw new Exception(
+                        $"Seeding shipper {userName} failed: {string.Join(", ", result.Errors.Select(e => e.Description))}"
+                    );
                 }
             }
         }

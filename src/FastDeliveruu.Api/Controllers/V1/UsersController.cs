@@ -43,7 +43,7 @@ public class UsersController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = PolicyConstants.RequiredCustomerShipper)]
+    [Authorize(Policy = PolicyConstants.AllowAll)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateCurrentUser(Guid id, [FromForm] UpdateUserCommand command)
@@ -89,7 +89,7 @@ public class UsersController : ApiController
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Policy = PolicyConstants.RequiredCustomerShipper)]
+    [Authorize(Policy = PolicyConstants.AllowAll)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteCurrentUser(Guid id)
     {

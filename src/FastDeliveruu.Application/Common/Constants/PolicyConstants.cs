@@ -2,6 +2,8 @@
 
 public static class PolicyConstants
 {
+    public const string AllowAll = "allowAll";
+
     public const string ManageResources = "manageResources";
     public const string RequiredCustomerShipper = "requiredCustomerShipper";
 

@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddTransient<IDataSeeder, GenreSeeder>();
         services.AddTransient<IDataSeeder, MenuItemSeeder>();
         services.AddTransient<IDataSeeder, MenuVariantSeeder>();
+        services.AddTransient<IDataSeeder, DeliveryMethodSeeder>();
 
         services.AddScoped<IFastDeliveruuUnitOfWork, FastDeliveruuUnitOfWork>();
         services.AddScoped<IOnlineTrackerService, OnlineTrackerService>();
@@ -155,6 +156,9 @@ public static class DependencyInjection
 
         services.AddAuthorization(options =>
         {
+            options.AddPolicy(PolicyConstants.AllowAll, policy =>
+                policy.RequireRole(RoleConstants.Admin, RoleConstants.Staff, RoleConstants.Shipper, RoleConstants.Customer));
+
             options.AddPolicy(PolicyConstants.ManageResources, policy =>
                 policy.RequireRole(RoleConstants.Admin, RoleConstants.Staff));
             options.AddPolicy(PolicyConstants.RequiredCustomerShipper, policy =>
