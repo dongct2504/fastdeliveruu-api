@@ -27,10 +27,10 @@ public class RestaurantSeeder : IDataSeeder
             ("Phở 24", "Nhà hàng chuyên phở truyền thống", "0901234567", "https://cdn.pastaxi-manager.onepas.vn/content/uploads/articles/lanmkt/phohanoi/pho-ha-noi-pho-nguyet.jpg", "12", "Lê Lợi",
                 hcm, hcm.Districts.First(d => d.Name == "Quận 1"), hcm.Districts.First(d => d.Name == "Quận 1").Wards.First()),
 
-            ("Bún Chả Hà Nội", "Bún chả chuẩn vị Hà Nội", "0912345678", "https://cdn.pastaxi-manager.onepas.vn/content/uploads/articles/giangmkt/BLOG/%C4%90%E1%BA%B7c%20s%E1%BA%A3n%20v%C3%B9ng%20mi%E1%BB%81n/quanbunchangonhanoi/quan-bun-cha-ngon-ha-noi-huong-lien.jpg", "34", "Hàng Bài",
+            ("Bún Chả Hà Nội", "Bún chả chuẩn vị Hà Nội", "0912345678", "https://res.cloudinary.com/dlfvm7syg/image/upload/v1758801078/buncha_ka9sdf.png", "34", "Hàng Bài",
                 hanoi, hanoi.Districts.First(d => d.Name == "Hoàn Kiếm"), hanoi.Districts.First(d => d.Name == "Hoàn Kiếm").Wards.First()),
 
-            ("Cơm Tấm Nhà Làm", "Cơm tấm Sài Gòn", "0934567890", "https://media-cdn.tripadvisor.com/media/photo-s/0a/be/ed/9c/nha-hang-qua-ngon.jpg", "45", "Nguyễn Thị Minh Khai",
+            ("Cơm Tấm Nhà Làm", "Cơm tấm Sài Gòn", "0934567890", "https://res.cloudinary.com/dlfvm7syg/image/upload/v1758801073/comtam_m9wltu.png", "45", "Nguyễn Thị Minh Khai",
                 hcm, hcm.Districts.First(d => d.Name == "Quận 3"), hcm.Districts.First(d => d.Name == "Quận 3").Wards.First())
         };
 
