@@ -54,11 +54,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             return Result.Fail(new BadRequestError(ErrorMessageConstants.AppUserNotFound));
         }
 
-        if (!appUser.PhoneNumberConfirmed)
-        {
-            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PhoneYetConfirmed} - {request}");
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.PhoneYetConfirmed));
-        }
+        //if (!appUser.PhoneNumberConfirmed)
+        //{
+        //    _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.PhoneYetConfirmed} - {request}");
+        //    return Result.Fail(new BadRequestError(ErrorMessageConstants.PhoneYetConfirmed));
+        //}
 
         DeliveryMethod? deliveryMethod = await _unitOfWork.DeliveryMethods.GetAsync(request.DeliveryMethodId);
         if (deliveryMethod == null)

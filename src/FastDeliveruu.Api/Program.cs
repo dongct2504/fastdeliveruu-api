@@ -109,7 +109,7 @@ var app = builder.Build();
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .WithOrigins("http://localhost:4200"));
+        .WithOrigins("http://localhost:4200", "https://08b052d1712d.ngrok-free.app", "https://polecat-enabled-aphid.ngrok-free.app"));
 
     app.UseAuthentication();
     app.UseAuthorization();

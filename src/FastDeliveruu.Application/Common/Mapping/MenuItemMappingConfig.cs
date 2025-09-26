@@ -18,6 +18,8 @@ public class MenuItemMappingConfig : IRegister
         // MenuItem config
         config.NewConfig<MenuItem, MenuItemDto>();
         config.NewConfig<MenuItem, MenuItemDetailDto>()
+            .Map(dest => dest.QuantityAvailable, src => src.MenuItemInventories.FirstOrDefault() == null ? 0 : src.MenuItemInventories.FirstOrDefault().QuantityAvailable)
+            .Map(dest => dest.QuantityReserved, src => src.MenuItemInventories.FirstOrDefault() == null ? 0 : src.MenuItemInventories.FirstOrDefault().QuantityReserved)
             .Map(dest => dest.GenreDto, src => src.Genre)
             .Map(dest => dest.RestaurantDto, src => src.Restaurant)
             .Map(dest => dest.MenuVariantDtos, src => src.MenuVariants);

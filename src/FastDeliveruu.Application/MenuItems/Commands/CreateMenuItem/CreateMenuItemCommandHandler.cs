@@ -4,6 +4,7 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
@@ -77,6 +78,16 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         menuItem.PublicId = uploadResult.PublicId;
 
         menuItem.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
+
+        var menuItemInventory = new MenuItemInventory
+        {
+            Id = Guid.NewGuid(),
+            MenuItemId = menuItem.Id,
+            QuantityAvailable = request.QuantityAvailable,
+            QuantityReserved = request.QuantityReserved,
+            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+        };
+        menuItem.MenuItemInventories.Add(menuItemInventory);
 
         _unitOfWork.MenuItems.Add(menuItem);
         await _unitOfWork.SaveChangesAsync();

@@ -42,7 +42,7 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
         }
 
         MenuItemInventory? menuItemInventory;
-        if (request.Id == Guid.Empty) // add
+        if (request.Id == null) // add
         {
             menuItemInventory = await _unitOfWork.MenuItemInventories.GetWithSpecAsync(new MenuItemInventoryByMenuItemIdSpecification(menuItem.Id), true);
             if (menuItemInventory != null)
@@ -58,7 +58,7 @@ public class UpdateMenuItemInventoryCommandHandler : IRequestHandler<UpdateMenuI
         }
         else // update
         {
-            menuItemInventory = await _unitOfWork.MenuItemInventories.GetAsync(request.Id);
+            menuItemInventory = await _unitOfWork.MenuItemInventories.GetAsync(request.Id.Value);
             if (menuItemInventory == null)
             {
                 _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.MenuItemInventoryNotFound} - {request}");

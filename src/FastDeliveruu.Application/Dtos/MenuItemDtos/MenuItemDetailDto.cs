@@ -11,7 +11,7 @@ public class MenuItemDetailDto
 
     public string Description { get; set; } = null!;
 
-    public int Inventory { get; set; }
+    //public int Inventory { get; set; }
 
     public decimal Price { get; set; }
 
@@ -20,6 +20,9 @@ public class MenuItemDetailDto
     public decimal DiscountAmount => Price * DiscountPercent;
 
     public decimal DiscountPrice => Price - DiscountAmount;
+
+    public int QuantityAvailable { get; set; }
+    public int QuantityReserved { get; set; }
 
     public string ImageUrl { get; set; } = null!;
 

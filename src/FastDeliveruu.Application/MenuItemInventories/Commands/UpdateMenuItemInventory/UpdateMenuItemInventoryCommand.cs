@@ -6,7 +6,7 @@ namespace FastDeliveruu.Application.MenuItemInventories.Commands.CreateMenuItemI
 
 public class UpdateMenuItemInventoryCommand : IRequest<Result<MenuItemInventoryDto>>
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public Guid MenuItemId { get; set; }
 
