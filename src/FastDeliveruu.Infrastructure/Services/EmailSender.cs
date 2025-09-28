@@ -25,7 +25,7 @@ public class EmailSender : IEmailSender
         message.From.Add(new MailboxAddress("Cay Trieu Dong", senderEmail));
         message.To.Add(new MailboxAddress("", email));
         message.Subject = subject;
-        message.Body = new TextPart("plain") { Text = messageBody };
+        message.Body = new TextPart("html") { Text = messageBody };
 
         using (SmtpClient client = new SmtpClient())
         {

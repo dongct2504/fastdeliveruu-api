@@ -8,5 +8,6 @@ public class OrderWithPaymentsById : Specification<Order>
         : base(o => o.Id == orderId)
     {
         AddInclude(o => o.Payments);
+        AddInclude(o => o.AppUser);
     }
 }

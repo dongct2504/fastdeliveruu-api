@@ -74,6 +74,9 @@ public static class DependencyInjection
             configuration["Payment:Paypal:Mode"]
         ));
 
+        services.AddTransient<IEmailTemplateService, EmailTemplateService>();
+        services.AddTransient<IMailNotificationService, MailNotificationService>();
+
         return services;
     }
 

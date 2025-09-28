@@ -2,6 +2,7 @@
 using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
@@ -16,12 +17,14 @@ namespace FastDeliveruu.Application.Orders.Commands.UpdateVnpay;
 public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Result<PaymentResponse>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly IMailNotificationService _orderNotificationService;
     private readonly ILogger<UpdateVnpayCommandHandler> _logger;
 
-    public UpdateVnpayCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<UpdateVnpayCommandHandler> logger)
+    public UpdateVnpayCommandHandler(IFastDeliveruuUnitOfWork unitOfWork, ILogger<UpdateVnpayCommandHandler> logger, IMailNotificationService orderNotificationService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _orderNotificationService = orderNotificationService;
     }
 
     public async Task<Result<PaymentResponse>> Handle(UpdateVnpayCommand request, CancellationToken cancellationToken)
@@ -113,6 +116,14 @@ public class UpdateVnpayCommandHandler : IRequestHandler<UpdateVnpayCommand, Res
                 }
             }
         }
+
+        await _orderNotificationService.SendOrderNotificationAsync(
+            order.AppUser,
+            order,
+            (OrderStatusEnum)order.OrderStatus,
+            (PaymentMethodsEnum)order.PaymentMethod,
+            (PaymentStatusEnum)payment.PaymentStatus
+        );
 
         await _unitOfWork.SaveChangesAsync();
 

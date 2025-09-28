@@ -16,18 +16,18 @@ namespace FastDeliveruu.Application.Authentication.Queries.ForgotPassword;
 public class ForgotPasswordQueryHandler : IRequestHandler<ForgotPasswordQuery, Result>
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly IEmailSender _emailSender;
     private readonly ICacheService _cacheService;
     private readonly IConfiguration _configuration;
+    private readonly IMailNotificationService _mailNotificationService;
     private readonly ILogger<ForgotPasswordQueryHandler> _logger;
 
-    public ForgotPasswordQueryHandler(UserManager<AppUser> userManager, IEmailSender emailSender, ILogger<ForgotPasswordQueryHandler> logger, ICacheService cacheService, IConfiguration configuration)
+    public ForgotPasswordQueryHandler(UserManager<AppUser> userManager, ILogger<ForgotPasswordQueryHandler> logger, ICacheService cacheService, IConfiguration configuration, IMailNotificationService mailNotificationService)
     {
         _userManager = userManager;
-        _emailSender = emailSender;
         _logger = logger;
         _cacheService = cacheService;
         _configuration = configuration;
+        _mailNotificationService = mailNotificationService;
     }
 
     public async Task<Result> Handle(ForgotPasswordQuery request, CancellationToken cancellationToken)
@@ -44,9 +44,8 @@ public class ForgotPasswordQueryHandler : IRequestHandler<ForgotPasswordQuery, R
         string key = $"{CacheConstants.ResetPasswordToken}-{user.Id}";
         await _cacheService.SetAsync(key, encodedToken, CacheOptions.ChangePasswordTokenExpiration, cancellationToken);
 
-        string subject = "Thay đổi mật khẩu";
-        string message = $"Xác nhận thành công. Bạn vui lòng nhấn vào link sau đây để tiến hành thay đổi mật khẩu: {_configuration["AppSettings:ResetPasswordUrl"]}?userId={user.Id}";
-        await _emailSender.SendEmailAsync(user.Email, subject, message);
+        string resetPasswordLink = $"{_configuration["AppSettings:RedirectUrl"]}/authen/reset-password?userId={user.Id}";
+        await _mailNotificationService.SendResetPasswordEmailAsync(user.UserName, user.Email, resetPasswordLink);
 
         return Result.Ok();
     }

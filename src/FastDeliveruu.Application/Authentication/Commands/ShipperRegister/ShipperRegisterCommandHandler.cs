@@ -12,6 +12,7 @@ using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -23,6 +24,8 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IGeocodingService _geocodingService;
     private readonly ILogger<ShipperRegisterCommandHandler> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly IMailNotificationService _mailNotificationService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
 
@@ -32,7 +35,9 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         IDateTimeProvider dateTimeProvider,
         IMapper mapper,
         ShipperManager shipperManager,
-        IGeocodingService geocodingService)
+        IGeocodingService geocodingService,
+        IMailNotificationService mailNotificationService,
+        IConfiguration configuration)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -40,6 +45,8 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         _mapper = mapper;
         _shipperManager = shipperManager;
         _geocodingService = geocodingService;
+        _mailNotificationService = mailNotificationService;
+        _configuration = configuration;
     }
 
     public async Task<Result<ShipperAuthenticationResponse>> Handle(ShipperRegisterCommand request, CancellationToken cancellationToken)
@@ -96,8 +103,12 @@ public class ShipperRegisterCommandHandler : IRequestHandler<ShipperRegisterComm
         }
 
         string token = await _shipperManager.GenerateEmailConfirmationTokenAsync(shipper);
-
         string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        string baseUrl = _configuration["AppSettings:BaseUrl"];
+        string confirmationLink = $"{baseUrl}/api/v1/shipper-auth/confirm-email?email={shipper.Email}&encodedToken={encodedToken}";
+
+        await _mailNotificationService.SendEmailConfirmationAsync(shipper.UserName, shipper.Email, confirmationLink);
 
         return _mapper.Map<ShipperAuthenticationResponse>((shipper, encodedToken));
     }

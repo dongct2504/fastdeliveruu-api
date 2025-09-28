@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Common.Helpers;
-using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Application.Orders.Commands.CreateOrder;
@@ -107,15 +106,19 @@ public class CheckoutsController : ApiController
             return Problem(updateVnpayResult.Errors);
         }
 
+        string checkoutLink;
+
         if (updateVnpayResult.Value.IsSuccess)
         {
+            checkoutLink = $"{_configuration["AppSettings:RedirectUrl"]}/checkout/success";
             return Redirect(Utils
-                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutSuccessRedirectUrl"], updateVnpayResult.Value));
+                .CreateResponsePaymentUrl(checkoutLink, updateVnpayResult.Value));
         }
         else
         {
+            checkoutLink = $"{_configuration["AppSettings:RedirectUrl"]}/checkout/failed";
             return Redirect(Utils
-                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutFailedRedirectUrl"], updateVnpayResult.Value));
+                .CreateResponsePaymentUrl(checkoutLink, updateVnpayResult.Value));
         }
     }
 
@@ -176,8 +179,8 @@ public class CheckoutsController : ApiController
                 return Problem(result.Errors);
             }
 
-            return Redirect(Utils
-                .CreateResponsePaymentUrl(_configuration["AppSettings:CheckoutSuccessRedirectUrl"], result.Value));
+            string checkoutLink = $"{_configuration["AppSettings:RedirectUrl"]}/checkout/success";
+            return Redirect(Utils.CreateResponsePaymentUrl(checkoutLink, result.Value));
         }
 
         return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Failed to capture PayPal order.");
