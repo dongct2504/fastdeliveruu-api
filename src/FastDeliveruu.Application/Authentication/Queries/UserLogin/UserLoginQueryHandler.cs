@@ -2,17 +2,20 @@ using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FastDeliveruu.Application.Authentication.Queries.UserLogin;
 
 public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, Result<UserAuthenticationResponse>>
 {
+    private readonly FastDeliveruuDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
@@ -26,7 +29,8 @@ public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, Result<User
         IMapper mapper,
         IJwtTokenGenerator jwtTokenGenerator,
         IDateTimeProvider dateTimeProvider,
-        ILogger<UserLoginQueryHandler> logger)
+        ILogger<UserLoginQueryHandler> logger,
+        FastDeliveruuDbContext dbContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -34,12 +38,17 @@ public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, Result<User
         _jwtTokenGenerator = jwtTokenGenerator;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<UserAuthenticationResponse>> Handle(UserLoginQuery request,
         CancellationToken cancellationToken)
     {
-        AppUser? user = await _userManager.FindByNameAsync(request.UserName);
+        var user = await _dbContext.Users
+            .Include(u => u.AppUserRoles)
+                .ThenInclude(ur => ur.AppRole)
+            .FirstOrDefaultAsync(u => u.UserName == request.UserName, cancellationToken: cancellationToken);
+
         if (user == null)
         {
             _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WrongUserName} - {request}");

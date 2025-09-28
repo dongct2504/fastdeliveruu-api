@@ -22,6 +22,7 @@ public class AppUserDto
     public int WardId { get; set; }
 
     public decimal? Latitude { get; set; }
-
     public decimal? Longitude { get; set; }
+
+    public List<string> Roles { get; set; } = new List<string>();
 }
