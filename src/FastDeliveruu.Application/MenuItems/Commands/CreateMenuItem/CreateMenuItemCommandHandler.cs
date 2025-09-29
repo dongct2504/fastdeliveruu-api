@@ -19,6 +19,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateMenuItemCommandHandler> _logger;
 
@@ -27,13 +28,15 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         IMapper mapper,
         ILogger<CreateMenuItemCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _fileStorageServices = fileStorageServices;
         _mapper = mapper;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<MenuItemDto>> Handle(
@@ -91,6 +94,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
 
         _unitOfWork.MenuItems.Add(menuItem);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.MenuItems, cancellationToken);
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }

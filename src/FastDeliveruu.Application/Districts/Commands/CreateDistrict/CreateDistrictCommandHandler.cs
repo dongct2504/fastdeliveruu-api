@@ -17,18 +17,21 @@ public class CreateDistrictCommandHandler : IRequestHandler<CreateDistrictComman
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<CreateDistrictCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
     public CreateDistrictCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<CreateDistrictCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<DistrictDto>> Handle(CreateDistrictCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,7 @@ public class CreateDistrictCommandHandler : IRequestHandler<CreateDistrictComman
 
         _unitOfWork.Districts.Add(district);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Districts, cancellationToken);
 
         return _mapper.Map<DistrictDto>(district);
     }
