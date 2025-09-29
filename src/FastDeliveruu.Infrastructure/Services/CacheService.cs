@@ -45,11 +45,13 @@ public class CacheService : ICacheService
         string cacheValue = JsonConvert.SerializeObject(value);
 
         await _distributedCache.SetStringAsync(key, cacheValue, options, cancellationToken);
+        CacheKeys.TryAdd(key, false);
     }
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
-        await _distributedCache.RemoveAsync(key);
+        await _distributedCache.RemoveAsync(key, cancellationToken);
+        CacheKeys.TryRemove(key, out bool _);
     }
 
     public async Task RemoveByPrefixAsync(string prefixKey, CancellationToken cancellationToken = default)
