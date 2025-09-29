@@ -39,11 +39,8 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
 
         IQueryable<Restaurant> restaurantsQuery = _dbContext.Restaurants.AsQueryable();
 
-        if (!string.IsNullOrEmpty(request.RestaurantParams.Search))
-        {
-            restaurantsQuery = restaurantsQuery
-                .Where(c => c.Name.ToLower().Contains(request.RestaurantParams.Search.ToLower()));
-        }
+        restaurantsQuery = restaurantsQuery
+            .Where(c => string.IsNullOrEmpty(request.RestaurantParams.Search) || c.Name.ToLower().Contains(request.RestaurantParams.Search.ToLower()));
 
         if (!string.IsNullOrEmpty(request.RestaurantParams.Sort))
         {

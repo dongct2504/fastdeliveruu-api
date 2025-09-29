@@ -24,7 +24,7 @@ public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, List<
         GetAllGenresQuery request,
         CancellationToken cancellationToken)
     {
-        string key = $"{CacheConstants.Genres}";
+        string key = $"{CacheConstants.Genres}-{request.Search}";
 
         List<GenreDto>? genreDtosCache = await _cacheService
             .GetAsync<List<GenreDto>>(key, cancellationToken);
@@ -33,7 +33,15 @@ public class GetAllGenresQueryHandler : IRequestHandler<GetAllGenresQuery, List<
             return genreDtosCache;
         }
 
-        List<GenreDto> genreDtos = await _dbContext.Genres
+        var query = _dbContext.Genres.AsQueryable();
+
+        if (!string.IsNullOrEmpty(request.Search))
+        {
+            query = query
+                .Where(c => c.Name.ToLower().Contains(request.Search.ToLower()));
+        }
+
+        List<GenreDto> genreDtos = await query
                 .AsNoTracking()
                 .ProjectToType<GenreDto>()
                 .ToListAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Application.Dtos.PaymentResponses;
 
 namespace FastDeliveruu.Application.Dtos.OrderDtos;
 
@@ -34,6 +35,7 @@ public class OrderDto
     public int WardId { get; set; }
 
     public decimal? Latitude { get; set; }
-
     public decimal? Longitude { get; set; }
+
+    public List<PaymentDto> PaymentDtos { get; set; } = new List<PaymentDto>();
 }
