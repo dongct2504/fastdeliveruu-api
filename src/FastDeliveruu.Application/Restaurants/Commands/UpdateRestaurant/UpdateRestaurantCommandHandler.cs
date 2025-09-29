@@ -14,6 +14,7 @@ namespace FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<UpdateRestaurantCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
@@ -24,13 +25,15 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
         IFileStorageServices fileStorageServices,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
-        ILogger<UpdateRestaurantCommandHandler> logger)
+        ILogger<UpdateRestaurantCommandHandler> logger,
+        ICacheService cacheService)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
@@ -69,6 +72,7 @@ public class UpdateRestaurantCommandHandler : IRequestHandler<UpdateRestaurantCo
         restaurant.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Restaurants, cancellationToken);
 
         return Result.Ok();
     }

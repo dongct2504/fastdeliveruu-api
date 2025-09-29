@@ -13,17 +13,20 @@ namespace FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
 public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<DeleteRestaurantCommandHandler> _logger;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteRestaurantCommandHandler(
         IFileStorageServices fileStorageServices,
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<DeleteRestaurantCommandHandler> logger)
+        ILogger<DeleteRestaurantCommandHandler> logger,
+        ICacheService cacheService)
     {
         _fileStorageServices = fileStorageServices;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteRestaurantCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ public class DeleteRestaurantCommandHandler : IRequestHandler<DeleteRestaurantCo
 
         _unitOfWork.Restaurants.Delete(restaurant);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Restaurants, cancellationToken);
 
         return Result.Ok();
     }

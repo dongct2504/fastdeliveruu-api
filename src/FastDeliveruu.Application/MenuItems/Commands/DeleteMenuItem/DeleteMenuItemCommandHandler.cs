@@ -14,16 +14,19 @@ public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemComman
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteMenuItemCommandHandler> _logger;
+    private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
 
     public DeleteMenuItemCommandHandler(
         IFileStorageServices fileStorageServices,
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<DeleteMenuItemCommandHandler> logger)
+        ILogger<DeleteMenuItemCommandHandler> logger,
+        ICacheService cacheService)
     {
         _fileStorageServices = fileStorageServices;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteMenuItemCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ public class DeleteMenuItemCommandHandler : IRequestHandler<DeleteMenuItemComman
 
         _unitOfWork.MenuItems.Delete(menuItem);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.MenuItems, cancellationToken);
 
         return Result.Ok();
     }
