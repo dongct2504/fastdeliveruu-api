@@ -98,6 +98,7 @@ public static class ErrorMessageConstants
     public const string WrongUserName = "Tên đăng nhập không hợp lệ";
     public const string WrongEmail = "Email không hợp lệ";
     public const string WrongPassword = "Mật khẩu không hợp lệ";
+    public const string Lockout = "Tài khoản của bạn đang bị khóa. Vui lòng liên hệ quản trị viên";
     public const string EmailYetConfirmed = "Chưa xác thực email";
     public const string OtpError = "Mã OTP không phù hợp hoặc đã hết hạn";
     public const string PhoneConfirmed = "Số điện thoại của tài khoản này đã xác thực";
