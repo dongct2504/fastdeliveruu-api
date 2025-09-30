@@ -1,5 +1,6 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.AddressesCustomers;
@@ -15,14 +16,17 @@ namespace FastDeliveruu.Application.Wards.Commands.DeleteWard;
 public class DeleteWardCommandHandler : IRequestHandler<DeleteWardCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<DeleteWardCommandHandler> _logger;
 
     public DeleteWardCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<DeleteWardCommandHandler> logger)
+        ILogger<DeleteWardCommandHandler> logger,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteWardCommand request, CancellationToken cancellationToken)
@@ -64,6 +68,7 @@ public class DeleteWardCommandHandler : IRequestHandler<DeleteWardCommand, Resul
 
         _unitOfWork.Wards.Delete(ward);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Wards, cancellationToken);
 
         return Result.Ok();
     }

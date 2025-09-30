@@ -16,6 +16,7 @@ public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Resul
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<CreateWardCommandHandler> _logger;
+    private readonly ICacheService _cacheService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
 
@@ -23,12 +24,14 @@ public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Resul
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<CreateWardCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<WardDto>> Handle(CreateWardCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,7 @@ public class CreateWardCommandHandler : IRequestHandler<CreateWardCommand, Resul
 
         _unitOfWork.Wards.Add(ward);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Wards, cancellationToken);
 
         return _mapper.Map<WardDto>(ward);
     }

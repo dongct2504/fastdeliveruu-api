@@ -9,6 +9,8 @@ using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.Services;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Infrastructure.Hubs;
+using FastDeliveruu.Infrastructure.SeedData.Seeders;
+using FastDeliveruu.Infrastructure.SeedData;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -76,13 +78,25 @@ var app = builder.Build();
         app.UseSwaggerDocument();
     }
 
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
 
     using (IServiceScope serviceScope = app.Services.CreateScope())
     {
         var services = serviceScope.ServiceProvider;
-        using FastDeliveruuDbContext dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
-        dbContext.Database.Migrate();
+        var dbContext = services.GetRequiredService<FastDeliveruuDbContext>();
+        var seeders = services.GetServices<IDataSeeder>();
+        await dbContext.Database.MigrateAsync();
+        using var transaction = await dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            await SeedData.InitializeAsync(dbContext, seeders);
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     app.UseMiddleware<ExceptionHandlerMiddleware>();
@@ -95,7 +109,7 @@ var app = builder.Build();
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .WithOrigins("http://localhost:4200"));
+        .WithOrigins("http://localhost:4200", "https://polecat-enabled-aphid.ngrok-free.app", "https://fastdeliveruu-fe.vercel.app", "https://fastdeliveruu-fe-plmq-git-develop-dongct2504s-projects.vercel.app"));
 
     app.UseAuthentication();
     app.UseAuthorization();

@@ -4,6 +4,7 @@ namespace FastDeliveruu.Application.Interfaces;
 
 public interface ICacheService
 {
+    Task<List<string>> GetKeysExcepPrefixAsync(string prefixKey, CancellationToken cancellationToken = default);
     Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class;
 
     Task SetAsync<T>(
@@ -13,4 +14,5 @@ public interface ICacheService
         CancellationToken cancellationToken = default) where T : class;
 
     Task RemoveAsync(string key, CancellationToken cancellationToken = default);
+    Task RemoveByPrefixAsync(string prefixKey, CancellationToken cancellationToken = default);
 }

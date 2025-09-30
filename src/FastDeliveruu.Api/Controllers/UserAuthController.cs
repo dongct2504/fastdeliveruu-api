@@ -8,7 +8,6 @@ using FastDeliveruu.Application.Authentication.Queries.SendConfirmPhoneNumber;
 using FastDeliveruu.Application.Authentication.Queries.UserEmailConfirm;
 using FastDeliveruu.Application.Authentication.Queries.UserLogin;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
-using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
@@ -22,16 +21,11 @@ namespace FastDeliveruu.Api.Controllers;
 public class UserAuthController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
 
-    public UserAuthController(
-        IMediator mediator,
-        IEmailSender emailSender,
-        IConfiguration configuration)
+    public UserAuthController(IMediator mediator, IConfiguration configuration)
     {
         _mediator = mediator;
-        _emailSender = emailSender;
         _configuration = configuration;
     }
 
@@ -46,8 +40,6 @@ public class UserAuthController : ApiController
         {
             return Problem(authenticationResult.Errors);
         }
-
-        await SendEmailAsync(authenticationResult.Value.AppUserDto.Email, authenticationResult.Value.Token);
 
         return Ok(authenticationResult.Value);
     }
@@ -79,7 +71,7 @@ public class UserAuthController : ApiController
             return Problem(isConfirmEmailResult.Errors);
         }
 
-        return Redirect(_configuration["AppSettings:RedirectUrl"]);
+        return Redirect($"{_configuration["AppSettings:RedirectUrl"]}/authen/login");
     }
 
     [HttpGet("send-confirm-phone-number")]
@@ -154,21 +146,5 @@ public class UserAuthController : ApiController
             return Problem(result.Errors);
         }
         return Ok();
-    }
-
-    [NonAction]
-    private async Task SendEmailAsync(string email, string encodedToken)
-    {
-        string? confirmationLink = Url.Action(
-            action: nameof(ConfirmEmail),
-            controller: "UserAuth",
-            values: new { email, encodedToken },
-            Request.Scheme);
-
-        string receiver = email;
-        string subject = "Cảm ơn vì đã đăng kí tại FastDeliveruu";
-        string messageBody = $"Vui lòng xác nhận email tại đây: {confirmationLink}";
-
-        await _emailSender.SendEmailAsync(receiver, subject, messageBody);
     }
 }

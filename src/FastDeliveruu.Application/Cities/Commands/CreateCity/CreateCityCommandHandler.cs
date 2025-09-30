@@ -17,18 +17,21 @@ public class CreateCityCommandHandler : IRequestHandler<CreateCityCommand, Resul
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<CreateCityCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
     public CreateCityCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<CreateCityCommandHandler> logger,
         IMapper mapper,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
         _dateTimeProvider = dateTimeProvider;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<CityDto>> Handle(CreateCityCommand request, CancellationToken cancellationToken)
@@ -46,6 +49,7 @@ public class CreateCityCommandHandler : IRequestHandler<CreateCityCommand, Resul
 
         _unitOfWork.Cities.Add(city);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Cities, cancellationToken);
 
         return _mapper.Map<CityDto>(city);
     }

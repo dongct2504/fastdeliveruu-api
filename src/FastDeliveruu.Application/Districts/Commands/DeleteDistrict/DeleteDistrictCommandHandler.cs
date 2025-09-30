@@ -1,5 +1,6 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.AddressesCustomers;
@@ -15,14 +16,17 @@ namespace FastDeliveruu.Application.Districts.Commands.DeleteDistrict;
 public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<DeleteDistrictCommandHandler> _logger;
 
     public DeleteDistrictCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
-        ILogger<DeleteDistrictCommandHandler> logger)
+        ILogger<DeleteDistrictCommandHandler> logger,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteDistrictCommand request, CancellationToken cancellationToken)
@@ -64,6 +68,7 @@ public class DeleteDistrictCommandHandler : IRequestHandler<DeleteDistrictComman
 
         _unitOfWork.Districts.Delete(district);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Districts, cancellationToken);
 
         return Result.Ok();
     }

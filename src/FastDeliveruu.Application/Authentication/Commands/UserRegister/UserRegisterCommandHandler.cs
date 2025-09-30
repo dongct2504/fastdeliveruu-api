@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -22,27 +23,31 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
     private readonly UserManager<AppUser> _userManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    //private readonly RoleManager<AppRole> _roleManager; //private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly IGeocodingService _geocodingService;
     private readonly ILogger<UserRegisterCommandHandler> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly IMailNotificationService _mailNotificationService;
     private readonly IMapper _mapper;
 
     public UserRegisterCommandHandler(
         IMapper mapper,
         UserManager<AppUser> userManager,
-        RoleManager<AppRole> roleManager,
         IDateTimeProvider dateTimeProvider,
         ILogger<UserRegisterCommandHandler> logger,
         IFastDeliveruuUnitOfWork unitOfWork,
-        IGeocodingService geocodingService)
+        IGeocodingService geocodingService,
+        IConfiguration configuration,
+        IMailNotificationService mailNotificationService)
     {
         _mapper = mapper;
         _userManager = userManager;
-        _roleManager = roleManager;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
         _unitOfWork = unitOfWork;
         _geocodingService = geocodingService;
+        _configuration = configuration;
+        _mailNotificationService = mailNotificationService;
     }
 
     public async Task<Result<UserAuthenticationResponse>> Handle(
@@ -124,39 +129,22 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
             return Result.Fail(new BadRequestError(message));
         }
 
-        string[] roleNames = { RoleConstants.Customer, RoleConstants.Staff, RoleConstants.Admin };
-        foreach (string roleName in roleNames)
+        if (string.IsNullOrEmpty(request.Role))
         {
-            if (!await _roleManager.RoleExistsAsync(roleName))
-            {
-                //await _roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
-                await _roleManager.CreateAsync(new AppRole(roleName));
-            }
-        }
-
-        if (request.UserName == "admin" ||
-            request.UserName == "admin1" ||
-            request.UserName == "admin2" ||
-            request.UserName == "admin3" ||
-            request.UserName == "admin4")
-        {
-            await _userManager.AddToRoleAsync(user, RoleConstants.Admin);
+            await _userManager.AddToRoleAsync(user, RoleConstants.Customer);
         }
         else
         {
-            if (string.IsNullOrEmpty(request.Role))
-            {
-                await _userManager.AddToRoleAsync(user, RoleConstants.Customer);
-            }
-            else
-            {
-                await _userManager.AddToRoleAsync(user, request.Role);
-            }
+            await _userManager.AddToRoleAsync(user, request.Role);
         }
 
         string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
         string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        string baseUrl = _configuration["AppSettings:BaseUrl"];
+        string confirmationLink = $"{baseUrl}/api/v1/user-auth/confirm-email?email={user.Email}&encodedToken={encodedToken}";
+
+        await _mailNotificationService.SendEmailConfirmationAsync(user.UserName, user.Email, confirmationLink);
 
         return _mapper.Map<UserAuthenticationResponse>((user, encodedToken));
     }

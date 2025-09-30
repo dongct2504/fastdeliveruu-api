@@ -15,18 +15,21 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateDistrictCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
     public UpdateDistrictCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<UpdateDistrictCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateDistrictCommand request, CancellationToken cancellationToken)
@@ -49,6 +52,7 @@ public class UpdateDistrictCommandHandler : IRequestHandler<UpdateDistrictComman
         district.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Districts, cancellationToken);
 
         return Result.Ok();
     }

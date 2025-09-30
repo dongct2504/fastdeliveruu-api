@@ -30,8 +30,8 @@ public class FileStorageServices : IFileStorageServices
                     Folder = uploadImagePath,
                     File = new FileDescription(imageFile.FileName, stream),
                     Transformation = new Transformation()
-                        .Height(500)
-                        .Width(500)
+                        .Width(594)
+                        .Height(396)
                         .Crop("fill")
                         .Gravity("face")
                 };

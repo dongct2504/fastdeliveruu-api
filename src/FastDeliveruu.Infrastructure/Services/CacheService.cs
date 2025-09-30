@@ -1,16 +1,28 @@
 ﻿using FastDeliveruu.Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace FastDeliveruu.Infrastructure.Services;
 
 public class CacheService : ICacheService
 {
+    private static readonly ConcurrentDictionary<string, bool> CacheKeys = new();
     private readonly IDistributedCache _distributedCache;
 
     public CacheService(IDistributedCache distributedCache)
     {
         _distributedCache = distributedCache;
+    }
+
+    public async Task<List<string>> GetKeysExcepPrefixAsync(string prefixKey, CancellationToken cancellationToken = default)
+    {
+        List<string> keys = CacheKeys.Keys
+            .Where(k => k.StartsWith(prefixKey))
+            .Select(k => k.Substring(prefixKey.Length + 1)) // exclude the "-"
+            .ToList();
+
+        return await Task.FromResult(keys);
     }
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
@@ -33,10 +45,20 @@ public class CacheService : ICacheService
         string cacheValue = JsonConvert.SerializeObject(value);
 
         await _distributedCache.SetStringAsync(key, cacheValue, options, cancellationToken);
+        CacheKeys.TryAdd(key, false);
     }
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
-        await _distributedCache.RemoveAsync(key);
+        await _distributedCache.RemoveAsync(key, cancellationToken);
+        CacheKeys.TryRemove(key, out bool _);
+    }
+
+    public async Task RemoveByPrefixAsync(string prefixKey, CancellationToken cancellationToken = default)
+    {
+        IEnumerable<Task> tasks = CacheKeys.Keys
+            .Where(k => k.StartsWith(prefixKey))
+            .Select(k => RemoveAsync(k, cancellationToken));
+        await Task.WhenAll(tasks);
     }
 }

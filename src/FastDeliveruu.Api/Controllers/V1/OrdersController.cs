@@ -1,10 +1,13 @@
 using Asp.Versioning;
 using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Application.Common.Enums;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Application.Orders.Commands.DeleteOrder;
+using FastDeliveruu.Application.Orders.Queries.GetAllOrders;
 using FastDeliveruu.Application.Orders.Queries.GetAllOrdersByUserId;
 using FastDeliveruu.Application.Orders.Queries.GetOrderById;
+using FastDeliveruu.Application.Orders.Queries.GetOrderSummary;
 using FastDeliveruu.Domain.Extensions;
 using FluentResults;
 using MediatR;
@@ -27,7 +30,25 @@ public class OrdersController : ApiController
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedList<OrderDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 6)
+    public async Task<IActionResult> GetAllOrders([FromQuery] OrderParams orderParams)
+    {
+        GetAllOrdersQuery query = new GetAllOrdersQuery(orderParams);
+        PagedList<OrderDto> result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("get-order-summary")]
+    [ProducesResponseType(typeof(OrderSummaryDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOrderSummary(TimeRangeEnum timeRange)
+    {
+        GetOrderSummaryQuery query = new GetOrderSummaryQuery(timeRange);
+        OrderSummaryDto result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("get-orders-by-user")]
+    [ProducesResponseType(typeof(PagedList<OrderDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOrdersByUser(int pageNumber = 1, int pageSize = 6)
     {
         Guid userId = User.GetCurrentUserId();
 

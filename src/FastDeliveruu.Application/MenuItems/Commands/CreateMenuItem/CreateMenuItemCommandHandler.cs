@@ -4,6 +4,7 @@ using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
+using FastDeliveruu.Domain.Entities.AutoGenEntities;
 using FastDeliveruu.Domain.Interfaces;
 using FastDeliveruu.Domain.Specifications.MenuItems;
 using FluentResults;
@@ -18,6 +19,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateMenuItemCommandHandler> _logger;
 
@@ -26,13 +28,15 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
         IMapper mapper,
         ILogger<CreateMenuItemCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _fileStorageServices = fileStorageServices;
         _mapper = mapper;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<MenuItemDto>> Handle(
@@ -78,8 +82,19 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
 
         menuItem.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
+        var menuItemInventory = new MenuItemInventory
+        {
+            Id = Guid.NewGuid(),
+            MenuItemId = menuItem.Id,
+            QuantityAvailable = request.QuantityAvailable,
+            QuantityReserved = request.QuantityReserved,
+            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
+        };
+        menuItem.MenuItemInventories.Add(menuItemInventory);
+
         _unitOfWork.MenuItems.Add(menuItem);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.MenuItems, cancellationToken);
 
         return _mapper.Map<MenuItemDto>(menuItem);
     }

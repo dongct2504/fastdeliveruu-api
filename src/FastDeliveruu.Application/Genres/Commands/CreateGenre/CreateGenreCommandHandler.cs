@@ -15,6 +15,7 @@ namespace FastDeliveruu.Application.Genres.Commands.CreateGenre;
 public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Result<GenreDto>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<CreateGenreCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
@@ -23,12 +24,14 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
         IMapper mapper,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
-        ILogger<CreateGenreCommandHandler> logger)
+        ILogger<CreateGenreCommandHandler> logger,
+        ICacheService cacheService)
     {
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<GenreDto>> Handle(CreateGenreCommand request, CancellationToken cancellationToken)
@@ -47,6 +50,7 @@ public class CreateGenreCommandHandler : IRequestHandler<CreateGenreCommand, Res
 
         _unitOfWork.Genres.Add(genre);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync(CacheConstants.Genres, cancellationToken);
 
         return _mapper.Map<GenreDto>(genre);
     }

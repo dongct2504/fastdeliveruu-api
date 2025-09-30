@@ -1,9 +1,15 @@
-﻿namespace FastDeliveruu.Application.Common.Enums;
+﻿using System.ComponentModel;
+
+namespace FastDeliveruu.Application.Common.Enums;
 
 public enum PaymentMethodsEnum
 {
+    [Description("Tiền mặt")]
     Cash = 1,
-    Vnpay,
-    Paypal,
-    Momo
+    [Description("VnPay")]
+    Vnpay = 2,
+    [Description("PayPal")]
+    Paypal = 3,
+    [Description("Momo")]
+    Momo = 4
 }

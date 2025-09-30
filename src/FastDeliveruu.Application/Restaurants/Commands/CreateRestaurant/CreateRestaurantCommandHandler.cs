@@ -17,6 +17,7 @@ namespace FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
 public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCommand, Result<RestaurantDto>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<CreateRestaurantCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageServices _fileStorageServices;
@@ -27,13 +28,15 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
         IFileStorageServices fileStorageServices,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
-        ILogger<CreateRestaurantCommandHandler> logger)
+        ILogger<CreateRestaurantCommandHandler> logger,
+        ICacheService cacheService)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<RestaurantDto>> Handle(CreateRestaurantCommand request, CancellationToken cancellationToken)
@@ -88,6 +91,7 @@ public class CreateRestaurantCommandHandler : IRequestHandler<CreateRestaurantCo
 
         _unitOfWork.Restaurants.Add(restaurant);
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.Restaurants, cancellationToken);
 
         return _mapper.Map<RestaurantDto>(restaurant);
     }

@@ -3,7 +3,6 @@ using FastDeliveruu.Application.Authentication.Commands.ShipperRegister;
 using FastDeliveruu.Application.Authentication.Queries.ShipperEmailConfirm;
 using FastDeliveruu.Application.Authentication.Queries.ShipperLogin;
 using FastDeliveruu.Application.Dtos.ShipperDtos;
-using FastDeliveruu.Application.Interfaces;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +14,13 @@ namespace FastDeliveruu.Api.Controllers;
 public class ShipperAuthController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
 
     public ShipperAuthController(
         IMediator mediator,
-        IEmailSender emailSender,
         IConfiguration configuration)
     {
         _mediator = mediator;
-        _emailSender = emailSender;
         _configuration = configuration;
     }
 
@@ -39,8 +35,6 @@ public class ShipperAuthController : ApiController
         {
             return Problem(result.Errors);
         }
-
-        await SendEmailAsync(result.Value.ShipperDto.Email, result.Value.Token);
 
         return Ok(result.Value);
     }
@@ -71,23 +65,6 @@ public class ShipperAuthController : ApiController
             return Problem(result.Errors);
         }
 
-        string redirectUrlBase = _configuration.GetValue<string>("RedirectUrl");
-        return Redirect($"{redirectUrlBase}/shipper-auth/login");
-    }
-
-    [NonAction]
-    private async Task SendEmailAsync(string email, string encodedToken)
-    {
-        string? confirmationLink = Url.Action(
-            action: nameof(ConfirmEmail),
-            controller: "ShipperAuth",
-            values: new { email, encodedToken },
-            Request.Scheme);
-
-        string receiver = email;
-        string subject = "Cảm ơn vì đã đăng kí tại FastDeliveruu";
-        string messageBody = $"Vui lòng xác nhận email tại đây: {confirmationLink}";
-
-        await _emailSender.SendEmailAsync(receiver, subject, messageBody);
+        return Redirect($"{_configuration["AppSettings:RedirectUrl"]}/shipper-auth/login");
     }
 }

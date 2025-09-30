@@ -13,6 +13,7 @@ namespace FastDeliveruu.Application.Genres.Commands.UpdateGenre;
 public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Result>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<UpdateGenreCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
@@ -21,12 +22,14 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
         IMapper mapper,
         IFastDeliveruuUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
-        ILogger<UpdateGenreCommandHandler> logger)
+        ILogger<UpdateGenreCommandHandler> logger,
+        ICacheService cacheService)
     {
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateGenreCommand request, CancellationToken cancellationToken)
@@ -42,6 +45,7 @@ public class UpdateGenreCommandHandler : IRequestHandler<UpdateGenreCommand, Res
         genre.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync(CacheConstants.Genres, cancellationToken);
 
         return Result.Ok();
     }

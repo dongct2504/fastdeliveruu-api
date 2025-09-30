@@ -25,6 +25,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
     private readonly ILogger<CreateOrderCommandHandler> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICacheService _cacheService;
+    private readonly IMailNotificationService _orderNotificationService;
     private readonly IMapper _mapper;
 
     public CreateOrderCommandHandler(
@@ -34,7 +35,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         ILogger<CreateOrderCommandHandler> logger,
         IDateTimeProvider dateTimeProvider,
         UserManager<AppUser> userManager,
-        IGeocodingService geocodingService)
+        IGeocodingService geocodingService,
+        IMailNotificationService orderNotificationService)
     {
         _mapper = mapper;
         _cacheService = cacheService;
@@ -43,6 +45,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         _dateTimeProvider = dateTimeProvider;
         _userManager = userManager;
         _geocodingService = geocodingService;
+        _orderNotificationService = orderNotificationService;
     }
 
     public async Task<Result<Order>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -207,8 +210,15 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
 
         _unitOfWork.Payments.Add(payment);
 
-        await _unitOfWork.SaveChangesAsync();
+        await _orderNotificationService.SendOrderNotificationAsync(
+            appUser,
+            order,
+            (OrderStatusEnum)order.OrderStatus,
+            (PaymentMethodsEnum)order.PaymentMethod,
+            (PaymentStatusEnum)payment.PaymentStatus
+        );
 
+        await _unitOfWork.SaveChangesAsync();
         await _cacheService.RemoveAsync(key, cancellationToken);
 
         return order;

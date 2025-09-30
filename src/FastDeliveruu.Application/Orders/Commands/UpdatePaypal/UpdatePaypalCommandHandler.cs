@@ -15,17 +15,17 @@ namespace FastDeliveruu.Application.Orders.Commands.UpdatePaypal;
 public class UpdatePaypalCommandHandler : IRequestHandler<UpdatePaypalCommand, Result<PaymentResponse>>
 {
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
-    private readonly ICacheService _cacheService;
+    private readonly IMailNotificationService _orderNotificationService;
     private readonly ILogger<UpdatePaypalCommandHandler> _logger;
 
     public UpdatePaypalCommandHandler(
         IFastDeliveruuUnitOfWork unitOfWork,
         ILogger<UpdatePaypalCommandHandler> logger,
-        ICacheService cacheService)
+        IMailNotificationService orderNotificationService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _cacheService = cacheService;
+        _orderNotificationService = orderNotificationService;
     }
 
     public async Task<Result<PaymentResponse>> Handle(UpdatePaypalCommand request, CancellationToken cancellationToken)
@@ -66,6 +66,14 @@ public class UpdatePaypalCommandHandler : IRequestHandler<UpdatePaypalCommand, R
             TotalAmount = order.TotalAmount,
             TransactionId = order.TransactionId ?? "0"
         };
+
+        await _orderNotificationService.SendOrderNotificationAsync(
+            order.AppUser,
+            order,
+            (OrderStatusEnum)order.OrderStatus,
+            (PaymentMethodsEnum)order.PaymentMethod,
+            (PaymentStatusEnum)payment.PaymentStatus
+        );
 
         await _unitOfWork.SaveChangesAsync();
 
