@@ -1,5 +1,6 @@
 ﻿using FastDeliveruu.Application.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MediatR;
@@ -11,17 +12,19 @@ namespace FastDeliveruu.Application.Users.Commands.EditUserRoles;
 public class EditUserRolesCommandHandler : IRequestHandler<EditUserRolesCommand, Result<string[]>>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<EditUserRolesCommandHandler> _logger;
 
-    public EditUserRolesCommandHandler(UserManager<AppUser> userManager, ILogger<EditUserRolesCommandHandler> logger)
+    public EditUserRolesCommandHandler(UserManager<AppUser> userManager, ILogger<EditUserRolesCommandHandler> logger, ICacheService cacheService)
     {
         _userManager = userManager;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<string[]>> Handle(EditUserRolesCommand request, CancellationToken cancellationToken)
     {
-        string[] allowRoles = { RoleConstants.Admin, RoleConstants.Customer, RoleConstants.Shipper, RoleConstants.Customer };
+        string[] allowRoles = { RoleConstants.Admin, RoleConstants.Staff, RoleConstants.Shipper, RoleConstants.Customer };
 
         string[] selectedRoles = request.Roles
             .Split(",", StringSplitOptions.RemoveEmptyEntries)
@@ -47,22 +50,28 @@ public class EditUserRolesCommandHandler : IRequestHandler<EditUserRolesCommand,
 
         var userRoles = await _userManager.GetRolesAsync(appUser);
 
-        var addRolesResult = await _userManager.AddToRolesAsync(appUser, selectedRoles.Except(userRoles));
+        var rolesToAdd = selectedRoles.Except(userRoles, StringComparer.OrdinalIgnoreCase);
+        var addRolesResult = await _userManager.AddToRolesAsync(appUser, rolesToAdd);
         if (!addRolesResult.Succeeded)
         {
-            string message = string.Join("\n", addRolesResult.Errors.Select(e => e.Description));
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            var message = string.Join("\n", addRolesResult.Errors.Select(e => e.Description));
+            _logger.LogWarning("{Command} - Failed to add roles - {Message}", request.GetType().Name, message);
             return Result.Fail(new BadRequestError(message));
         }
 
-        var removeRolesResult = await _userManager.RemoveFromRolesAsync(appUser, userRoles.Except(selectedRoles));
+        var rolesToRemove = userRoles.Except(selectedRoles, StringComparer.OrdinalIgnoreCase);
+        var removeRolesResult = await _userManager.RemoveFromRolesAsync(appUser, rolesToRemove);
         if (!removeRolesResult.Succeeded)
         {
-            string message = string.Join("\n", removeRolesResult.Errors.Select(e => e.Description));
-            _logger.LogWarning($"{request.GetType().Name} - {message} - {request}");
+            var message = string.Join("\n", removeRolesResult.Errors.Select(e => e.Description));
+            _logger.LogWarning("{Command} - Failed to remove roles - {Message}", request.GetType().Name, message);
             return Result.Fail(new BadRequestError(message));
         }
 
-        return (await _userManager.GetRolesAsync(appUser)).ToArray();
+        var updatedRoles = await _userManager.GetRolesAsync(appUser);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsers, cancellationToken);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsersWithRoles, cancellationToken);
+
+        return updatedRoles.ToArray();
     }
 }

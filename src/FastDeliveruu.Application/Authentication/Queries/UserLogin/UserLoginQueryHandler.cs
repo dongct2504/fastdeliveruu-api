@@ -63,7 +63,12 @@ public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, Result<User
         }
 
         SignInResult signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-        if (!signInResult.Succeeded)
+        if (signInResult.IsLockedOut)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.Lockout} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.Lockout));
+        }
+        else if (!signInResult.Succeeded)
         {
             _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WrongPassword} - {request}");
             return Result.Fail(new BadRequestError(ErrorMessageConstants.WrongPassword));

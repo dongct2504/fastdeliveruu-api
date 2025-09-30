@@ -11,10 +11,12 @@ namespace FastDeliveruu.Application.Users.Commands.ToggleLock;
 public class ToggleLockCommandHandler : IRequestHandler<ToggleLockCommand, Result>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ICacheService _cacheService;
 
-    public ToggleLockCommandHandler(UserManager<AppUser> userManager)
+    public ToggleLockCommandHandler(UserManager<AppUser> userManager, ICacheService cacheService)
     {
         _userManager = userManager;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(ToggleLockCommand request, CancellationToken cancellationToken)
@@ -39,6 +41,9 @@ public class ToggleLockCommandHandler : IRequestHandler<ToggleLockCommand, Resul
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
             return Result.Fail(new BadRequestError(string.Join("\n", result.Errors)));
+
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsers, cancellationToken);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsersWithRoles, cancellationToken);
 
         return Result.Ok();
     }

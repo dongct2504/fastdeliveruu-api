@@ -74,7 +74,7 @@ public class AdminController : ApiController
     [HttpPost("edit-user-roles/{id:guid}")]
     [ProducesResponseType(typeof(PagedList<AppUserWithRolesDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> EditUserRoles(Guid id, [FromQuery] string roles)
+    public async Task<IActionResult> EditUserRoles(Guid id, [FromBody] string roles)
     {
         EditUserRolesCommand command = new EditUserRolesCommand(id, roles);
         Result<string[]> result = await _mediator.Send(command);
