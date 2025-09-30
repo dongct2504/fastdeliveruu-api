@@ -19,6 +19,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly ILogger<UpdateUserCommand> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -30,7 +31,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         UserManager<AppUser> userManager,
         IDateTimeProvider dateTimeProvider,
         ILogger<UpdateUserCommand> logger,
-        IFastDeliveruuUnitOfWork unitOfWork)
+        IFastDeliveruuUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
@@ -38,6 +40,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -130,6 +133,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         user.UpdatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
         await _userManager.UpdateAsync(user);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsers, cancellationToken);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsersWithRoles, cancellationToken);
 
         return Result.Ok();
     }

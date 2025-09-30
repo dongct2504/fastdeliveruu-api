@@ -13,15 +13,17 @@ namespace FastDeliveruu.Application.Users.Commands.DeleteUser;
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Result>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
     private readonly ILogger<DeleteUserCommandHandler> _logger;
 
     public DeleteUserCommandHandler(
-        IFileStorageServices fileStorageServices, UserManager<AppUser> userManager, ILogger<DeleteUserCommandHandler> logger)
+        IFileStorageServices fileStorageServices, UserManager<AppUser> userManager, ILogger<DeleteUserCommandHandler> logger, ICacheService cacheService)
     {
         _fileStorageServices = fileStorageServices;
         _userManager = userManager;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -45,6 +47,8 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
         }
 
         await _userManager.DeleteAsync(user);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsers, cancellationToken);
+        await _cacheService.RemoveByPrefixAsync(CacheConstants.AppUsersWithRoles, cancellationToken);
 
         return Result.Ok();
     }
