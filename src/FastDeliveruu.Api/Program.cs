@@ -109,7 +109,7 @@ var app = builder.Build();
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .WithOrigins("http://localhost:4200", "https://08b052d1712d.ngrok-free.app", "https://millard-nonecstatic-trochaically.ngrok-free.dev"));
+        .WithOrigins("http://localhost:4200", "https://polecat-enabled-aphid.ngrok-free.app", "https://fastdeliveruu-fe.vercel.app", "https://fastdeliveruu-fe-plmq-git-develop-dongct2504s-projects.vercel.app"));
 
     app.UseAuthentication();
     app.UseAuthorization();
