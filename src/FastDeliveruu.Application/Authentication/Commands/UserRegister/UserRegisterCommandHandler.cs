@@ -1,7 +1,7 @@
-﻿using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Interfaces;

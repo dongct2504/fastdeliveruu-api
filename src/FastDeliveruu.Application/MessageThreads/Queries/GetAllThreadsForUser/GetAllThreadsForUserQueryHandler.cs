@@ -1,6 +1,6 @@
 ﻿using FastDeliveruu.Application.Chats.Queries.GetAllThreadsForUser;
 using FastDeliveruu.Application.Common;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Dtos.ChatDtos;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Data;

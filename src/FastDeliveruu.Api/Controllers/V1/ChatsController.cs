@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using FastDeliveruu.Application.Chats.Commands.SendMessage;
 using FastDeliveruu.Application.Chats.Queries.GetAllMessagesBetweenUsers;
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Application.Dtos.ChatDtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

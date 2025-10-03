@@ -1,5 +1,5 @@
 ﻿using Asp.Versioning;
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Application.Common.Helpers;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 using FastDeliveruu.Application.Interfaces;

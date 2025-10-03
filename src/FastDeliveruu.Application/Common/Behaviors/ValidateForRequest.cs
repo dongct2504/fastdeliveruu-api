@@ -1,5 +1,5 @@
-using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Constants;
+using FastDeliveruu.Common.Enums;
 using System.Text.RegularExpressions;
 
 namespace FastDeliveruu.Application.Common.Behaviors;

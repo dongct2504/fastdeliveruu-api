@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastDeliveruu.Domain.Tests"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{60AA617B-7832-4427-8B94-1286915AE4FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDeliveruu.Common", "src\FastDeliveruu.Common\FastDeliveruu.Common.csproj", "{9CA83656-5587-4E79-B6E6-B6E8396D79D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{60AA617B-7832-4427-8B94-1286915AE4FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60AA617B-7832-4427-8B94-1286915AE4FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60AA617B-7832-4427-8B94-1286915AE4FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CA83656-5587-4E79-B6E6-B6E8396D79D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CA83656-5587-4E79-B6E6-B6E8396D79D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CA83656-5587-4E79-B6E6-B6E8396D79D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CA83656-5587-4E79-B6E6-B6E8396D79D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +86,9 @@ Global
 		{A649E90F-2AAE-4CBD-A34B-D8E00C775866} = {B1447FC9-990A-4991-A18C-6E33C6129340}
 		{9014D3B3-1F8D-42C3-B639-B5FF68F48262} = {B1447FC9-990A-4991-A18C-6E33C6129340}
 		{7320FEC3-C343-459C-AB70-410BBD252C8C} = {B1447FC9-990A-4991-A18C-6E33C6129340}
+		{9CA83656-5587-4E79-B6E6-B6E8396D79D5} = {27E10351-FE57-4622-9884-C82CB8D0CDE1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {238B4699-84AB-4C16-95B8-0A988DEF3991}
 	EndGlobalSection
 EndGlobal

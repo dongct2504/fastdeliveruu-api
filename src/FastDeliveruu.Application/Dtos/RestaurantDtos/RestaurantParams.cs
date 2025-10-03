@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using FastDeliveruu.Common.Constants;
 
 namespace FastDeliveruu.Application.Dtos.RestaurantDtos;
 

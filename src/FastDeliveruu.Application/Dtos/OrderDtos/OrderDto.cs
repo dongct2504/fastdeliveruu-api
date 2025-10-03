@@ -1,4 +1,4 @@
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Application.Dtos.PaymentResponses;
 
 namespace FastDeliveruu.Application.Dtos.OrderDtos;

@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Common.Enums;
+﻿using FastDeliveruu.Common.Enums;
 
 namespace FastDeliveruu.Application.Dtos.ChatDtos;
 

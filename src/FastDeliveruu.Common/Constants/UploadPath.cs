@@ -1,4 +1,4 @@
-namespace FastDeliveruu.Application.Common.Constants;
+namespace FastDeliveruu.Common.Constants;
 
 public static class UploadPath
 {

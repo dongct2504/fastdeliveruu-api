@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FastDeliveruu.Application\FastDeliveruu.Application.csproj" />
+    <ProjectReference Include="..\FastDeliveruu.Common\FastDeliveruu.Common.csproj" />
     <ProjectReference Include="..\FastDeliveruu.Infrastructure\FastDeliveruu.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

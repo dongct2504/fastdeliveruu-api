@@ -1,5 +1,5 @@
 ﻿using Asp.Versioning;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Districts.Commands.CreateDistrict;
 using FastDeliveruu.Application.Districts.Commands.DeleteDistrict;
 using FastDeliveruu.Application.Districts.Commands.UpdateDistrict;
