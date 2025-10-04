@@ -1,5 +1,5 @@
 using FastDeliveruu.Application.Common.Behaviors;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Authentication.Commands.UserRegister;
@@ -13,7 +13,6 @@ public class UserRegisterCommandValidator : AbstractValidator<UserRegisterComman
             .MaximumLength(128);
 
         RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
             .Must(ValidateForRequest.BeValidPhoneNumber)
             .WithMessage(ErrorMessageConstants.PhoneValidator);
 
@@ -30,20 +29,13 @@ public class UserRegisterCommandValidator : AbstractValidator<UserRegisterComman
             .WithMessage(ErrorMessageConstants.RoleValidator);
 
         RuleFor(x => x.HouseNumber)
-            .NotEmpty()
             .MaximumLength(50);
 
         RuleFor(x => x.StreetName)
-            .NotEmpty()
             .MaximumLength(80);
 
-        RuleFor(x => x.CityId)
-            .NotEmpty();
-
-        RuleFor(x => x.DistrictId)
-            .NotEmpty();
-
-        RuleFor(x => x.WardId)
-            .NotEmpty();
+        RuleFor(x => x.CityId);
+        RuleFor(x => x.DistrictId);
+        RuleFor(x => x.WardId);
     }
 }

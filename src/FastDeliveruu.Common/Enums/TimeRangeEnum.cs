@@ -1,4 +1,4 @@
-﻿namespace FastDeliveruu.Application.Common.Enums;
+﻿namespace FastDeliveruu.Common.Enums;
 
 public enum TimeRangeEnum
 {

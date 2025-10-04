@@ -4,7 +4,7 @@ using FastDeliveruu.Application.Cities.Commands.DeleteCity;
 using FastDeliveruu.Application.Cities.Commands.UpdateCity;
 using FastDeliveruu.Application.Cities.Queries.GetAllCities;
 using FastDeliveruu.Application.Cities.Queries.GetCityById;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FluentResults;

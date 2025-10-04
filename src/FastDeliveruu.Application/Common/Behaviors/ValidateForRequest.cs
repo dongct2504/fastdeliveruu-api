@@ -1,13 +1,15 @@
-using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Constants;
+using FastDeliveruu.Common.Enums;
 using System.Text.RegularExpressions;
 
 namespace FastDeliveruu.Application.Common.Behaviors;
 
 public static class ValidateForRequest
 {
-    public static bool BeValidPhoneNumber(string phoneNumber)
+    public static bool BeValidPhoneNumber(string? phoneNumber)
     {
+        if (phoneNumber == null) return true;
+
         Regex regex = new Regex(@"^\+84\d{6,15}$");
         return regex.IsMatch(phoneNumber);
     }

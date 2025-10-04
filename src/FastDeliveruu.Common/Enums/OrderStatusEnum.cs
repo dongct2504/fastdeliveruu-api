@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace FastDeliveruu.Application.Common.Enums;
+namespace FastDeliveruu.Common.Enums;
 
 public enum OrderStatusEnum
 {

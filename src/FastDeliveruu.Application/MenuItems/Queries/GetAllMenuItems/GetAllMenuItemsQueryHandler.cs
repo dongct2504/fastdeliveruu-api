@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.MenuItemDtos;
 using FastDeliveruu.Application.Interfaces;
@@ -67,10 +67,10 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
                     menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.UpdatedAt);
                     break;
                 case SortConstants.PriceAsc:
-                    menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Price);
+                    menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Price * (1 -mi.DiscountPercent));
                     break;
                 case SortConstants.PriceDesc:
-                    menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.Price);
+                    menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.Price * (1 -mi.DiscountPercent));
                     break;
                 case SortConstants.NameAsc:
                     menuItemsQuery = menuItemsQuery.OrderBy(mi => mi.Name);

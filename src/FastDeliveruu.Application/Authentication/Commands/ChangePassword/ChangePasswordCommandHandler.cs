@@ -1,5 +1,5 @@
-﻿using FastDeliveruu.Application.Common.Constants;
-using FastDeliveruu.Application.Common.Errors;
+﻿using FastDeliveruu.Application.Common.Errors;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Domain.Entities.Identity;
 using FluentResults;
 using MediatR;

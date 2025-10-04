@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Common.Enums;
+﻿using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Domain.Entities;
 using FluentResults;
 using MediatR;

@@ -1,5 +1,5 @@
 using CloudinaryDotNet.Actions;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
@@ -21,6 +21,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
     private readonly IFastDeliveruuUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
     private readonly IFileStorageServices _fileStorageServices;
+    private readonly IGeocodingService _geocodingService;
     private readonly ILogger<UpdateUserCommand> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IMapper _mapper;
@@ -32,7 +33,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         IDateTimeProvider dateTimeProvider,
         ILogger<UpdateUserCommand> logger,
         IFastDeliveruuUnitOfWork unitOfWork,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IGeocodingService geocodingService)
     {
         _mapper = mapper;
         _fileStorageServices = fileStorageServices;
@@ -41,6 +43,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         _logger = logger;
         _unitOfWork = unitOfWork;
         _cacheService = cacheService;
+        _geocodingService = geocodingService;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -66,6 +69,14 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
         {
             _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
             return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
+        }
+
+        string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
+        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
+        if (mostAccurateLocation == null)
+        {
+            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
+            return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
         }
 
         AppUser? user = await _userManager.Users

@@ -1,4 +1,4 @@
-namespace FastDeliveruu.Domain.Constants;
+namespace FastDeliveruu.Common.Constants;
 
 public static class StoreProcedureNames
 {

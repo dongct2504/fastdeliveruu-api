@@ -12,7 +12,7 @@ using FastDeliveruu.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Infrastructure.UnitOfWork;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Domain.Identity.CustomManagers;
 using FastDeliveruu.Application.Common.Helpers;
 using FastDeliveruu.Infrastructure.SeedData.Seeders;

@@ -1,5 +1,5 @@
 using FastDeliveruu.Application.Dtos.RestaurantDtos;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
