@@ -71,7 +71,8 @@ public static class DependencyInjection
         services.AddSingleton(x => new PaypalClient(
             configuration["Payment:Paypal:AppId"],
             configuration["Payment:Paypal:AppSecret"],
-            configuration["Payment:Paypal:Mode"]
+            configuration["Payment:Paypal:Mode"],
+            configuration["AppSettings:BaseUrl"]
         ));
 
         services.AddTransient<IEmailTemplateService, EmailTemplateService>();

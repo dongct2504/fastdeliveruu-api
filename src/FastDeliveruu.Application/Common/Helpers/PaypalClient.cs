@@ -10,16 +10,18 @@ namespace FastDeliveruu.Application.Common.Helpers
         public string Mode { get; }
         public string ClientId { get; }
         public string ClientSecret { get; }
+        public string BaseUrlApi { get; }
 
         public string BaseUrl => Mode == "Live"
             ? "https://api-m.paypal.com"
             : "https://api-m.sandbox.paypal.com";
 
-        public PaypalClient(string clientId, string clientSecret, string mode)
+        public PaypalClient(string clientId, string clientSecret, string mode, string baseUrlApi)
         {
             ClientId = clientId;
             ClientSecret = clientSecret;
             Mode = mode;
+            BaseUrlApi = baseUrlApi;
         }
 
         private async Task<AuthResponse> Authenticate()
@@ -71,7 +73,7 @@ namespace FastDeliveruu.Application.Common.Helpers
                 },
                 application_context = new ApplicationContext
                 {
-                    return_url = "http://localhost:5000/api/v1/checkouts/capture-payment-order",
+                    return_url = $"{BaseUrlApi}/api/v1/checkouts/capture-payment-order",
                 }
             };
 
