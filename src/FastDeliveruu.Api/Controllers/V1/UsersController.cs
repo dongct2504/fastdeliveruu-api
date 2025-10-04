@@ -11,6 +11,7 @@ using FastDeliveruu.Application.Dtos.AppUserDtos;
 using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Users.Commands.UpdatePhoneNumber;
 using System.Text.RegularExpressions;
+using FastDeliveruu.Application.Users.Commands.UpdateProfilePicture;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -47,6 +48,30 @@ public class UsersController : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateCurrentUser(Guid id, [FromForm] UpdateUserCommand command)
+    {
+        if (id != command.Id)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Id not match.");
+        }
+
+        if (id != User.GetCurrentUserId())
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Not allow!");
+        }
+
+        Result updatedUserResult = await _mediator.Send(command);
+        if (updatedUserResult.IsFailed)
+        {
+            return Problem(updatedUserResult.Errors);
+        }
+        return NoContent();
+    }
+
+    [HttpPut("update-profile-picture/{id:guid}")]
+    [Authorize(Policy = PolicyConstants.AllowAll)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateProfilePicture(Guid id, [FromForm] UpdateProfilePictureCommand command)
     {
         if (id != command.Id)
         {
