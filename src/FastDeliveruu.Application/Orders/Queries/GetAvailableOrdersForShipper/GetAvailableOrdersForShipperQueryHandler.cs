@@ -1,4 +1,4 @@
-using FastDeliveruu.Common.Enums;
+﻿using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Application.Dtos.OrderDtos;
 using FastDeliveruu.Domain.Data;
 using FastDeliveruu.Domain.Entities;
@@ -23,7 +23,7 @@ public class GetAvailableOrdersForShipperQueryHandler : IRequestHandler<GetAvail
 
         var query = _dbContext.Orders
             .AsNoTracking()
-            .Where(o => !o.OrderDeliveries.Any()) // no shipper accepted yet
+            .Where(o => !o.OrderDeliveries.Any() && o.DeliveryMethodId == 1) // only orders with status 1
             .Select(o => new
             {
                 o,
@@ -35,17 +35,18 @@ public class GetAvailableOrdersForShipperQueryHandler : IRequestHandler<GetAvail
                 Id = x.o.Id,
                 OrderDate = x.o.OrderDate,
                 PaymentMethod = x.o.PaymentMethod,
-                PaymentMethodText = x.o.PaymentMethod == 1 ? "Ti?n m?t" : x.o.PaymentMethod == 2 ? "VNPAY" : x.o.PaymentMethod == 3 ? "PayPal" : null,
+                PaymentMethodText = x.o.PaymentMethod == 1 ? "Tiền mặt" : x.o.PaymentMethod == 2 ? "VNPAY" : x.o.PaymentMethod == 3 ? "PayPal" : null,
                 TotalAmount = x.o.TotalAmount,
                 OrderStatus = x.o.OrderStatus,
-                OrderStatusText = x.o.OrderStatus == 5 ? "?� thanh to�n"
-                                  : x.o.OrderStatus == 3 ? "?� h?y"
-                                  : x.o.OrderStatus == 1 ? "Ch?a thanh to�n"
-                                  : x.o.OrderStatus == 2 ? "?ang x? l�"
-                                  : x.o.OrderStatus == 4 ? "Thanh to�n th?t b?i"
-                                  : x.o.OrderStatus == 6 ? "?� giao h�ng"
-                                  : x.o.OrderStatus == 7 ? "?� ho�n ti?n"
-                                  : x.o.OrderStatus == 8 ? "Thanh to�n ch?m" : null,
+                OrderStatusText = x.o.OrderStatus == 5 ? "Đã thanh toán"
+                                  : x.o.OrderStatus == 3 ? "Đã hủy"
+                                  : x.o.OrderStatus == 1 ? "Chưa thanh toán"
+                                  : x.o.OrderStatus == 2 ? "Đang xử lý"
+                                  : x.o.OrderStatus == 4 ? "Thanh toán thất bại"
+                                  : x.o.OrderStatus == 6 ? "Đã giao hàng"
+                                  : x.o.OrderStatus == 7 ? "Đã hoàn tiền"
+                                  : x.o.OrderStatus == 8 ? "Thanh toán chậm" : null,
+                DeliveryMethodId = x.o.DeliveryMethodId,
                 Latitude = x.o.Latitude,
                 Longitude = x.o.Longitude
             });

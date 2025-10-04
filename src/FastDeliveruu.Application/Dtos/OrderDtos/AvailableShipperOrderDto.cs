@@ -15,6 +15,8 @@ public class AvailableShipperOrderDto
     public byte? OrderStatus { get; set; }
     public string? OrderStatusText { get; set; }
 
+    public int? DeliveryMethodId { get; set; }
+
     public decimal Latitude { get; set; }
     public decimal Longitude { get; set; }
 }

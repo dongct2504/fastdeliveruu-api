@@ -1,4 +1,4 @@
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using FastDeliveruu.Application.Orders.Queries.GetAvailableOrdersForShipper;
 using FastDeliveruu.Application.Orders.Queries.GetShipperDeliveryHistory;
 using FastDeliveruu.Domain.Data;
@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FastDeliveruu.Application.Interfaces;
+using FastDeliveruu.Common.Enums;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -35,7 +36,9 @@ public class ShipperOrdersController : ApiController
     {
         var query = new GetAvailableOrdersForShipperQuery(lat, lng);
         var result = await _mediator.Send(query);
-        return Ok(result);
+        // filter only DeliveryMethodId == 1
+        var filtered = result.Where(o => o.DeliveryMethodId == 1).ToList();
+        return Ok(filtered);
     }
 
     [HttpGet("history")]
@@ -53,24 +56,36 @@ public class ShipperOrdersController : ApiController
     public async Task<IActionResult> AcceptOrder([FromBody] AcceptOrderRequest request)
     {
         var shipperId = User.GetCurrentUserId();
-        var order = await _dbContext.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == request.OrderId);
-        if (order == null) return NotFound("Kh�ng t�m th?y ??n H�ng");
+
+        bool hasActive = await _dbContext.OrderDeliveries.AnyAsync(d => d.ShipperId == shipperId && d.DeliveryStatus == 1);
+        if (hasActive)
+        {
+            return BadRequest("Bạn đang có đơn hàng đang giao, vui lòng hoàn tất trước khi nhận đơn mới");
+        }
+
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderId);
+        if (order == null) return NotFound("Không tìm thấy Đơn Hàng");
+
+        // ensure only orders with DeliveryMethodId == 1 are acceptable
+        if (order.DeliveryMethodId != 1) return BadRequest("Đơn hàng không ở trạng thái có thể nhận");
 
         bool hasDelivery = await _dbContext.OrderDeliveries.AnyAsync(od => od.OrderId == order.Id);
-        if (hasDelivery) return BadRequest("??n h�ng ?� ???c nh?n b?i shipper kh�c");
+        if (hasDelivery) return BadRequest("Đơn hàng đã được nhận bởi shipper khác");
 
         var shipper = await _dbContext.Shippers.AsNoTracking().FirstOrDefaultAsync(s => s.Id == shipperId);
         if (shipper == null) return Unauthorized();
 
-        // compute distance (meters) via Haversine
+        // base travel time to destination
         double distanceMeters = HaversineInMeters((double)shipper.Latitude, (double)shipper.Longitude, (double)order.Latitude, (double)order.Longitude);
         double speed = 4.0 + _random.NextDouble() * (7.0 - 4.0); // m/s in [4,7]
-        double seconds = speed <= 0 ? 0 : distanceMeters / speed;
+        double secondsToDestination = speed <= 0 ? 0 : distanceMeters / speed;
+
+        // add pickup buffer 5-15 minutes
+        int pickupMinutes = _random.Next(5, 16);
 
         DateTime now = _dateTimeProvider.VietnamDateTimeNow;
-        DateTime eta = now.AddSeconds(seconds);
+        DateTime eta = now.AddSeconds(secondsToDestination).AddMinutes(pickupMinutes);
 
-        // CreatedAt from OrderDetails.CreatedAt (min) for this OrderId, fallback order.CreatedAt or now
         DateTime createdAt = await _dbContext.OrderDetails
             .Where(od => od.OrderId == order.Id && od.CreatedAt != null)
             .Select(od => od.CreatedAt!.Value)
@@ -83,7 +98,7 @@ public class ShipperOrdersController : ApiController
             Id = Guid.NewGuid(),
             OrderId = order.Id,
             ShipperId = shipper.Id,
-            DeliveryStatus = 1, // ?ang giao h�ng
+            DeliveryStatus = 1, // Đang giao hàng
             EstimatedDeliveryTime = eta,
             ActualDeliveryTime = null,
             CreatedAt = createdAt,
@@ -110,12 +125,24 @@ public class ShipperOrdersController : ApiController
     {
         var shipperId = User.GetCurrentUserId();
         var delivery = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == deliveryId && d.ShipperId == shipperId);
-        if (delivery == null) return NotFound("Kh�ng t�m th?y b?n ghi giao h�ng");
+        if (delivery == null) return NotFound("Không tìm thấy bản ghi giao hàng");
 
         DateTime now = _dateTimeProvider.VietnamDateTimeNow;
-        delivery.DeliveryStatus = 2; // ?� giao
+        delivery.DeliveryStatus = 2; // Đã giao
         delivery.ActualDeliveryTime = now;
         delivery.UpdatedAt = now;
+
+        // update Orders table columns as requested
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == delivery.OrderId);
+        if (order != null)
+        {
+            order.DeliveryMethodId = 2; // Đã giao
+            if (order.OrderStatus != (byte)OrderStatusEnum.Success)
+            {
+                order.OrderStatus = (byte)OrderStatusEnum.Success; // set to paid only if not already 5
+            }
+            order.UpdatedAt = now;
+        }
 
         await _dbContext.SaveChangesAsync();
         return Ok(new
@@ -136,11 +163,10 @@ public class ShipperOrdersController : ApiController
     {
         var shipperId = User.GetCurrentUserId();
         var delivery = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == deliveryId && d.ShipperId == shipperId);
-        if (delivery == null) return NotFound("Kh�ng t�m th?y b?n ghi giao h�ng");
+        if (delivery == null) return NotFound("Không tìm thấy bản ghi giao hàng");
 
         DateTime now = _dateTimeProvider.VietnamDateTimeNow;
 
-        // Update OrderDetails.UpdatedAt for the corresponding OrderId
         var orderDetails = await _dbContext.OrderDetails.Where(od => od.OrderId == delivery.OrderId).ToListAsync();
         foreach (var od in orderDetails)
         {

@@ -14,7 +14,8 @@ public class OrderMappingConfig : IRegister
             .Map(dest => dest.DeliveryMethodShortName,
                 src => src.DeliveryMethod == null ? string.Empty : src.DeliveryMethod.ShortName)
             .Map(dest => dest.ShippingPrice,
-                src => src.DeliveryMethod == null ? 0 : src.DeliveryMethod.Price);
+                src => src.DeliveryMethod == null ? 0 : src.DeliveryMethod.Price)
+            .Map(dest => dest.DeliveryMethodId, src => src.DeliveryMethodId);
 
         config.NewConfig<Order, OrderHeaderDetailDto>()
             .Map(dest => dest.DeliveryMethodDto, src => src.DeliveryMethod)

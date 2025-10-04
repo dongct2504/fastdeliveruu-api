@@ -187,6 +187,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         order.PaymentMethod = (byte?)request.PaymentMethod;
         order.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
+        // Default shipping status for new order
+        order.DeliveryMethodId = 1; // 1 = Đang giao hàng (per requirement)
+
         Shipper? shipper = await _unitOfWork.Shippers.FindNearestShipper(order.Latitude, order.Longitude);
         if (shipper == null)
         {

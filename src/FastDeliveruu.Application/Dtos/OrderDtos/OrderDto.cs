@@ -21,6 +21,8 @@ public class OrderDto
 
     public decimal ShippingPrice { get; set; }
 
+    public int? DeliveryMethodId { get; set; }
+
     public OrderStatusEnum? OrderStatus { get; set; }
 
     public PaymentMethodsEnum? PaymentMethod { get; set; }
