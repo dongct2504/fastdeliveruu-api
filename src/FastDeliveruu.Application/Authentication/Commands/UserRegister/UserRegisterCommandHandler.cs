@@ -68,56 +68,61 @@ public class UserRegisterCommandHandler : IRequestHandler<UserRegisterCommand, R
         user = _mapper.Map<AppUser>(request);
         user.CreatedAt = _dateTimeProvider.VietnamDateTimeNow;
 
-        AddressesCustomer addressesCustomer = new AddressesCustomer
+        if (request.CityId.HasValue && request.DistrictId.HasValue && request.WardId.HasValue)
         {
-            Id = Guid.NewGuid(),
-            AppUserId = user.Id,
-            IsPrimary = true,
-            HouseNumber = request.HouseNumber,
-            StreetName = request.StreetName,
-            CreatedAt = _dateTimeProvider.VietnamDateTimeNow
-        };
+            City? city = await _unitOfWork.Cities.GetAsync(request.CityId.Value);
+            if (city == null)
+            {
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
+            }
 
-        City? city = await _unitOfWork.Cities.GetAsync(request.CityId);
-        if (city == null)
-        {
-            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.CityNotFound} - {request}");
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.CityNotFound));
+            District? district = await _unitOfWork.Districts.GetWithSpecAsync(
+                new DistrictExistInCitySpecification(request.CityId.Value, request.DistrictId.Value));
+            if (district == null)
+            {
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
+            }
+
+            Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
+                new WardExistInDistrictSpecification(request.DistrictId.Value, request.WardId.Value));
+            if (ward == null)
+            {
+                _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
+                return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
+            }
+
+            var addressesCustomer = new AddressesCustomer
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = user.Id,
+                IsPrimary = true,
+                HouseNumber = request.HouseNumber ?? "",
+                StreetName = request.StreetName ?? "",
+                CreatedAt = _dateTimeProvider.VietnamDateTimeNow,
+                CityId = request.CityId.Value,
+                DistrictId = request.DistrictId.Value,
+                WardId = request.WardId.Value
+            };
+
+            if (!string.IsNullOrEmpty(request.HouseNumber) || !string.IsNullOrEmpty(request.StreetName))
+            {
+                string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
+                (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
+
+                if (mostAccurateLocation == null)
+                {
+                    _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
+                    return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
+                }
+
+                addressesCustomer.Latitude = (decimal)mostAccurateLocation.Value.Item1;
+                addressesCustomer.Longitude = (decimal)mostAccurateLocation.Value.Item2;
+            }
+
+            user.AddressesCustomers.Add(addressesCustomer);
         }
-        addressesCustomer.CityId = request.CityId;
-
-        District? district = await _unitOfWork.Districts.GetWithSpecAsync(
-            new DistrictExistInCitySpecification(request.CityId, request.DistrictId));
-        if (district == null)
-        {
-            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.DistrictNotFound} - {request}");
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.DistrictNotFound));
-        }
-        addressesCustomer.DistrictId = request.DistrictId;
-
-        Ward? ward = await _unitOfWork.Wards.GetWithSpecAsync(
-            new WardExistInDistrictSpecification(request.DistrictId, request.WardId));
-        if (ward == null)
-        {
-            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.WardNotFound} - {request}");
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.WardNotFound));
-        }
-        addressesCustomer.WardId = request.WardId;
-
-        // convert to lat and long
-        string fullAddress = $"{request.HouseNumber} {request.StreetName}, {ward.Name}, {district.Name}, {city.Name}";
-        (double, double)? mostAccurateLocation = await _geocodingService.ConvertToLatLongAsync(fullAddress);
-
-        if (mostAccurateLocation == null)
-        {
-            _logger.LogWarning($"{request.GetType().Name} - {ErrorMessageConstants.LatLongNotFound} - {request}");
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.LatLongNotFound));
-        }
-
-        addressesCustomer.Latitude = (decimal)mostAccurateLocation.Value.Item1;
-        addressesCustomer.Longitude = (decimal)mostAccurateLocation.Value.Item2;
-
-        user.AddressesCustomers.Add(addressesCustomer);
 
         IdentityResult result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
