@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Dtos;
 using FastDeliveruu.Application.Dtos.AddressDtos;
 using FastDeliveruu.Application.Interfaces;

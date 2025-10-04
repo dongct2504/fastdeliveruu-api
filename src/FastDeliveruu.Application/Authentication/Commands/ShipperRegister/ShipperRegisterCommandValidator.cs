@@ -1,5 +1,5 @@
 ﻿using FastDeliveruu.Application.Common.Behaviors;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FluentValidation;
 
 namespace FastDeliveruu.Application.Authentication.Commands.ShipperRegister;

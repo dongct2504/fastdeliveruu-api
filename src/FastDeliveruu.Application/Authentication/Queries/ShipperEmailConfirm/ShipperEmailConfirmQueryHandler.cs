@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Common.Constants;
+﻿using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Common.Errors;
 using FastDeliveruu.Domain.Entities.Identity;
 using FastDeliveruu.Domain.Identity.CustomManagers;

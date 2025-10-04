@@ -15,4 +15,7 @@
   <ItemGroup>
     <Folder Include="Identity\Migrations\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FastDeliveruu.Common\FastDeliveruu.Common.csproj" />
+  </ItemGroup>
 </Project>

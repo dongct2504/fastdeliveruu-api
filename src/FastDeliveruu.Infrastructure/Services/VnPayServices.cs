@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using FastDeliveruu.Infrastructure.Common;
 using FastDeliveruu.Application.Common.Libraries.Vnpay;
 using FastDeliveruu.Application.Common.Helpers;
-using FastDeliveruu.Application.Common.Enums;
+using FastDeliveruu.Common.Enums;
 
 namespace FastDeliveruu.Infrastructure.Services;
 

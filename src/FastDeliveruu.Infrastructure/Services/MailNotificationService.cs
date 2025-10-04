@@ -1,4 +1,4 @@
-﻿using FastDeliveruu.Application.Common.Enums;
+﻿using FastDeliveruu.Common.Enums;
 using FastDeliveruu.Application.Interfaces;
 using FastDeliveruu.Domain.Entities;
 using FastDeliveruu.Domain.Entities.Identity;

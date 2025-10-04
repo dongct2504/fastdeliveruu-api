@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
 using FastDeliveruu.Domain.Extensions;
 using FastDeliveruu.Application.Dtos.AppUserDtos;
-using FastDeliveruu.Application.Common.Constants;
+using FastDeliveruu.Common.Constants;
 using FastDeliveruu.Application.Users.Commands.UpdatePhoneNumber;
 using System.Text.RegularExpressions;
 
