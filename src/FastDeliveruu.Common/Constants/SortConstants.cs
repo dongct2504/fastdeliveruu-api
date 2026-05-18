@@ -10,4 +10,7 @@ public static class SortConstants
 
     public const string NameAsc = "nameAsc";
     public const string NameDesc = "nameDesc";
+
+    public const string Nearest = "nearest";
+    public const string Farthest = "farthest";
 }

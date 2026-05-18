@@ -109,7 +109,15 @@ var app = builder.Build();
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .WithOrigins("http://localhost:4200", "https://millard-nonecstatic-trochaically.ngrok-free.dev", "https://fastdeliveruu-fe.vercel.app", "https://fastdeliveruu-fe-plmq-git-develop-dongct2504s-projects.vercel.app"));
+        .WithOrigins(
+            //LOCAL
+            "http://localhost:4200", 
+            //BE
+            "https://millard-nonecstatic-trochaically.ngrok-free.dev",
+            "https://antiques-viewer-zoning.ngrok-free.dev", 
+            //FE
+            "https://fastdeliveruu-fe.vercel.app", 
+            "https://fastdeliveruu-fe-plmq-git-develop-dongct2504s-projects.vercel.app"));
 
     app.UseAuthentication();
     app.UseAuthorization();
