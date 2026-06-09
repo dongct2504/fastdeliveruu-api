@@ -27,11 +27,12 @@ public class RestaurantsController : ApiController
     }
 
     [HttpGet]
-    [Authorize]
     [ProducesResponseType(typeof(PagedList<RestaurantDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
-        restaurantParams.UserId = User.GetCurrentUserId();
+        restaurantParams.UserId = User.Identity?.IsAuthenticated == true
+            ? User.GetCurrentUserId()
+            : Guid.Empty;
         GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(restaurantParams);
         Result<PagedList<RestaurantDto>> paginationResponse = await _mediator.Send(query);
         if (paginationResponse.IsFailed)
@@ -42,7 +43,6 @@ public class RestaurantsController : ApiController
     }
 
     [HttpGet("{id:guid}", Name = "GetRestaurantById")]
-    [Authorize]
     [ProducesResponseType(typeof(RestaurantDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRestaurantById(Guid id)

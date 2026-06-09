@@ -11,6 +11,7 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FastDeliveruu.Domain.Extensions;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -29,6 +30,9 @@ public class MenuItemsController : ApiController
     [ProducesResponseType(typeof(PagedList<MenuItemDetailDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllMenuItems([FromQuery] MenuItemParams menuItemParams)
     {
+        menuItemParams.UserId = User.Identity?.IsAuthenticated == true
+            ? User.GetCurrentUserId()
+            : Guid.Empty;
         GetAllMenuItemsQuery query = new GetAllMenuItemsQuery(menuItemParams);
         PagedList<MenuItemDto> paginationResponse = await _mediator.Send(query);
         return Ok(paginationResponse);

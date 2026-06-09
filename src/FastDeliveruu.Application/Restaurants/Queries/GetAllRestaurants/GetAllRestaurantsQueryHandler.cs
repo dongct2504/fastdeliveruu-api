@@ -41,68 +41,76 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
             return paginationResponseCache;
         }
 
-        AppUser? user = await _dbContext.Users
-            .Include(u => u.AddressesCustomers)
-            .FirstOrDefaultAsync(u => u.Id == request.RestaurantParams.UserId, cancellationToken: cancellationToken);
+        bool hasUser = request.RestaurantParams.UserId != Guid.Empty;
 
-        AddressesCustomer? primaryAddress = user?
-            .AddressesCustomers
-            .FirstOrDefault(a => a.IsPrimary);
+        AppUser? user = null;
+        AddressesCustomer? primaryAddress = null;
 
-        if (primaryAddress == null)
+        if (hasUser)
         {
-            return Result.Fail(new BadRequestError(ErrorMessageConstants.PrimaryAddressNotFound));
+            user = await _dbContext.Users
+                .Include(u => u.AddressesCustomers)
+                .FirstOrDefaultAsync(u => u.Id == request.RestaurantParams.UserId, cancellationToken: cancellationToken);
+
+            primaryAddress = user?
+                .AddressesCustomers
+                .FirstOrDefault(a => a.IsPrimary);
         }
 
         IQueryable<Restaurant> restaurantsQuery = _dbContext.Restaurants.AsQueryable();
 
-
         restaurantsQuery = restaurantsQuery
             .Where(c => string.IsNullOrEmpty(request.RestaurantParams.Search) || c.Name.ToLower().Contains(request.RestaurantParams.Search.ToLower()));
-
-        List<Restaurant> restaurants = await restaurantsQuery
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
 
         if (!string.IsNullOrEmpty(request.RestaurantParams.Sort))
         {
             switch (request.RestaurantParams.Sort)
             {
                 case SortConstants.OldestUpdateAsc:
-                    restaurants = restaurants.OrderBy(r => r.UpdatedAt).ToList();
+                    restaurantsQuery = restaurantsQuery.OrderBy(r => r.UpdatedAt);
                     break;
                 case SortConstants.LatestUpdateDesc:
-                    restaurants = restaurants.OrderByDescending(r => r.UpdatedAt).ToList();
+                    restaurantsQuery = restaurantsQuery.OrderByDescending(r => r.UpdatedAt);
                     break;
                 case SortConstants.NameAsc:
-                    restaurants = restaurants.OrderBy(r => r.Name).ToList();
+                    restaurantsQuery = restaurantsQuery.OrderBy(r => r.Name);
                     break;
                 case SortConstants.NameDesc:
-                    restaurants = restaurants.OrderByDescending(r => r.Name).ToList();
-                    break;
-                case SortConstants.Nearest:
-                    restaurants = restaurants.OrderBy(r =>
-                        GeoHelper.CalculateDistance(
-                            (double)primaryAddress.Latitude,
-                            (double)primaryAddress.Longitude,
-                            (double)r.Latitude,
-                            (double)r.Longitude))
-                        .ToList();
-                    break;
-                case SortConstants.Farthest:
-                    restaurants = restaurants.OrderByDescending(r =>
-                        GeoHelper.CalculateDistance(
-                            (double)primaryAddress.Latitude,
-                            (double)primaryAddress.Longitude,
-                            (double)r.Latitude,
-                            (double)r.Longitude))
-                        .ToList();
+                    restaurantsQuery = restaurantsQuery.OrderByDescending(r => r.Name);
                     break;
             }
         }
         else
         {
-            restaurants = restaurants.OrderBy(r => r.Name).ToList();
+            restaurantsQuery = restaurantsQuery.OrderByDescending(mi => mi.UpdatedAt);
+        }
+
+        List<Restaurant> list = await restaurantsQuery
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        //Sort special case
+        bool isNearest = request.RestaurantParams.Sort == SortConstants.Nearest;
+        bool isFarthest = request.RestaurantParams.Sort == SortConstants.Farthest;
+
+        if ((isNearest || isFarthest) && primaryAddress != null)
+        {
+            double lat = (double)primaryAddress.Latitude;
+            double lng = (double)primaryAddress.Longitude;
+
+            list = isNearest
+                ? list.OrderBy(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Latitude,
+                        (double)x.Longitude))
+                    .ToList()
+                : list.OrderByDescending(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Latitude,
+                        (double)x.Longitude))
+                    .ToList();
         }
 
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
@@ -110,13 +118,7 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
             PageNumber = request.RestaurantParams.PageNumber,
             PageSize = request.RestaurantParams.PageSize,
             TotalRecords = await restaurantsQuery.CountAsync(cancellationToken),
-            //Items = await restaurantsQuery
-            //    .AsNoTracking()
-            //    .ProjectToType<RestaurantDto>()
-            //    .Skip((request.RestaurantParams.PageNumber - 1) * request.RestaurantParams.PageSize)
-            //    .Take(request.RestaurantParams.PageSize)
-            //    .ToListAsync(cancellationToken)
-            Items = restaurants
+            Items = list
                 .Skip((request.RestaurantParams.PageNumber - 1) * request.RestaurantParams.PageSize)
                 .Take(request.RestaurantParams.PageSize)
                 .Adapt<List<RestaurantDto>>()

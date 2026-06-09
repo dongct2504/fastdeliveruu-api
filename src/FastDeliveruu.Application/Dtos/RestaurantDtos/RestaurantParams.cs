@@ -9,6 +9,6 @@ public class RestaurantParams : DefaultParams
 
     public override string? ToString()
     {
-        return $"{Sort}-{Search}-{PageNumber}-{PageSize}";
+        return $"{UserId}-{Sort}-{Search}-{PageNumber}-{PageSize}";
     }
 }
