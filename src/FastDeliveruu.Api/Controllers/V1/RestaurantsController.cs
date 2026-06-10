@@ -11,6 +11,7 @@ using FastDeliveruu.Application.Restaurants.Commands.CreateRestaurant;
 using FastDeliveruu.Application.Restaurants.Commands.UpdateRestaurant;
 using FastDeliveruu.Application.Restaurants.Commands.DeleteRestaurant;
 using Asp.Versioning;
+using FastDeliveruu.Domain.Extensions;
 
 namespace FastDeliveruu.Api.Controllers.V1;
 
@@ -29,9 +30,16 @@ public class RestaurantsController : ApiController
     [ProducesResponseType(typeof(PagedList<RestaurantDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
+        restaurantParams.UserId = User.Identity?.IsAuthenticated == true
+            ? User.GetCurrentUserId()
+            : Guid.Empty;
         GetAllRestaurantsQuery query = new GetAllRestaurantsQuery(restaurantParams);
-        PagedList<RestaurantDto> paginationResponse = await _mediator.Send(query);
-        return Ok(paginationResponse);
+        Result<PagedList<RestaurantDto>> paginationResponse = await _mediator.Send(query);
+        if (paginationResponse.IsFailed)
+        {
+            return Problem(paginationResponse.Errors);
+        }
+        return Ok(paginationResponse.Value);
     }
 
     [HttpGet("{id:guid}", Name = "GetRestaurantById")]

@@ -8,6 +8,8 @@ using FastDeliveruu.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using FastDeliveruu.Domain.Entities.Identity;
+using FastDeliveruu.Common.Helpers;
 
 namespace FastDeliveruu.Application.MenuItems.Queries.GetAllMenuItems;
 
@@ -36,6 +38,22 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
         if (paginationResponseCache != null)
         {
             return paginationResponseCache;
+        }
+
+        bool hasUser = request.MenuItemParams.UserId != Guid.Empty;
+
+        AppUser? user = null;
+        AddressesCustomer? primaryAddress = null;
+
+        if (hasUser)
+        {
+            user = await _dbContext.Users
+                .Include(u => u.AddressesCustomers)
+                .FirstOrDefaultAsync(u => u.Id == request.MenuItemParams.UserId, cancellationToken: cancellationToken);
+
+            primaryAddress = user?
+                .AddressesCustomers
+                .FirstOrDefault(a => a.IsPrimary);
         }
 
         IQueryable<MenuItem> menuItemsQuery = _dbContext.MenuItems.AsQueryable();
@@ -85,17 +103,44 @@ public class GetAllMenuItemsQueryHandler : IRequestHandler<GetAllMenuItemsQuery,
             menuItemsQuery = menuItemsQuery.OrderByDescending(mi => mi.UpdatedAt);
         }
 
+        List<MenuItem> list = await menuItemsQuery
+            .AsNoTracking()
+            .Include(m => m.Restaurant)
+            .ToListAsync(cancellationToken);
+
+        //Sort special case
+        bool isNearest = request.MenuItemParams.Sort == SortConstants.Nearest;
+        bool isFarthest = request.MenuItemParams.Sort == SortConstants.Farthest;
+
+        if ((isNearest || isFarthest) && primaryAddress != null)
+        {
+            double lat = (double)primaryAddress.Latitude;
+            double lng = (double)primaryAddress.Longitude;
+
+            list = isNearest
+                ? list.OrderBy(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Restaurant.Latitude,
+                        (double)x.Restaurant.Longitude))
+                    .ToList()
+                : list.OrderByDescending(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Restaurant.Latitude,
+                        (double)x.Restaurant.Longitude))
+                    .ToList();
+        }
+
         PagedList<MenuItemDto> paginationResponse = new PagedList<MenuItemDto>
         {
             PageNumber = request.MenuItemParams.PageNumber,
             PageSize = request.MenuItemParams.PageSize,
             TotalRecords = await menuItemsQuery.CountAsync(cancellationToken),
-            Items = await menuItemsQuery
-                .AsNoTracking()
-                .ProjectToType<MenuItemDto>()
+            Items = list
                 .Skip((request.MenuItemParams.PageNumber - 1) * request.MenuItemParams.PageSize)
                 .Take(request.MenuItemParams.PageSize)
-                .ToListAsync(cancellationToken)
+                .Adapt<List<MenuItemDto>>()
         };
 
         await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);

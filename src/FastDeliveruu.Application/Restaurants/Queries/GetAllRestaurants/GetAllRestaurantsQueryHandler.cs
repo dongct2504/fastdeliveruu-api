@@ -8,10 +8,14 @@ using FastDeliveruu.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using FastDeliveruu.Common.Helpers;
+using FastDeliveruu.Domain.Entities.Identity;
+using FluentResults;
+using FastDeliveruu.Application.Common.Errors;
 
 namespace FastDeliveruu.Application.Restaurants.Queries.GetAllRestaurants;
 
-public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQuery, PagedList<RestaurantDto>>
+public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQuery, Result<PagedList<RestaurantDto>>>
 {
     private readonly ICacheService _cacheService;
     private readonly FastDeliveruuDbContext _dbContext;
@@ -24,7 +28,7 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         _dbContext = dbContext;
     }
 
-    public async Task<PagedList<RestaurantDto>> Handle(
+    public async Task<Result<PagedList<RestaurantDto>>> Handle(
         GetAllRestaurantsQuery request,
         CancellationToken cancellationToken)
     {
@@ -35,6 +39,22 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         if (paginationResponseCache != null)
         {
             return paginationResponseCache;
+        }
+
+        bool hasUser = request.RestaurantParams.UserId != Guid.Empty;
+
+        AppUser? user = null;
+        AddressesCustomer? primaryAddress = null;
+
+        if (hasUser)
+        {
+            user = await _dbContext.Users
+                .Include(u => u.AddressesCustomers)
+                .FirstOrDefaultAsync(u => u.Id == request.RestaurantParams.UserId, cancellationToken: cancellationToken);
+
+            primaryAddress = user?
+                .AddressesCustomers
+                .FirstOrDefault(a => a.IsPrimary);
         }
 
         IQueryable<Restaurant> restaurantsQuery = _dbContext.Restaurants.AsQueryable();
@@ -62,7 +82,35 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
         }
         else
         {
-            restaurantsQuery = restaurantsQuery.OrderBy(r => r.Name);
+            restaurantsQuery = restaurantsQuery.OrderByDescending(mi => mi.UpdatedAt);
+        }
+
+        List<Restaurant> list = await restaurantsQuery
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        //Sort special case
+        bool isNearest = request.RestaurantParams.Sort == SortConstants.Nearest;
+        bool isFarthest = request.RestaurantParams.Sort == SortConstants.Farthest;
+
+        if ((isNearest || isFarthest) && primaryAddress != null)
+        {
+            double lat = (double)primaryAddress.Latitude;
+            double lng = (double)primaryAddress.Longitude;
+
+            list = isNearest
+                ? list.OrderBy(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Latitude,
+                        (double)x.Longitude))
+                    .ToList()
+                : list.OrderByDescending(x =>
+                    GeoHelper.CalculateDistance(
+                        lat, lng,
+                        (double)x.Latitude,
+                        (double)x.Longitude))
+                    .ToList();
         }
 
         PagedList<RestaurantDto> paginationResponse = new PagedList<RestaurantDto>
@@ -70,12 +118,10 @@ public class GetAllRestaurantsQueryHandler : IRequestHandler<GetAllRestaurantsQu
             PageNumber = request.RestaurantParams.PageNumber,
             PageSize = request.RestaurantParams.PageSize,
             TotalRecords = await restaurantsQuery.CountAsync(cancellationToken),
-            Items = await restaurantsQuery
-                .AsNoTracking()
-                .ProjectToType<RestaurantDto>()
+            Items = list
                 .Skip((request.RestaurantParams.PageNumber - 1) * request.RestaurantParams.PageSize)
                 .Take(request.RestaurantParams.PageSize)
-                .ToListAsync(cancellationToken)
+                .Adapt<List<RestaurantDto>>()
         };
 
         await _cacheService.SetAsync(key, paginationResponse, CacheOptions.DefaultExpiration, cancellationToken);

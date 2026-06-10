@@ -106,6 +106,9 @@ public static class ErrorMessageConstants
     public const string PhoneDuplicated = "Số điện thoại đã tồn tại";
     public const string PhoneValidator = "Số điện thoại phải có +84 ở đầu và các số sau phải có độ dài từ 6-15 kí tự";
 
+    //address
+    public const string PrimaryAddressNotFound = "User chưa có địa chỉ mặc định";
+
     //tokens
     public const string TokenNotFound = "Token không hợp lệ hoặc đã hết hạn.";
     public const string InvalidToken = "Token không hợp lệ.";
